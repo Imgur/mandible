@@ -1,5 +1,7 @@
 # ImgurGo
 
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/gophergala/ImgurGo)
+
 A packageable uploader. It accepts an image via a REST interface and returns information about a file
 
 Supported file types
