@@ -8,12 +8,6 @@ import (
 	"os"
 )
 
-type FileUpload struct {
-	filename string
-	path     string
-	mime     string
-}
-
 type URLUpload struct {
 	url string
 }
