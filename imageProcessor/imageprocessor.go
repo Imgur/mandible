@@ -5,14 +5,15 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"cryto/rand"
 )
 
 func init() {
 	hashGetter = make(chan string)
+	length := 7
 
 	go func() {
 		for {
-			length := 7
 			str := ""
 
 			for len(str) < length {
@@ -54,21 +55,66 @@ func init() {
 			}
 
 			hashGetter <- str
-		}
+		} 
 	}()
 }
 
 type multiProcessType []ProcessType
+
+func (this *multiProcessType) Process(filename string) string, error {
+    for _, processor := range this {
+        filename, err := processor.Process(image)
+        if err != nil {
+            return nil, err
+        }
+    }
+
+    return filename, nil
+}
+
+type asyncProcessType []ProcessType
+
+func (this *asyncProcessType) Process(filename string) string, error {
+    results := make(chan string, len(this))
+	errs    := make(chan error, len(this))
+
+    for _, processor := range this {
+    	go func(p ProcessType) {
+	        filename, err := processor.Process(image)
+	        if err != nil {
+	            errs <- err
+	        }
+
+	        results <- filename
+	    }(processor)
+    }
+
+    resultStr := ""
+    for i := 0; i < len(this); i++ {
+        select {
+        case result := <-results:
+            resultStr += result + ", "
+
+        case err := <-errs:
+            return nil, err
+        }
+    }
+
+    return resultStr, nil
+}
 
 type ProcessType interface {
 	Process(filename string) error
 }
 
 type ImageProcessor struct {
-	processor ProcessType
+	processor *ProcessType
 }
 
 func Factory(scale bool) ImageProcessor {
+	processor := &multiProcessType{
+		imagescaler.Factory(scale)
+	}
 
-	return ImageProcessor{}
+	return ImageProcessor{processor}
 }

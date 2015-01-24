@@ -8,7 +8,11 @@ import (
 )
 
 type ImageScaler struct {
-    Command OCRCommand
+    targetSize int
+}
+
+func Factory(targetSize int) (*ImageScaler) {
+    return &ImageScaler{targetSize}
 }
 
 func (this *ImageScaler) Process(image string) error {
