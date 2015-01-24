@@ -7,7 +7,7 @@ import (
 
 func main() {
 	// Change path to location of ImgurGo config
-	configFile := "config/default.config.json"
+	configFile := "config/default.conf.json"
     //if _, err := os.Stat(configFile); err != nil {
 	//	fmt.Printf("Configuration file %s does not exist", configFile)
 	//	os.Exit(-1)
