@@ -14,79 +14,77 @@ type FileUpload struct {
 	mime     string
 }
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+type URLUpload struct {
+	url string
+}
 
-	uploadType := r.FormValue("type")
+type Server struct {
+	Config *Configuration
+}
 
-	switch uploadType {
-	case "base64":
-	case "url":
-	case "file":
-		uploadFile, header, err := r.FormFile("image")
-		if err != nil {
-			errorResponse(w, "Error processing form file!", http.StatusInternalServerError)
-			return
-		}
+func CreateServer(c *Configuration) *Server {
+	return &Server{c}
+}
 
-		defer uploadFile.Close()
+func (s *Server) initServer() {
+	http.ListenAndServe(":8080", nil)
 
-		tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
-		if err != nil {
-			errorResponse(w, "Unable to write to /tmp", http.StatusInternalServerError)
-			return
-		}
+	uploadHandler := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 
-		defer tmpFile.Close()
+		uploadType := r.FormValue("type")
 
-		_, err = io.Copy(tmpFile, uploadFile)
+		switch uploadType {
+		case "base64":
+		case "url":
+		case "file":
+			uploadFile, _, err := r.FormFile("image")
+			if err != nil {
+				ErrorResponse(w, "Error processing form file!", http.StatusInternalServerError)
+				return
+			}
 
-		if err != nil {
-			errorResponse(w, "Unable to copy image to disk!", http.StatusInternalServerError)
-			return
-		}
+			defer uploadFile.Close()
 
-		upload := FileUpload{
-			header.Filename,
-			os.TempDir() + tmpFile.Name(),
-			header.Header.Get("Content-Type"),
-		}
+			tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
+			if err != nil {
+				ErrorResponse(w, "Unable to write to /tmp", http.StatusInternalServerError)
+				return
+			}
+
+			defer tmpFile.Close()
+
+			_, err = io.Copy(tmpFile, uploadFile)
+
+			if err != nil {
+				ErrorResponse(w, "Unable to copy image to disk!", http.StatusInternalServerError)
+				return
+			}
+
+			// upload := FileUpload{
+			// 	header.Filename,
+			// 	os.TempDir() + tmpFile.Name(),
+			// 	header.Header.Get("Content-Type"),
+			// }
 
 		// TODO: Pass `upload` over channel for processing
-	default:
-		errorResponse(w, "Invalid type!", http.StatusBadRequest)
-		return
+		default:
+			ErrorResponse(w, "Invalid type!", http.StatusBadRequest)
+			return
+		}
+
+		resp := make(map[string]interface{})
+
+		// TODO: Build JSON response
+
+		js, err := json.Marshal(resp)
+		if err != nil {
+			ErrorResponse(w, "Unable to build JSON response!", http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(js)
 	}
 
-	resp := make(map[string]interface{})
-
-	// TODO: Build JSON response
-
-	js, err := json.Marshal(resp)
-	if err != nil {
-		errorResponse(w, "Unable to build JSON response!", http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(js)
-}
-
-func errorResponse(w http.ResponseWriter, message string, status int) {
-	w.WriteHeader(status)
-
-	resp, _ := json.Marshal(
-		map[string]interface{}{
-			"success": false,
-			"status":  status,
-			"data": map[string]string{
-				"error": message,
-			},
-		})
-
-	w.Write(resp)
-}
-
-func main() {
 	http.HandleFunc("/upload", uploadHandler)
-	http.ListenAndServe(":8080", nil)
 }
