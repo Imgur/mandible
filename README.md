@@ -5,6 +5,8 @@ A ready-to-deploy uploader that you can run on AWS EC2 or Heroku. It accepts an 
 
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
+![TravisStatus](https://travis-ci.org/gophergala/ImgurGo.svg)
+
 ## Features
 Supported file types
 - JPG
