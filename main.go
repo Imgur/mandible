@@ -6,8 +6,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Starting server!")
-
 	// Change path to location of ImgurGo config
 	configFile := "config/default.config.json"
 	if _, err := os.Stat(configFile); err != nil {
