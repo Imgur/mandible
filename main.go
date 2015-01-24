@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	configFile := os.Getenv("CONFIG")
+    configFile := os.Getenv("IMGUR_GO_CONF")
 
     if _, err := os.Stat(configFile); err != nil {
 		fmt.Printf("Configuration file %s does not exist", configFile)
