@@ -1,0 +1,9 @@
+{
+  "name": "ImgurGo",
+  "description": "An easy Heroku image uploading service",
+  "repository": "https://github.com/gophergala/ImgurGo",
+  "env" : {
+      "BUILDPACK_URL": "https://github.com/kr/heroku-buildpack-go.git",
+      "IMGUR_GO_CONF": "config/default.conf.json"
+  }
+}
