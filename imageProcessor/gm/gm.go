@@ -1,4 +1,4 @@
-package imageprocessor
+package gm
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 
 const GM_COMMAND = "convert"
 
-func convertToJpeg(filename string) (string, error) {
+func ConvertToJpeg(filename string) (string, error) {
 	outfile := strings.Sprintf("%s_q", filename)
 
 	args := []string{
@@ -28,7 +28,7 @@ func convertToJpeg(filename string) (string, error) {
 	}
 }
 
-func quality(filename string, quality int) error {
+func Quality(filename string, quality int) error {
 	outfile := strings.Sprintf("%s_q", filename)
 
 	args := []string{
@@ -46,7 +46,7 @@ func quality(filename string, quality int) error {
 	}
 }
 
-func resize_percent(filename string, percent int) (string, error) {
+func ResizePercent(filename string, percent int) (string, error) {
 	args := []string{
 		filename,
 		"-resize",

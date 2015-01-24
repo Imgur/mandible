@@ -1,5 +1,9 @@
 package uploadedfile
 
+import (
+    "os"
+)
+
 type UplodedFile struct {
     filename string
     path     string
@@ -19,14 +23,14 @@ func (this *UplodedFile) GetMime() string {
 }
 
 func (this *UplodedFile) FileSize() (int, error) {
-    f, err := os.Open(file.Filename)
+    f, err := os.Open(this.Filename)
     if err != nil {
-        return nil, err
+        return 0, err
     }
 
     stats, err := f.Stat()
     if err != nil {
-        return nil, err
+        return 0, err
     }
 
     size := stats.Size()

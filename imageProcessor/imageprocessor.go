@@ -8,6 +8,8 @@ import (
 	"cryto/rand"
 )
 
+const MAX_SIZE = 1024*50
+
 func init() {
 	hashGetter = make(chan string)
 	length := 7
@@ -80,12 +82,12 @@ func (this *asyncProcessType) Process(filename string) string, error {
 
     for _, processor := range this {
     	go func(p ProcessType) {
-	        filename, err := processor.Process(image)
+	        f, err := processor.Process(image)
 	        if err != nil {
 	            errs <- err
 	        }
 
-	        results <- filename
+	        results <- f
 	    }(processor)
     }
 
@@ -111,9 +113,13 @@ type ImageProcessor struct {
 	processor *ProcessType
 }
 
-func Factory(scale bool) ImageProcessor {
-	processor := &multiProcessType{
-		imagescaler.Factory(scale)
+func Factory(file FileUpload) ImageProcessor, error {
+	size := file.FileSize()
+
+	processor := &multiProcessType{}
+
+	if(size > MAX_SIZE) {
+		Append(processor, imagescaler.Factory(MAX_SIZE))
 	}
 
 	return ImageProcessor{processor}
