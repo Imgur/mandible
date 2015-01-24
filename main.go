@@ -12,11 +12,11 @@ func main() {
 	//	fmt.Printf("Configuration file %s does not exist", configFile)
 	//	os.Exit(-1)
 	//}
-    fmt.Printf("got here")
+    fmt.Println("got here")
 	config := NewConfiguration(configFile)
-    fmt.Printf("got here2")
+    fmt.Println("got here2")
 	server := CreateServer(config)
-    fmt.Printf("got here3")
+    fmt.Println("got here3")
 	server.initServer()
-    fmt.Printf("got here4")
+    fmt.Println("got here4")
 }
