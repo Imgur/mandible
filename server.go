@@ -72,6 +72,7 @@ func (s *Server) initServer() {
 
 		if err != nil {
 			ErrorResponse(w, "Error dowloading URL!", http.StatusInternalServerError)
+            return
 		}
 
 		s._uploadFile(uploadFile, w)
