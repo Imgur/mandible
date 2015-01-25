@@ -10,23 +10,8 @@ type Configuration struct {
 	MaxFileSize int64
 	HashLength  int
 	UserAgent   string
-	Store       StoreConfig
+	Stores      []map[string]string
 	Port        int
-}
-
-type StoreConfig struct {
-	S3    S3StoreConfig
-	Local LocalStoreConfig
-}
-
-type S3StoreConfig struct {
-	BucketName string
-	Region     string
-	StoreRoot  string
-}
-
-type LocalStoreConfig struct {
-	StoreRoot string
 }
 
 func NewConfiguration(path string) *Configuration {

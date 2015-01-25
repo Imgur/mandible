@@ -4,15 +4,18 @@ import (
 	"bufio"
 	"io"
 	"os"
+	"path"
 )
 
 type LocalImageStore struct {
-	storeRoot string
+	storeRoot      string
+	namePathMapper *NamePathMapper
 }
 
-func NewLocalImageStore(root string) *LocalImageStore {
+func NewLocalImageStore(root string, mapper *NamePathMapper) *LocalImageStore {
 	return &LocalImageStore{
-		storeRoot: root,
+		storeRoot:      root,
+		namePathMapper: mapper,
 	}
 }
 
@@ -76,13 +79,13 @@ func (this *LocalImageStore) Save(src string, obj *StoreObject) (*StoreObject, e
 }
 
 func (this *LocalImageStore) createParent(obj *StoreObject) {
-	path := this.storeRoot + "/" + obj.Type
+	path := path.Dir(this.toPath(obj))
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(path, 0777)
+		os.MkdirAll(path, 0777)
 	}
 }
 
 func (this *LocalImageStore) toPath(obj *StoreObject) string {
-	return this.storeRoot + "/" + obj.Type + "/" + obj.Name
+	return this.storeRoot + "/" + this.namePathMapper.mapToPath(obj)
 }

@@ -10,3 +10,7 @@ type ImageStores []ImageStore
 func (this *ImageStores) Save(src string, obj *StoreObject) {
 	// TODO
 }
+
+func (this *ImageStores) Exists(obj *StoreObject) (bool, error) {
+	return false, nil
+}
