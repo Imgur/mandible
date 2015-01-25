@@ -5,7 +5,6 @@ import (
 	"net/http"
 )
 
-// Builds and writes a successful response
 func Response(w http.ResponseWriter, data map[string]interface{}, status ...int) {
 	var responseStatus int
 	if len(status) > 0 {
@@ -26,7 +25,6 @@ func Response(w http.ResponseWriter, data map[string]interface{}, status ...int)
 	w.Write(resp)
 }
 
-// Builds and writes an error response
 func ErrorResponse(w http.ResponseWriter, message string, status int) {
 	Response(w, map[string]interface{}{"error": message}, status)
 }

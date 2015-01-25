@@ -8,6 +8,7 @@ import (
 
 type Configuration struct {
 	MaxFileSize int
+	UserAgent   string
 	Store       StoreConfig
 }
 
@@ -30,7 +31,7 @@ func NewConfiguration(path string) *Configuration {
 	file, err := os.Open(path)
 
 	if err != nil {
-		fmt.Printf("Error leading config file!")
+		fmt.Printf("Error opening config file!")
 		os.Exit(-1)
 	}
 
