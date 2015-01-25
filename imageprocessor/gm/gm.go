@@ -37,8 +37,7 @@ func FixOrientation(filename string) (string, error) {
 		outfile,
 	}
 
-		fmt.Printf("%s -auto-orient %s", filename, outfile)
-
+	fmt.Printf("%s -auto-orient %s", filename, outfile)
 
 	err := runConvertCommand(args)
 	if err != nil {
