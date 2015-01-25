@@ -1,6 +1,8 @@
 package uploadedfile
 
 import (
+	"errors"
+	"net/http"
 	"os"
 )
 
@@ -11,13 +13,39 @@ type UploadedFile struct {
 	hash     string
 }
 
-func NewUploadedFile(filename, path, mime string) *UploadedFile {
+var supportedTypes = map[string]bool{
+	"image/jpeg": true,
+	"image/jpg":  true,
+	"image/gif":  true,
+	"image/png":  true,
+}
+
+func NewUploadedFile(filename, path string) (*UploadedFile, error) {
+	file, err := os.Open(path)
+
+	if err != nil {
+		return nil, err
+	}
+
+	buff := make([]byte, 512) // http://golang.org/pkg/net/http/#DetectContentType
+	_, err = file.Read(buff)
+
+	if err != nil {
+		return nil, err
+	}
+
+	filetype := http.DetectContentType(buff)
+
+	if _, ok := supportedTypes[filetype]; !ok {
+		return nil, errors.New("Unsupported file type!")
+	}
+
 	return &UploadedFile{
 		filename,
 		path,
-		mime,
+		filetype,
 		"",
-	}
+	}, nil
 }
 
 func (this *UploadedFile) GetFilename() string {

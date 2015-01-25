@@ -46,7 +46,13 @@ func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fil
 		return
 	}
 
-	upload := uploadedfile.NewUploadedFile(fileName, tmpFile.Name(), "image/jpeg")
+	upload, err := uploadedfile.NewUploadedFile(fileName, tmpFile.Name())
+
+	if err != nil {
+		ErrorResponse(w, "Error detecting mime type!", http.StatusInternalServerError)
+		return
+	}
+
 	processor, err := imageprocessor.Factory(s.Config.MaxFileSize, upload)
 	if err != nil {
 		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
