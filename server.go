@@ -3,12 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/gophergala/ImgurGo/imageprocessor"
-	"github.com/gophergala/ImgurGo/uploadedfile"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+
+	"github.com/gophergala/ImgurGo/imageprocessor"
+	"github.com/gophergala/ImgurGo/uploadedfile"
 )
 
 type Server struct {
@@ -21,7 +22,7 @@ func CreateServer(c *Configuration) *Server {
 	return &Server{c, httpclient}
 }
 
-func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter) {
+func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, name ...string) {
 	defer uploadFile.Close()
 
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
@@ -41,7 +42,14 @@ func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter) {
 		return
 	}
 
-	upload := uploadedfile.NewUploadedFile("testfile.jpg", tmpFile.Name(), "image/jpeg")
+	var fileName string
+	if len(name) > 0 {
+		fileName = name[0]
+	} else {
+		fileName = ""
+	}
+
+	upload := uploadedfile.NewUploadedFile(fileName, os.TempDir()+tmpFile.Name(), "image/jpeg")
 	processor, err := imageprocessor.Factory(s.Config.MaxFileSize, upload)
 	if err != nil {
 		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
@@ -65,7 +73,7 @@ func (s *Server) initServer() {
 	fileHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		uploadFile, _, err := r.FormFile("image")
+		uploadFile, header, err := r.FormFile("image")
 
 		if err != nil {
 			fmt.Println(err)
@@ -73,7 +81,7 @@ func (s *Server) initServer() {
 			return
 		}
 
-		s._uploadFile(uploadFile, w)
+		s._uploadFile(uploadFile, w, header.Filename)
 	}
 
 	urlHandler := func(w http.ResponseWriter, r *http.Request) {
