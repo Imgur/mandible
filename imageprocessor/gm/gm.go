@@ -37,7 +37,7 @@ func Quality(filename string, quality int) (string, error) {
 		fmt.Sprintf("%d", quality),
 		"-density",
 		"72x72",
-		"JPEG:"+outfile,
+		outfile,
 	}
 
 	fmt.Printf("%s -quality %d -density 72x72 %s", filename, quality, outfile)
