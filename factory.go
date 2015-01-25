@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./imagestore"
+	"github.com/gophergala/ImgurGo/imagestore"
 )
 
 type Factory struct {
