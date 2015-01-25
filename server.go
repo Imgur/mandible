@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gophergala/ImgurGo/imageprocessor"
 	"github.com/gophergala/ImgurGo/imagestore"
@@ -31,8 +33,8 @@ func CreateServer(c *Configuration) *Server {
 	return &Server{c, httpclient, store, hashGenerator}
 }
 
-func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fileName string, thumbs []*uploadedfile.ThumbFile) {
-	defer uploadFile.Close()
+func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileName string, thumbs []*uploadedfile.ThumbFile) {
+	w.Header().Set("Content-Type", "application/json")
 
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
 	if err != nil {
@@ -108,8 +110,6 @@ func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fil
 
 func (s *Server) initServer() {
 	fileHandler := func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
 		uploadFile, header, err := r.FormFile("image")
 
 		if err != nil {
@@ -125,6 +125,7 @@ func (s *Server) initServer() {
 		}
 
 		s.uploadFile(uploadFile, w, header.Filename, thumbs)
+		uploadFile.Close()
 	}
 
 	urlHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -142,10 +143,26 @@ func (s *Server) initServer() {
 		}
 
 		s.uploadFile(uploadFile, w, "", thumbs)
+		uploadFile.Close()
+	}
+
+	base64Handler := func(w http.ResponseWriter, r *http.Request) {
+		b64data := r.FormValue("image")
+
+		uploadFile := base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data))
+
+		thumbs, err := parseThumbs(r)
+		if err != nil {
+			ErrorResponse(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		s.uploadFile(uploadFile, w, "", thumbs)
 	}
 
 	http.HandleFunc("/file", fileHandler)
 	http.HandleFunc("/url", urlHandler)
+	http.HandleFunc("/base64", base64Handler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
