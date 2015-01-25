@@ -8,6 +8,7 @@ type UploadedFile struct {
 	filename string
 	path     string
 	mime     string
+    hash     string
 }
 
 func NewUploadedFile(filename, path, mime string) *UploadedFile {
@@ -15,6 +16,7 @@ func NewUploadedFile(filename, path, mime string) *UploadedFile {
 		filename,
 		path,
 		mime,
+        "",
 	}
 }
 
@@ -24,6 +26,14 @@ func (this *UploadedFile) GetFilename() string {
 
 func (this *UploadedFile) SetFilename(filename string) {
 	this.filename = filename
+}
+
+func (this *UploadedFile) GetHash() string {
+    return this.hash
+}
+
+func (this *UploadedFile) SetHash(hash string) {
+    this.hash = hash
 }
 
 func (this *UploadedFile) SetPath(path string) {
