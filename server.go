@@ -51,6 +51,7 @@ func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fil
 	}
 
 	upload, err := uploadedfile.NewUploadedFile(fileName, tmpFile.Name(), thumbs)
+	defer upload.Clean()
 
 	if err != nil {
 		ErrorResponse(w, "Error detecting mime type!", http.StatusInternalServerError)
