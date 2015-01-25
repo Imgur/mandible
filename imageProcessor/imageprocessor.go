@@ -73,7 +73,6 @@ func (this multiProcessType) Process(image *uploadedfile.UploadedFile) error {
 type asyncProcessType []ProcessType
 
 func (this asyncProcessType) Process(image *uploadedfile.UploadedFile) error {
-	results := make(chan bool, len(this))
 	errs := make(chan error, len(this))
 
 	for _, processor := range this {
@@ -82,16 +81,15 @@ func (this asyncProcessType) Process(image *uploadedfile.UploadedFile) error {
 			if err != nil {
 				errs <- err
 			}
-
-			results <- true
 		}(processor)
 	}
 
 	for i := 0; i < len(this); i++ {
 		select {
-		case <-results:
 		case err := <-errs:
-			return err
+			if err != nil {
+				return err
+			}
 		}
 	}
 
