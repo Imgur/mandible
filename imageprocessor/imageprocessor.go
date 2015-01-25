@@ -24,7 +24,7 @@ func (this asyncProcessType) Process(image *uploadedfile.UploadedFile) error {
 
 	for _, processor := range this {
 		go func(p ProcessType) {
-			errs <- processor.Process(image)
+			errs <- p.Process(image)
 		}(processor)
 	}
 

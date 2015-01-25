@@ -79,15 +79,17 @@ func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fil
 		return
 	}
 
+	thumbsResp := map[string]interface{}{}
 	for _, t := range upload.GetThumbs() {
-		fmt.Println(t.GetPath())
 		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.GetName())
-		obj := factory.NewStoreObject(thumbName, upload.GetMime(), "t")
-		obj, err = s.imageStore.Save(t.GetPath(), obj)
+		tObj := factory.NewStoreObject(thumbName, upload.GetMime(), "t")
+		tObj, err = s.imageStore.Save(t.GetPath(), tObj)
 		if err != nil {
 			ErrorResponse(w, "Unable to save thumbnail!", http.StatusInternalServerError)
 			return
 		}
+
+		thumbsResp[t.GetName()] = tObj.Url
 	}
 
 	size, err := upload.FileSize()
@@ -110,7 +112,7 @@ func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fil
 		"size":   size,
 		"width":  width,
 		"height": height,
-		"thumbs": map[string]interface{}{},
+		"thumbs": thumbsResp,
 	}
 
 	Response(w, resp)
