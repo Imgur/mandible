@@ -26,7 +26,7 @@ func CreateServer(c *Configuration) *Server {
 	return &Server{c, httpclient, store}
 }
 
-func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fileName string) {
+func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fileName string) {
 	defer uploadFile.Close()
 
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
@@ -88,7 +88,7 @@ func (s *Server) initServer() {
 			return
 		}
 
-		s._uploadFile(uploadFile, w, header.Filename)
+		s.uploadFile(uploadFile, w, header.Filename)
 	}
 
 	urlHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +99,7 @@ func (s *Server) initServer() {
 			return
 		}
 
-		s._uploadFile(uploadFile, w, "")
+		s.uploadFile(uploadFile, w, "")
 	}
 
 	http.HandleFunc("/file", fileHandler)
