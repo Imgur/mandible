@@ -3,6 +3,9 @@ package uploadedfile
 import (
 	"errors"
 	"image"
+	"image/gif"
+	"image/jpeg"
+	"image/png"
 	"net/http"
 	"os"
 )
@@ -111,12 +114,11 @@ func (this *UploadedFile) Dimensions() (int, int, error) {
 	var cfg image.Config
 	switch true {
 	case this.IsGif():
-		cfg, err = image.gif.DecodeConfig(f)
+		cfg, err = gif.DecodeConfig(f)
 	case this.IsPng():
-		cfg, err = image.png.DecodeConfig(f)
-		return cfg.Width, cfg.Height, nil
+		cfg, err = png.DecodeConfig(f)
 	case this.IsJpeg():
-		cfg, err = image.jpeg.DecodeConfig(f)
+		cfg, err = jpeg.DecodeConfig(f)
 	default:
 		return 0, 0, errors.New("Invalid mime type!")
 	}
