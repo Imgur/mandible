@@ -24,5 +24,6 @@ _testmain.go
 *.prof
 
 ImgurGo
+tags
 
 *.sw[o-p]
