@@ -68,5 +68,14 @@ func Factory(maxFileSize int64, file *uploadedfile.UploadedFile) (*ImageProcesso
 		processor = append(processor, &ImageScaler{maxFileSize})
 	}
 
+	// async := asyncProcessType{}
+	// if(len(thumbs) > 0) {
+	// 	async = thumbs
+	// }
+
+	// if(len(async) > 0) {
+	// 	processor = append(processor, async)
+	// }
+
 	return &ImageProcessor{processor}, nil
 }
