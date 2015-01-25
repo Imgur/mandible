@@ -23,7 +23,8 @@ type Server struct {
 func CreateServer(c *Configuration) *Server {
 	factory := Factory{c}
 	httpclient := &http.Client{}
-	store := factory.NewImageStores()
+	stores := factory.NewImageStores()
+	store := stores[0]
 
 	hashGenerator := factory.NewHashGenerator(store)
 	return &Server{c, httpclient, store, hashGenerator}

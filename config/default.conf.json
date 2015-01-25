@@ -5,22 +5,18 @@
     "UserAgent": "ImgurGo (https://github.com/gophergala/ImgurGo)",
     "Stores" : [
         {
-            "Type" : "S3StoreConfig",
-            "Config" : {
-                "BucketName" : "gophergala",
-                "StoreRoot" : "",
-                "Region" : "us-east-1",
-                "NamePathRegex" : "",
-                "NamePathMap" : "${ImageName}/${ImageSize}"
-            }
+            "Type" : "s3",
+            "BucketName" : "gophergala",
+            "StoreRoot" : "",
+            "Region" : "us-east-1",
+            "NamePathRegex" : "([a-zA-Z0-9])([a-zA-Z0-9])([a-zA-Z0-9])([a-zA-Z0-9])[a-zA-Z0-9]{3}",
+            "NamePathMap" : "${ImageSize}/${1}/${2}/${3}/${4}/${ImageName}"
         },
         {
-            "Type" : "LocalStoreConfig",
-            "Config" : {
-                "StoreRoot": "/Users/jarvis/imagestore",
-                "NamePathRegex" : "",
-                "NamePathMap" : "${ImageName}/${ImageSize}"
-            }
+            "Type" : "local",
+            "StoreRoot": "/Users/jarvis/imagestore",
+            "NamePathRegex" : "",
+            "NamePathMap" : "${ImageName}/${ImageSize}"
         }
     ]
 }

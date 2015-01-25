@@ -15,43 +15,41 @@ func (this *Factory) NewImageStores() []imagestore.ImageStore {
 	stores := []imagestore.ImageStore{}
 
 	for _, configWrapper := range this.config.Stores {
-		switch configWrapper.Type {
-		case "S3StoreConfig":
-			config, _ := configWrapper.Config.(S3StoreConfig)
-			store := this.NewS3ImageStore(config)
+		switch configWrapper["Type"] {
+		case "s3":
+			store := this.NewS3ImageStore(configWrapper)
 			stores = append(stores, store)
-		case "LocalStoreConfig":
-			config, _ := configWrapper.Config.(LocalStoreConfig)
-			store := this.NewLocalImageStore(config)
+		case "local":
+			store := this.NewLocalImageStore(configWrapper)
 			stores = append(stores, store)
 		default:
-			log.Fatal("Unsupported store %s", configWrapper.Type)
+			log.Fatal("Unsupported store %s", configWrapper["Type"])
 		}
 	}
 
 	return stores
 }
 
-func (this *Factory) NewS3ImageStore(config S3StoreConfig) imagestore.ImageStore {
+func (this *Factory) NewS3ImageStore(config map[string]string) imagestore.ImageStore {
 	auth, err := aws.EnvAuth()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	client := s3.New(auth, aws.Regions[config.Region])
-	mapper := imagestore.NewNamePathMapper(config.NamePathRegex, config.NamePathMap)
+	client := s3.New(auth, aws.Regions[config["Region"]])
+	mapper := imagestore.NewNamePathMapper(config["NamePathRegex"], config["NamePathMap"])
 
 	return imagestore.NewS3ImageStore(
-		config.BucketName,
-		config.StoreRoot,
+		config["BucketName"],
+		config["StoreRoot"],
 		client,
 		mapper,
 	)
 }
 
-func (this *Factory) NewLocalImageStore(config LocalStoreConfig) imagestore.ImageStore {
-	mapper := imagestore.NewNamePathMapper(config.NamePathRegex, config.NamePathMap)
-	return imagestore.NewLocalImageStore(config.StoreRoot, mapper)
+func (this *Factory) NewLocalImageStore(config map[string]string) imagestore.ImageStore {
+	mapper := imagestore.NewNamePathMapper(config["NamePathRegex"], config["NamePathMap"])
+	return imagestore.NewLocalImageStore(config["StoreRoot"], mapper)
 }
 
 func (this *Factory) NewStoreObject(name string, mime string, imgType string) *imagestore.StoreObject {
