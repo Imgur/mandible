@@ -10,6 +10,7 @@ type Configuration struct {
 	MaxFileSize int64
 	UserAgent   string
 	Store       StoreConfig
+	Port        int
 }
 
 type StoreConfig struct {

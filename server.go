@@ -9,17 +9,21 @@ import (
 	"os"
 
 	"github.com/gophergala/ImgurGo/imageprocessor"
+	"github.com/gophergala/ImgurGo/imagestore"
 	"github.com/gophergala/ImgurGo/uploadedfile"
 )
 
 type Server struct {
 	Config     *Configuration
 	HTTPClient *http.Client
+	imageStore imagestore.ImageStore
 }
 
 func CreateServer(c *Configuration) *Server {
+	factory := Factory{c}
 	httpclient := &http.Client{}
-	return &Server{c, httpclient}
+	store := factory.NewS3()
+	return &Server{c, httpclient, store}
 }
 
 func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fileName string) {
@@ -52,6 +56,16 @@ func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fi
 	err = processor.Run(upload)
 	if err != nil {
 		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
+		return
+	}
+
+	upload.SetHash(<-hashGetter)
+	factory := Factory{s.Config}
+	obj := factory.NewStoreObject(upload.GetHash(), upload.GetMime(), "original")
+	err = s.imageStore.Save(upload.GetPath(), obj)
+
+	if err != nil {
+		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
 		return
 	}
 
@@ -91,7 +105,7 @@ func (s *Server) initServer() {
 	http.HandleFunc("/file", fileHandler)
 	http.HandleFunc("/url", urlHandler)
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(fmt.Sprintf(":%d", s.Config.Port), nil)
 }
 
 func (s *Server) download(url string) (io.ReadCloser, error) {
