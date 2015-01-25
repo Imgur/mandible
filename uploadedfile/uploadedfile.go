@@ -23,13 +23,12 @@ func (this *UploadedFile) GetFilename() string {
 }
 
 func (this *UploadedFile) SetFilename(filename string) {
-
 	this.filename = filename
 }
 
 func (this *UploadedFile) SetPath(path string) {
 	// TODO: find a better location for this
-	os.Remove(this.filename)
+	os.Remove(this.path)
 
 	this.path = path
 }
@@ -43,7 +42,7 @@ func (this *UploadedFile) GetMime() string {
 }
 
 func (this *UploadedFile) FileSize() (int64, error) {
-	f, err := os.Open(this.filename)
+	f, err := os.Open(this.path)
 	if err != nil {
 		return 0, err
 	}
