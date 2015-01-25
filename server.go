@@ -75,9 +75,12 @@ func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fi
 		return
 	}
 
-	resp := make(map[string]interface{})
-
-	// TODO: Build JSON respons
+	resp := map[string]interface{}{
+		"link": obj.Url,
+		"mime": obj.MimeType,
+		"type": obj.Type,
+		"name": fileName,
+	}
 
 	Response(w, resp)
 }

@@ -2,6 +2,7 @@ package imageprocessor
 
 import (
 	"errors"
+
 	"github.com/gophergala/ImgurGo/imageprocessor/gm"
 	"github.com/gophergala/ImgurGo/uploadedfile"
 )
@@ -12,7 +13,7 @@ type ImageScaler struct {
 
 func (this *ImageScaler) Process(image *uploadedfile.UploadedFile) error {
 	switch image.GetMime() {
-	case "image/jpeg":
+	case "image/jpeg", "image/jpg":
 		return this.scaleJpeg(image)
 	case "image/png":
 		return this.scalePng(image)
@@ -30,6 +31,7 @@ func (this *ImageScaler) scalePng(image *uploadedfile.UploadedFile) error {
 	}
 
 	image.SetPath(filename)
+	image.SetMime("image/jpeg")
 	return this.scaleJpeg(image)
 }
 
@@ -66,7 +68,10 @@ func (this *ImageScaler) scaleJpeg(image *uploadedfile.UploadedFile) error {
 	}
 
 	for {
-		gm.ResizePercent(image.GetPath(), percent)
+		filename, err = gm.ResizePercent(image.GetPath(), percent)
+		if err != nil {
+			return err
+		}
 
 		image.SetPath(filename)
 		size, err := image.FileSize()

@@ -1,10 +1,11 @@
 package imagestore
 
 import (
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/goamz/s3"
 	"io/ioutil"
 	"log"
+
+	"github.com/mitchellh/goamz/aws"
+	"github.com/mitchellh/goamz/s3"
 )
 
 type S3ImageStore struct {
@@ -53,7 +54,8 @@ func (this *S3ImageStore) Save(src string, obj *StoreObject) error {
 		return err
 	}
 
-	return nil
+	obj.Url = "https://s3.amazonaws.com/" + this.bucketName + this.toPath(obj)
+	return obj, nil
 }
 
 func (this *S3ImageStore) toPath(obj *StoreObject) string {
