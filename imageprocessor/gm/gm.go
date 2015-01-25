@@ -28,6 +28,26 @@ func ConvertToJpeg(filename string) (string, error) {
 	return outfile, nil
 }
 
+func FixOrientation(filename string) (string, error) {
+	outfile := fmt.Sprintf("%s_ort", filename)
+
+	args := []string{
+		filename,
+		"-auto-orient",
+		outfile,
+	}
+
+		fmt.Printf("%s -auto-orient %s", filename, outfile)
+
+
+	err := runConvertCommand(args)
+	if err != nil {
+		return "", err
+	}
+
+	return outfile, nil
+}
+
 func Quality(filename string, quality int) (string, error) {
 	outfile := fmt.Sprintf("%s_q", filename)
 
