@@ -12,10 +12,27 @@ type Factory struct {
 }
 
 func (this *Factory) NewImageStores() []imagestore.ImageStore {
-	return []imagestore.ImageStore{}
+	stores := []imagestore.ImageStore{}
+
+	for _, configWrapper := range this.config.Stores {
+		switch configWrapper.Type {
+		case "S3StoreConfig":
+			config, _ := configWrapper.Config.(S3StoreConfig)
+			store := this.NewS3ImageStore(config)
+			stores = append(stores, store)
+		case "LocalStoreConfig":
+			config, _ := configWrapper.Config.(LocalStoreConfig)
+			store := this.NewLocalImageStore(config)
+			stores = append(stores, store)
+		default:
+			log.Fatal("Unsupported store %s", configWrapper.Type)
+		}
+	}
+
+	return stores
 }
 
-func (this *Factory) NewS3ImageStore(config *S3StoreConfig) imagestore.ImageStore {
+func (this *Factory) NewS3ImageStore(config S3StoreConfig) imagestore.ImageStore {
 	auth, err := aws.EnvAuth()
 	if err != nil {
 		log.Fatal(err)
@@ -32,7 +49,7 @@ func (this *Factory) NewS3ImageStore(config *S3StoreConfig) imagestore.ImageStor
 	)
 }
 
-func (this *Factory) NewLocalImageStore(config *LocalStoreConfig) imagestore.ImageStore {
+func (this *Factory) NewLocalImageStore(config LocalStoreConfig) imagestore.ImageStore {
 	mapper := imagestore.NewNamePathMapper(config.NamePathRegex, config.NamePathMap)
 	return imagestore.NewLocalImageStore(config.StoreRoot, mapper)
 }
