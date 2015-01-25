@@ -15,8 +15,8 @@
         {
             "Type" : "local",
             "StoreRoot": "/Users/jarvis/imagestore",
-            "NamePathRegex" : "",
-            "NamePathMap" : "${ImageSize}/${ImageName}"
+            "NamePathRegex" : "^([a-zA-Z0-9])([a-zA-Z0-9]).*",
+            "NamePathMap" : "${ImageSize}/${1}/${2}/${ImageName}"
         }
     ]
 }
