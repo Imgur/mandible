@@ -2,20 +2,29 @@ package main
 
 import (
 	"crypto/rand"
+	"github.com/gophergala/ImgurGo/imagestore"
 	"log"
 )
 
-var hashGetter (chan string)
+type HashGenerator struct {
+	hashGetter chan string
+	length     int
+	store      imagestore.ImageStore
+}
 
-func init() {
-	hashGetter = make(chan string)
-	length := 7
-
+func (this *HashGenerator) init() {
 	go func() {
+		storeObj := &imagestore.StoreObject{
+			"",
+			"",
+			"original",
+			"",
+		}
+
 		for {
 			str := ""
 
-			for len(str) < length {
+			for len(str) < this.length {
 				c := 10
 				bArr := make([]byte, c)
 				_, err := rand.Read(bArr)
@@ -25,7 +34,7 @@ func init() {
 				}
 
 				for _, b := range bArr {
-					if len(str) == length {
+					if len(str) == this.length {
 						break
 					}
 
@@ -53,7 +62,16 @@ func init() {
 
 			}
 
-			hashGetter <- str
+			storeObj.Name = str
+
+			exists, _ := this.store.Exists(storeObj)
+			if !exists {
+				this.hashGetter <- str
+			}
 		}
 	}()
+}
+
+func (this *HashGenerator) Get() string {
+	return <-this.hashGetter
 }
