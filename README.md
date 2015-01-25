@@ -81,15 +81,15 @@ curl -i http://127.0.0.1:8080/url \
     "data": {
         "width": 380,
         "height": 430,
-        "link": "https://s3.amazonaws.com/gophergala/rvBho90/original",
+        "link": "https://s3.amazonaws.com/gophergala/original/CUqU4If",
         "mime": "image/jpeg",
         "name": "",
         "size": 82199,
         "thumbs": {
-            "profile": "https://s3.amazonaws.com/gophergala/rvBho90/profile/t",
-            "small": "https://s3.amazonaws.com/gophergala/rvBho90/small/t"
+            "profile":"https://s3.amazonaws.com/gophergala/t/CUqU4If/profile",
+            "small": "https://s3.amazonaws.com/gophergala/t/CUqU4If/small"
         }
-    }
+    },
     "status": 200,
     "success": true
 }
@@ -108,12 +108,12 @@ curl -i http://127.0.0.1:8080/file \
     "data": {
         "width": 354,
         "height": 200,
-        "link": "https://s3.amazonaws.com/gophergala/2lbXPsZ/original",
+        "link": "https://s3.amazonaws.com/gophergala/original/L4ASjMX",
         "mime": "image/gif",
         "name": "cat.gif",
         "size": 3511100,
         "thumbs": {
-            "small": "https://s3.amazonaws.com/gophergala/2lbXPsZ/small/t"
+            "small":"https://s3.amazonaws.com/gophergala/t/L4ASjMX/small"
         }
     },
     "status": 200,
