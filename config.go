@@ -8,6 +8,7 @@ import (
 
 type Configuration struct {
 	MaxFileSize int
+	UserAgent   string
 }
 
 func NewConfiguration(path string) *Configuration {

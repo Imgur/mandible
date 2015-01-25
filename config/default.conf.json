@@ -1,3 +1,4 @@
 {
-    "MaxFileSize": 20
+    "MaxFileSize": 20,
+    "UserAgent": "Imgur"
 }
