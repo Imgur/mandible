@@ -27,7 +27,7 @@ func (this *NamePathMapper) mapToPath(obj *StoreObject) string {
 	repl = strings.Replace(repl, "${ImageSize}", obj.Type, -1)
 
 	if this.regex != nil {
-		return this.regex.ReplaceAllString("sjmajed", repl)
+		return this.regex.ReplaceAllString(obj.Name, repl)
 	}
 
 	return repl
