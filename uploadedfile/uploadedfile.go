@@ -98,3 +98,7 @@ func (this *UploadedFile) FileSize() (int64, error) {
 
 	return size, nil
 }
+
+func (this *UploadedFile) IsJpeg() bool {
+	return (this.GetMime() == "image/jpeg" || this.GetMime() == "image/jpg")
+}

@@ -8,6 +8,7 @@ import (
 
 type Configuration struct {
 	MaxFileSize int64
+	HashLength  int
 	UserAgent   string
 	Store       StoreConfig
 	Port        int

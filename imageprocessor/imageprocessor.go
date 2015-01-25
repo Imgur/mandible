@@ -62,6 +62,7 @@ func Factory(maxFileSize int64, file *uploadedfile.UploadedFile) (*ImageProcesso
 	}
 
 	processor := multiProcessType{}
+	processor = append(processor, &ImageOrienter{})
 
 	if size > maxFileSize {
 		processor = append(processor, &ImageScaler{maxFileSize})

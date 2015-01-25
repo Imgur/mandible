@@ -1,6 +1,7 @@
 {
     "Port": 8080,
     "MaxFileSize": 20971520,
+    "HashLength": 7,
     "UserAgent": "ImgurGo (https://github.com/gophergala/ImgurGo)",
     "Store" : {
         "S3" : {

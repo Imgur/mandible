@@ -27,3 +27,14 @@ func (this *Factory) NewStoreObject(name string, mime string, imgType string) *i
 		Type:     imgType,
 	}
 }
+
+func (this *Factory) NewHashGenerator(store imagestore.ImageStore) *HashGenerator {
+	hashGen := &HashGenerator{
+		make(chan string),
+		this.config.HashLength,
+		store,
+	}
+
+	hashGen.init()
+	return hashGen
+}
