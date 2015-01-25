@@ -114,7 +114,12 @@ func (s *Server) initServer() {
 	http.HandleFunc("/file", fileHandler)
 	http.HandleFunc("/url", urlHandler)
 
-	http.ListenAndServe(fmt.Sprintf(":%d", s.Config.Port), nil)
+	port := ":" + os.Getenv("PORT")
+	if port == ":" {
+		port = fmt.Sprintf(":%d", s.Config.Port)
+	}
+
+	http.ListenAndServe(port, nil)
 }
 
 func (s *Server) download(url string) (io.ReadCloser, error) {
