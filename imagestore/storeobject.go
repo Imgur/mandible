@@ -1,6 +1,7 @@
 package imagestore
 
 type StoreObject struct {
-	Path     string
-	MimeType string
+	Name     string // Unique identifier
+	MimeType string // i.e. image/jpg
+	Type     string // i.e. thumb
 }

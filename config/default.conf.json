@@ -1,3 +1,13 @@
 {
-    "MaxFileSize": 20
+    "MaxFileSize": 20,
+    "Store" : {
+        "S3" : {
+            "bucketName" : "gophergala",
+            "storeRoot" : "",
+            "region" : "us-east-1"
+        },
+        "Local" : {
+            "storeRoot": "/Users/jarvis/imagestore"
+        }
+    }
 }

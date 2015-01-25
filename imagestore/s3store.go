@@ -10,43 +10,52 @@ import (
 type S3ImageStore struct {
 	bucketName string
 	storeRoot  string
-	client     s3.S3
+	region     string
+	client     *s3.S3
 }
 
-func NewS3ImageStore(bucket string, root string) *S3ImageStore {
-	return &S3ImageStore{
-		bucketName: bucket,
-		storeRoot:  root,
-	}
-}
-
-func (this *S3ImageStore) Exists(obj *StoreObject) bool {
-	return true
-}
-
-func (this *S3ImageStore) Save(src string, obj *StoreObject) error {
+func NewS3ImageStore(bucket string, root string, region string) *S3ImageStore {
 	auth, err := aws.EnvAuth()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	client := s3.New(auth, aws.USEast)
-	bucket := client.Bucket(this.bucketName)
+	client := s3.New(auth, aws.Regions[region])
+	return &S3ImageStore{
+		bucketName: bucket,
+		storeRoot:  root,
+		region:     region,
+		client:     client,
+	}
+}
+
+func (this *S3ImageStore) Exists(obj *StoreObject) (bool, error) {
+	bucket := this.client.Bucket(this.bucketName)
+	response, err := bucket.Head(this.toPath(obj))
+
+	if err != nil {
+		return false, err
+	}
+
+	return (response.StatusCode == 200), nil
+}
+
+func (this *S3ImageStore) Save(src string, obj *StoreObject) error {
+	bucket := this.client.Bucket(this.bucketName)
 
 	data, err := ioutil.ReadFile(src)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	err = bucket.Put(this.toPath(obj.Path), data, obj.MimeType, s3.PublicReadWrite)
-
+	err = bucket.Put(this.toPath(obj), data, obj.MimeType, s3.PublicReadWrite)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil
 }
 
-func (this *S3ImageStore) toPath(path string) string {
-	return this.storeRoot + "/" + path
+func (this *S3ImageStore) toPath(obj *StoreObject) string {
+	return this.storeRoot + "/" + obj.Type + "/" + obj.Name
 }

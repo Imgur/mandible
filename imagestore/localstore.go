@@ -16,43 +16,34 @@ func NewLocalImageStore(root string) *LocalImageStore {
 	}
 }
 
-func (this *LocalImageStore) Exists(obj *StoreObject) bool {
-	if _, err := os.Stat(this.storeRoot + "/" + obj.Path); os.IsNotExist(err) {
-		return false
+func (this *LocalImageStore) Exists(obj *StoreObject) (bool, error) {
+	if _, err := os.Stat(this.toPath(obj)); os.IsNotExist(err) {
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
 
 func (this *LocalImageStore) Save(src string, obj *StoreObject) error {
 	// open input file
 	fi, err := os.Open(src)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	// close fi on exit and check for its returned error
-	defer func() {
-		if err := fi.Close(); err != nil {
-			panic(err)
-		}
-	}()
+	defer fi.Close()
 
 	// make a read buffer
 	r := bufio.NewReader(fi)
 
 	// open output file
-	fo, err := os.Create(this.storeRoot + "/" + obj.Path)
+	this.createParent(obj)
+	fo, err := os.Create(this.toPath(obj))
 	if err != nil {
 		panic(err)
 	}
 
-	// close fo on exit and check for its returned error
-	defer func() {
-		if err := fo.Close(); err != nil {
-			panic(err)
-		}
-	}()
+	defer fo.Close()
 
 	// make a write buffer
 	w := bufio.NewWriter(fo)
@@ -63,7 +54,7 @@ func (this *LocalImageStore) Save(src string, obj *StoreObject) error {
 		// read a chunk
 		n, err := r.Read(buf)
 		if err != nil && err != io.EOF {
-			panic(err)
+			return err
 		}
 
 		if n == 0 {
@@ -72,13 +63,25 @@ func (this *LocalImageStore) Save(src string, obj *StoreObject) error {
 
 		// write a chunk
 		if _, err := w.Write(buf[:n]); err != nil {
-			panic(err)
+			return err
 		}
 	}
 
 	if err = w.Flush(); err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil
+}
+
+func (this *LocalImageStore) createParent(obj *StoreObject) {
+	path := this.storeRoot + "/" + obj.Type
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, 0777)
+	}
+}
+
+func (this *LocalImageStore) toPath(obj *StoreObject) string {
+	return this.storeRoot + "/" + obj.Type + "/" + obj.Name
 }
