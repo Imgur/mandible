@@ -84,7 +84,7 @@ func runConvertCommand(args []string) error {
 	case <-time.After(time.Duration(500000) * time.Millisecond):
 		killCmd(cmd)
 		<-cmdDone
-		return errors.New("Command command timed out")
+		return errors.New("Command timed out")
 	case err := <-cmdDone:
 		if err != nil {
 			log.Println(stderr.String())
