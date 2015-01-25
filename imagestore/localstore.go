@@ -40,7 +40,7 @@ func (this *LocalImageStore) Save(src string, obj *StoreObject) error {
 	this.createParent(obj)
 	fo, err := os.Create(this.toPath(obj))
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	defer fo.Close()
