@@ -2,22 +2,39 @@ package main
 
 import (
 	"github.com/gophergala/ImgurGo/imagestore"
+	"github.com/mitchellh/goamz/aws"
+	"github.com/mitchellh/goamz/s3"
+	"log"
 )
 
 type Factory struct {
 	config *Configuration
 }
 
-func (this *Factory) NewS3() imagestore.ImageStore {
+func (this *Factory) NewImageStores() []imagestore.ImageStore {
+	return []imagestore.ImageStore{}
+}
+
+func (this *Factory) NewS3ImageStore(config *S3StoreConfig) imagestore.ImageStore {
+	auth, err := aws.EnvAuth()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client := s3.New(auth, aws.Regions[config.Region])
+	mapper := imagestore.NewNamePathMapper(config.NamePathRegex, config.NamePathMap)
+
 	return imagestore.NewS3ImageStore(
-		this.config.Store.S3.BucketName,
-		this.config.Store.S3.StoreRoot,
-		this.config.Store.S3.Region,
+		config.BucketName,
+		config.StoreRoot,
+		client,
+		mapper,
 	)
 }
 
-func (this *Factory) NewLocal() imagestore.ImageStore {
-	return imagestore.NewLocalImageStore(this.config.Store.Local.StoreRoot)
+func (this *Factory) NewLocalImageStore(config *LocalStoreConfig) imagestore.ImageStore {
+	mapper := imagestore.NewNamePathMapper(config.NamePathRegex, config.NamePathMap)
+	return imagestore.NewLocalImageStore(config.StoreRoot, mapper)
 }
 
 func (this *Factory) NewStoreObject(name string, mime string, imgType string) *imagestore.StoreObject {

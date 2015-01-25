@@ -7,12 +7,14 @@ import (
 )
 
 type LocalImageStore struct {
-	storeRoot string
+	storeRoot      string
+	namePathMapper *NamePathMapper
 }
 
-func NewLocalImageStore(root string) *LocalImageStore {
+func NewLocalImageStore(root string, mapper *NamePathMapper) *LocalImageStore {
 	return &LocalImageStore{
-		storeRoot: root,
+		storeRoot:      root,
+		namePathMapper: mapper,
 	}
 }
 

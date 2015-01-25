@@ -6,14 +6,14 @@ import (
 )
 
 type NamePathMapper struct {
-	regex   *Regexp
+	regex   *regexp.Regexp
 	replace string
 }
 
 func NewNamePathMapper(expr string, mapping string) *NamePathMapper {
-	r := nil
+	var r *regexp.Regexp
 	if len(expr) > 0 {
-		r, _ = regex.Compile(expr)
+		r = regexp.MustCompile(expr)
 	}
 
 	return &NamePathMapper{

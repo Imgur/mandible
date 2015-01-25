@@ -1,32 +1,23 @@
 package imagestore
 
 import (
-	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/s3"
 	"io/ioutil"
-	"log"
 )
 
 type S3ImageStore struct {
-	bucketName string
-	storeRoot  string
-	region     string
-	client     *s3.S3
-	mapper     *NamePathMapper
+	bucketName     string
+	storeRoot      string
+	client         *s3.S3
+	namePathMapper *NamePathMapper
 }
 
-func NewS3ImageStore(bucket string, root string, region string) *S3ImageStore {
-	auth, err := aws.EnvAuth()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	client := s3.New(auth, aws.Regions[region])
+func NewS3ImageStore(bucket string, root string, client *s3.S3, mapper *NamePathMapper) *S3ImageStore {
 	return &S3ImageStore{
-		bucketName: bucket,
-		storeRoot:  root,
-		region:     region,
-		client:     client,
+		bucketName:     bucket,
+		storeRoot:      root,
+		client:         client,
+		namePathMapper: mapper,
 	}
 }
 
@@ -58,5 +49,5 @@ func (this *S3ImageStore) Save(src string, obj *StoreObject) (*StoreObject, erro
 }
 
 func (this *S3ImageStore) toPath(obj *StoreObject) string {
-	return this.storeRoot + "/" + obj.Type + "/" + obj.Name
+	return this.storeRoot + "/" + this.namePathMapper.mapToPath(obj)
 }
