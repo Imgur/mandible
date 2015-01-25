@@ -26,7 +26,7 @@ func CreateServer(c *Configuration) *Server {
 	return &Server{c, httpclient, store}
 }
 
-func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fileName string) {
+func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fileName string) {
 	defer uploadFile.Close()
 
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
@@ -68,7 +68,7 @@ func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fi
 	upload.SetHash(<-hashGetter)
 	factory := Factory{s.Config}
 	obj := factory.NewStoreObject(upload.GetHash(), upload.GetMime(), "original")
-	err = s.imageStore.Save(upload.GetPath(), obj)
+	obj, err = s.imageStore.Save(upload.GetPath(), obj)
 
 	if err != nil {
 		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
@@ -97,7 +97,7 @@ func (s *Server) initServer() {
 			return
 		}
 
-		s._uploadFile(uploadFile, w, header.Filename)
+		s.uploadFile(uploadFile, w, header.Filename)
 	}
 
 	urlHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +108,7 @@ func (s *Server) initServer() {
 			return
 		}
 
-		s._uploadFile(uploadFile, w, "")
+		s.uploadFile(uploadFile, w, "")
 	}
 
 	http.HandleFunc("/file", fileHandler)

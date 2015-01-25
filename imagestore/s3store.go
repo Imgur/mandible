@@ -41,17 +41,17 @@ func (this *S3ImageStore) Exists(obj *StoreObject) (bool, error) {
 	return (response.StatusCode == 200), nil
 }
 
-func (this *S3ImageStore) Save(src string, obj *StoreObject) error {
+func (this *S3ImageStore) Save(src string, obj *StoreObject) (*StoreObject, error) {
 	bucket := this.client.Bucket(this.bucketName)
 
 	data, err := ioutil.ReadFile(src)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = bucket.Put(this.toPath(obj), data, obj.MimeType, s3.PublicReadWrite)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	obj.Url = "https://s3.amazonaws.com/" + this.bucketName + this.toPath(obj)
