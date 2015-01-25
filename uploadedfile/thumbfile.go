@@ -111,4 +111,5 @@ func (this *ThumbFile) processThumb(original *UploadedFile) error {
         return err
     }
 
-    return nil;}
+    return nil;
+}
