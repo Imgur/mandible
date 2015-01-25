@@ -96,12 +96,21 @@ func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fil
 		return
 	}
 
+	width, height, err := upload.Dimensions()
+
+	if err != nil {
+		ErrorResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	resp := map[string]interface{}{
-		"link": obj.Url,
-		"mime": obj.MimeType,
-		"type": obj.Type,
-		"name": fileName,
-		"size": size,
+		"link":   obj.Url,
+		"mime":   obj.MimeType,
+		"name":   fileName,
+		"size":   size,
+		"width":  width,
+		"height": height,
+		"thumbs": map[string]interface{}{},
 	}
 
 	Response(w, resp)

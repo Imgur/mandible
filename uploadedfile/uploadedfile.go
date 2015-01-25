@@ -2,6 +2,10 @@ package uploadedfile
 
 import (
 	"errors"
+	"image"
+	"image/gif"
+	"image/jpeg"
+	"image/png"
 	"net/http"
 	"os"
 )
@@ -105,6 +109,39 @@ func (this *UploadedFile) FileSize() (int64, error) {
 	return size, nil
 }
 
+func (this *UploadedFile) Dimensions() (int, int, error) {
+	f, err := os.Open(this.path)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	var cfg image.Config
+	switch true {
+	case this.IsGif():
+		cfg, err = gif.DecodeConfig(f)
+	case this.IsPng():
+		cfg, err = png.DecodeConfig(f)
+	case this.IsJpeg():
+		cfg, err = jpeg.DecodeConfig(f)
+	default:
+		return 0, 0, errors.New("Invalid mime type!")
+	}
+
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return cfg.Width, cfg.Height, nil
+}
+
 func (this *UploadedFile) IsJpeg() bool {
 	return (this.GetMime() == "image/jpeg" || this.GetMime() == "image/jpg")
+}
+
+func (this *UploadedFile) IsPng() bool {
+	return this.GetMime() == "image/png"
+}
+
+func (this *UploadedFile) IsGif() bool {
+	return this.GetMime() == "image/gif"
 }
