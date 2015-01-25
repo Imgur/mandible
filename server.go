@@ -188,18 +188,30 @@ func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
 
 	var thumbs []*uploadedfile.ThumbFile
 	for name, thumb := range t {
-		width := int(thumb["width"].(float64))
-		height := int(thumb["height"].(float64))
+		width, w_ok := thumb["width"].(float64)
+		if !w_ok {
+			return nil, errors.New("Invalid thumbnail width!")
+		}
 
-		switch thumb["shape"].(string) {
+		height, h_ok := thumb["height"].(float64)
+		if !h_ok {
+			return nil, errors.New("Invalid thumbnail height!")
+		}
+
+		shape, s_ok := thumb["shape"].(string)
+		if !s_ok {
+			return nil, errors.New("Invalid thumbnail shape!")
+		}
+
+		switch shape {
 		case "thumb":
 		case "square":
 		case "circle":
 		default:
-			return nil, errors.New("Invalid shape!")
+			return nil, errors.New("Invalid thumbnail shape!")
 		}
 
-		thumbs = append(thumbs, uploadedfile.NewThumbFile(width, height, name, thumb["shape"].(string), ""))
+		thumbs = append(thumbs, uploadedfile.NewThumbFile(int(width), int(height), name, shape, ""))
 	}
 
 	return thumbs, nil
