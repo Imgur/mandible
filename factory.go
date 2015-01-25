@@ -8,7 +8,7 @@ type Factory struct {
 	config *Configuration
 }
 
-func (this *Factory) NewS3() *imagestore.S3ImageStore {
+func (this *Factory) NewS3() imagestore.ImageStore {
 	return imagestore.NewS3ImageStore(
 		this.config.Store.S3.BucketName,
 		this.config.Store.S3.StoreRoot,
@@ -16,7 +16,7 @@ func (this *Factory) NewS3() *imagestore.S3ImageStore {
 	)
 }
 
-func (this *Factory) NewLocal() *imagestore.LocalImageStore {
+func (this *Factory) NewLocal() imagestore.ImageStore {
 	return imagestore.NewLocalImageStore(this.config.Store.Local.StoreRoot)
 }
 
