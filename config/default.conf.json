@@ -1,4 +1,14 @@
 {
     "MaxFileSize": 20,
-    "UserAgent": "ImgurGo (https://github.com/gophergala/ImgurGo)"
+    "UserAgent": "ImgurGo (https://github.com/gophergala/ImgurGo)",
+    "Store" : {
+        "S3" : {
+            "bucketName" : "gophergala",
+            "storeRoot" : "",
+            "region" : "us-east-1"
+        },
+        "Local" : {
+            "storeRoot": "/Users/jarvis/imagestore"
+        }
+    }
 }
