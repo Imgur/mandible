@@ -24,19 +24,22 @@ Processing Steps:
 Interfacing with ImgurGo is extremely simple:
 
 ### Upload an image file
-```POST /upload```
+`POST /file`
 
 with the following multi-part/form-data
+- ```image``` - file
 
-- `type` - string
-    - Value should be one of:
-        - `url`
-        - `file`
-        - `base64`
-- ```image``` - mixed
-    - string, if `type` is `url`
-    - base64 data, if `type` is `base64`
-    - image file, if `type` is `file`
+### Upload an image from a URL
+`POST /url`
+
+with the following multi-part/form-data
+- ```image``` - string
+
+### Upload an image from base64 data
+`POST /base64`
+
+with the following multi-part/form-data
+- ```image``` - image encoded as base64 data
 
 ### Example usage
 
