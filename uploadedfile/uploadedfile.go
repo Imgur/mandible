@@ -109,6 +109,14 @@ func (this *UploadedFile) FileSize() (int64, error) {
 	return size, nil
 }
 
+func (this *UploadedFile) Clean() {
+	os.Remove(this.path)
+
+	for _, thumb := range this.thumbs {
+		os.Remove(thumb.path)
+	}
+}
+
 func (this *UploadedFile) Dimensions() (int, int, error) {
 	f, err := os.Open(this.path)
 	if err != nil {
