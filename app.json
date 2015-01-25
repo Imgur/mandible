@@ -6,10 +6,12 @@
       "BUILDPACK_URL": "https://github.com/ddollar/heroku-buildpack-multi",
       "IMGUR_GO_CONF": "config/default.conf.json",
       "AWS_ACCESS_KEY_ID": {
-          "description": "AWS Acess Key ID"
+          "description": "AWS Acess Key ID",
+          "required": false
       },
       "AWS_SECRET_ACCESS_KEY": {
-          "description": "AWS Acess Key Secret"
+          "description": "AWS Acess Key Secret",
+          "required": false
       }
   }
 }
