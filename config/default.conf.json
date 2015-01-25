@@ -10,13 +10,13 @@
             "StoreRoot" : "",
             "Region" : "us-east-1",
             "NamePathRegex" : "",
-            "NamePathMap" : "${ImageName}/${ImageSize}"
+            "NamePathMap" : "${ImageSize}/${ImageName}"
         },
         {
             "Type" : "local",
             "StoreRoot": "/Users/jarvis/imagestore",
             "NamePathRegex" : "",
-            "NamePathMap" : "${ImageName}/${ImageSize}"
+            "NamePathMap" : "${ImageSize}/${ImageName}"
         }
     ]
 }
