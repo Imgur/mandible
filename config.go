@@ -7,7 +7,7 @@ import (
 )
 
 type Configuration struct {
-	MaxFileSize int
+	MaxFileSize int64
 	UserAgent   string
 	Store       StoreConfig
 }

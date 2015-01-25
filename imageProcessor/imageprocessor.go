@@ -6,8 +6,6 @@ import (
 	"log"
 )
 
-const MAX_SIZE = 1024 * 50
-
 func init() {
 	hashGetter := make(chan string)
 	length := 7
@@ -112,7 +110,7 @@ func (this *ImageProcessor) Run(image *uploadedfile.UploadedFile) error {
 	return this.processor.Process(image)
 }
 
-func Factory(file *uploadedfile.UploadedFile) (*ImageProcessor, error) {
+func Factory(maxFileSize int64, file *uploadedfile.UploadedFile) (*ImageProcessor, error) {
 	size, err := file.FileSize()
 	if err != nil {
 		return &ImageProcessor{}, err
@@ -120,8 +118,8 @@ func Factory(file *uploadedfile.UploadedFile) (*ImageProcessor, error) {
 
 	processor := multiProcessType{}
 
-	if size > MAX_SIZE {
-		processor = append(processor, &ImageScaler{MAX_SIZE})
+	if size > maxFileSize {
+		processor = append(processor, &ImageScaler{maxFileSize})
 	}
 
 	return &ImageProcessor{processor}, nil
