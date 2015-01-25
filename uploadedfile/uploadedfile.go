@@ -79,6 +79,10 @@ func (this *UploadedFile) GetMime() string {
 	return this.mime
 }
 
+func (this *UploadedFile) SetMime(mime string) {
+	this.mime = mime
+}
+
 func (this *UploadedFile) FileSize() (int64, error) {
 	f, err := os.Open(this.path)
 	if err != nil {
