@@ -3,14 +3,24 @@
     "MaxFileSize": 20971520,
     "HashLength": 7,
     "UserAgent": "ImgurGo (https://github.com/gophergala/ImgurGo)",
-    "Store" : {
-        "S3" : {
-            "bucketName" : "gophergala",
-            "storeRoot" : "",
-            "region" : "us-east-1"
+    "Stores" : [
+        {
+            "Type" : "S3StoreConfig",
+            "Config" : {
+                "BucketName" : "gophergala",
+                "StoreRoot" : "",
+                "Region" : "us-east-1",
+                "NamePathRegex" : "",
+                "NamePathMap" : "${ImageName}/${ImageSize}"
+            }
         },
-        "Local" : {
-            "storeRoot": "/Users/jarvis/imagestore"
+        {
+            "Type" : "LocalStoreConfig",
+            "Config" : {
+                "StoreRoot": "/Users/jarvis/imagestore",
+                "NamePathRegex" : "",
+                "NamePathMap" : "${ImageName}/${ImageSize}"
+            }
         }
-    }
+    ]
 }
