@@ -1,11 +1,10 @@
 package imagestore
 
 import (
-	"io/ioutil"
-	"log"
-
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/s3"
+	"io/ioutil"
+	"log"
 )
 
 type S3ImageStore struct {
@@ -13,6 +12,7 @@ type S3ImageStore struct {
 	storeRoot  string
 	region     string
 	client     *s3.S3
+	mapper     *NamePathMapper
 }
 
 func NewS3ImageStore(bucket string, root string, region string) *S3ImageStore {
