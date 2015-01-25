@@ -22,7 +22,7 @@ func CreateServer(c *Configuration) *Server {
 	return &Server{c, httpclient}
 }
 
-func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, name ...string) {
+func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fileName string) {
 	defer uploadFile.Close()
 
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
@@ -42,14 +42,7 @@ func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, na
 		return
 	}
 
-	var fileName string
-	if len(name) > 0 {
-		fileName = name[0]
-	} else {
-		fileName = ""
-	}
-
-	upload := uploadedfile.NewUploadedFile(fileName, os.TempDir()+tmpFile.Name(), "image/jpeg")
+	upload := uploadedfile.NewUploadedFile(fileName, tmpFile.Name(), "image/jpeg")
 	processor, err := imageprocessor.Factory(s.Config.MaxFileSize, upload)
 	if err != nil {
 		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
@@ -92,7 +85,7 @@ func (s *Server) initServer() {
 			return
 		}
 
-		s._uploadFile(uploadFile, w)
+		s._uploadFile(uploadFile, w, "")
 	}
 
 	http.HandleFunc("/file", fileHandler)
