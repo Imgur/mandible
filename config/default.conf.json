@@ -1,5 +1,5 @@
 {
-    "MaxFileSize": 20,
+    "MaxFileSize": 20971520,
     "UserAgent": "ImgurGo (https://github.com/gophergala/ImgurGo)",
     "Store" : {
         "S3" : {
