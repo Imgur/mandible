@@ -8,7 +8,7 @@ import (
 var hashGetter (chan string)
 
 func init() {
-	hashGetter := make(chan string)
+	hashGetter = make(chan string)
 	length := 7
 
 	go func() {
