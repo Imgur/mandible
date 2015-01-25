@@ -9,8 +9,8 @@
             "BucketName" : "gophergala",
             "StoreRoot" : "",
             "Region" : "us-east-1",
-            "NamePathRegex" : "([a-zA-Z0-9])([a-zA-Z0-9])([a-zA-Z0-9])([a-zA-Z0-9])[a-zA-Z0-9]{3}",
-            "NamePathMap" : "${ImageSize}/${1}/${2}/${3}/${4}/${ImageName}"
+            "NamePathRegex" : "",
+            "NamePathMap" : "${ImageName}/${ImageSize}"
         },
         {
             "Type" : "local",
