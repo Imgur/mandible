@@ -1,17 +1,16 @@
 package imageprocessor
 
 import (
-	"fmt"
-	"io/ioutil"
+	"crypto/rand"
 	"log"
-	"os"
-	"cryto/rand"
+	"github.com/gophergala/imgurgo/uploadedfile"
+	"github.com/gophergala/imgurgo/imageprocessor/imagescaler"
 )
 
-const MAX_SIZE = 1024*50
+const MAX_SIZE = 1024 * 50
 
 func init() {
-	hashGetter = make(chan string)
+	hashGetter := make(chan string)
 	length := 7
 
 	go func() {
@@ -57,70 +56,74 @@ func init() {
 			}
 
 			hashGetter <- str
-		} 
+		}
 	}()
 }
 
 type multiProcessType []ProcessType
 
-func (this *multiProcessType) Process(filename string) string, error {
-    for _, processor := range this {
-        filename, err := processor.Process(image)
-        if err != nil {
-            return nil, err
-        }
-    }
+func (this multiProcessType) Process(image *uploadedfile.UploadedFile) (error) {
+	for _, processor := range this {
+		err := processor.Process(image)
+		if err != nil {
+			return err
+		}
+	}
 
-    return filename, nil
+	return nil
 }
 
 type asyncProcessType []ProcessType
 
-func (this *asyncProcessType) Process(filename string) string, error {
-    results := make(chan string, len(this))
-	errs    := make(chan error, len(this))
+func (this asyncProcessType) Process(image *uploadedfile.UploadedFile) (error) {
+	results  := make(chan bool, len(this))
+	errs     := make(chan error, len(this))
 
-    for _, processor := range this {
-    	go func(p ProcessType) {
-	        f, err := processor.Process(image)
-	        if err != nil {
-	            errs <- err
-	        }
+	for _, processor := range this {
+		go func(p ProcessType) {
+			err := processor.Process(image)
+			if err != nil {
+				errs <- err
+			}
 
-	        results <- f
-	    }(processor)
-    }
+			results <- true
+		}(processor)
+	}
 
-    resultStr := ""
-    for i := 0; i < len(this); i++ {
-        select {
-        case result := <-results:
-            resultStr += result + ", "
+	for i := 0; i < len(this); i++ {
+		select {
+		case <-results:
+		case err := <-errs:
+			return err
+		}
+	}
 
-        case err := <-errs:
-            return nil, err
-        }
-    }
-
-    return resultStr, nil
+	return nil
 }
 
 type ProcessType interface {
-	Process(filename string) error
+	Process(image *uploadedfile.UploadedFile) error
 }
 
 type ImageProcessor struct {
-	processor *ProcessType
+	processor ProcessType
 }
 
-func Factory(file FileUpload) ImageProcessor, error {
-	size := file.FileSize()
+func (this *ImageProcessor) Run(image *uploadedfile.UploadedFile) (error) {
+	return this.processor.Process(image)
+}
 
-	processor := &multiProcessType{}
-
-	if(size > MAX_SIZE) {
-		Append(processor, imagescaler.Factory(MAX_SIZE))
+func Factory(file *uploadedfile.UploadedFile) (*ImageProcessor, error) {
+	size, err := file.FileSize()
+	if err != nil {
+		return &ImageProcessor{}, err
 	}
 
-	return ImageProcessor{processor}
+	processor := multiProcessType{}
+
+	if size > MAX_SIZE {
+		processor = append(processor, imagescaler.Factory(MAX_SIZE))
+	}
+
+	return &ImageProcessor{processor}, nil
 }

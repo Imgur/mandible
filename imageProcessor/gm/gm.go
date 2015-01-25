@@ -3,18 +3,16 @@ package gm
 import (
 	"bytes"
 	"errors"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"os/exec"
-	"strings"
+	"fmt"
 	"time"
 )
 
 const GM_COMMAND = "convert"
 
 func ConvertToJpeg(filename string) (string, error) {
-	outfile := strings.Sprintf("%s_q", filename)
+	outfile := fmt.Sprintf("%s_jpg", filename)
 
 	args := []string{
 		filename,
@@ -24,17 +22,19 @@ func ConvertToJpeg(filename string) (string, error) {
 
 	err := runConvertCommand(args)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
+
+	return outfile, nil
 }
 
-func Quality(filename string, quality int) error {
-	outfile := strings.Sprintf("%s_q", filename)
+func Quality(filename string, quality int) (string, error) {
+	outfile := fmt.Sprintf("%s_q", filename)
 
 	args := []string{
 		filename,
 		"-quality",
-		quality,
+		string(quality),
 		"-density",
 		"72x72",
 		outfile,
@@ -42,26 +42,32 @@ func Quality(filename string, quality int) error {
 
 	err := runConvertCommand(args)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
+
+	return outfile, nil
 }
 
 func ResizePercent(filename string, percent int) (string, error) {
+	outfile := fmt.Sprintf("%s_rp", filename)
+	
 	args := []string{
 		filename,
 		"-resize",
-		strings.Sprintf("%i%", percent),
+		fmt.Sprintf("%i%", percent),
 		outfile,
 	}
 
 	err := runConvertCommand(args)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
+
+	return outfile, nil
 }
 
 func runConvertCommand(args []string) error {
-	cmd := exec.Command(GM_COMMAND, args)
+	cmd := exec.Command(GM_COMMAND, args...)
 
 	var out bytes.Buffer
 	var stderr bytes.Buffer

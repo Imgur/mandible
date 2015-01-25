@@ -3,11 +3,13 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"github.com/gophergala/imgurgo/imageprocessor"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
+    "github.com/gophergala/imgurgo/uploadedfile"
 )
 
 type URLUpload struct {
@@ -62,11 +64,21 @@ func (s *Server) initServer() {
 			return
 		}
 
-		// upload := FileUpload{
-		// 	header.Filename,
-		// 	os.TempDir() + tmpFile.Name(),
-		// 	header.Header.Get("Content-Type"),
-		// }
+
+
+		upload := uploadedfile.NewUploadedFile("testfile.jpg", os.TempDir() + tmpFile.Name(), "image/jpeg")
+		processor, err := imageprocessor.Factory(upload)
+		if err != nil {
+			ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
+			return
+		}
+
+		err = processor.Run(upload)
+		if err != nil {
+			ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
+			return
+		}
+		
 
 		resp := make(map[string]interface{})
 

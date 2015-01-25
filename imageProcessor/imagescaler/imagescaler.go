@@ -1,24 +1,20 @@
 package imagescaler
 
 import (
-    "log"
-    "fmt"
-    "os"
-    "io/ioutil"
-    "github.com/gophergala/imgurgo/uploadedimage"
+    "github.com/gophergala/imgurgo/uploadedfile"
     "github.com/gophergala/imgurgo/imageprocessor/gm"
     "errors"
 )
 
 type ImageScaler struct {
-    targetSize int
+    targetSize int64
 }
 
-func Factory(targetSize int) (*ImageScaler) {
+func Factory(targetSize int64) (*ImageScaler) {
     return &ImageScaler{targetSize}
 }
 
-func (this *ImageScaler) Process(image *UploadedImage) error {
+func (this *ImageScaler) Process(image *uploadedfile.UploadedFile) error {
     switch image.GetMime() {
     case "image/jpeg":
         return this.scaleJpeg(image)
@@ -31,35 +27,35 @@ func (this *ImageScaler) Process(image *UploadedImage) error {
     return errors.New("Unsuported filetype")
 }
 
-func (this *ImageScaler) scalePng(image *UploadedImage) error {
-    filename, err := gm.ConvertToJpeg(image.GetFilename(), 90)
+func (this *ImageScaler) scalePng(image *uploadedfile.UploadedFile) error {
+    filename, err := gm.ConvertToJpeg(image.GetPath())
     if err != nil {
         return err
     }
 
-    image.SetFilename(filename)
-    return this.scale_jpg(image)
+    image.SetPath(filename)
+    return this.scaleJpeg(image)
 }
 
-func (this *ImageScaler) scaleJpeg(image *UploadedImage) error {
-    filename, err := gm.Quality(image.GetFilename(), 90)
+func (this *ImageScaler) scaleJpeg(image *uploadedfile.UploadedFile) error {
+    filename, err := gm.Quality(image.GetPath(), 90)
     if err != nil {
         return err
     }
 
-    image.SetFilename(filename)
+    image.SetPath(filename)
     size, err := image.FileSize()
     if(size < this.targetSize) {
         return nil
     }
 
-    filename, err := gm.Quality(image.GetFilename(), 70)
+    filename, err = gm.Quality(image.GetPath(), 70)
     if err != nil {
         return err
     }
 
-    image.SetFilename(filename)
-    size, err := image.FileSize()
+    image.SetPath(filename)
+    size, err = image.FileSize()
     if(size < this.targetSize) {
         return nil
     }
@@ -74,11 +70,13 @@ func (this *ImageScaler) scaleJpeg(image *UploadedImage) error {
     }
 
     for {
-        gm.ResizePercent(image.GetFilename(), percent)
+        gm.ResizePercent(image.GetPath(), percent)
 
-        image.SetFilename(filename)
+        image.SetPath(filename)
         size, err := image.FileSize()
-        if size == 0 || percent < 10 {
+        if err != nil {
+            return err
+        } else if size == 0 || percent < 10 {
             return errors.New("Could not scale image to desired filesize")
         } else if(size < this.targetSize) {
             return nil
@@ -88,6 +86,6 @@ func (this *ImageScaler) scaleJpeg(image *UploadedImage) error {
     }
 }
 
-func (this *ImageScaler) scaleGif(image *UploadedImage) error {
+func (this *ImageScaler) scaleGif(image *uploadedfile.UploadedFile) error {
     return errors.New("Unimplimented")
 }
