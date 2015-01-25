@@ -33,7 +33,6 @@ func NewS3ImageStore(bucket string, root string, region string) *S3ImageStore {
 func (this *S3ImageStore) Exists(obj *StoreObject) (bool, error) {
 	bucket := this.client.Bucket(this.bucketName)
 	response, err := bucket.Head(this.toPath(obj))
-
 	if err != nil {
 		return false, err
 	}

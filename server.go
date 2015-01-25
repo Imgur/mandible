@@ -14,16 +14,19 @@ import (
 )
 
 type Server struct {
-	Config     *Configuration
-	HTTPClient *http.Client
-	imageStore imagestore.ImageStore
+	Config        *Configuration
+	HTTPClient    *http.Client
+	imageStore    imagestore.ImageStore
+	hashGenerator *HashGenerator
 }
 
 func CreateServer(c *Configuration) *Server {
 	factory := Factory{c}
 	httpclient := &http.Client{}
 	store := factory.NewS3()
-	return &Server{c, httpclient, store}
+
+	hashGenerator := factory.NewHashGenerator(store)
+	return &Server{c, httpclient, store, hashGenerator}
 }
 
 func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fileName string) {
@@ -65,7 +68,7 @@ func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fil
 		return
 	}
 
-	upload.SetHash(<-hashGetter)
+	upload.SetHash(s.hashGenerator.Get())
 	factory := Factory{s.Config}
 	obj := factory.NewStoreObject(upload.GetHash(), upload.GetMime(), "original")
 	obj, err = s.imageStore.Save(upload.GetPath(), obj)
