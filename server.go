@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -29,7 +30,7 @@ func CreateServer(c *Configuration) *Server {
 	return &Server{c, httpclient, store, hashGenerator}
 }
 
-func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fileName string) {
+func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fileName string, thumbs []*uploadedfile.ThumbFile) {
 	defer uploadFile.Close()
 
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
@@ -49,7 +50,7 @@ func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fil
 		return
 	}
 
-	upload, err := uploadedfile.NewUploadedFile(fileName, tmpFile.Name())
+	upload, err := uploadedfile.NewUploadedFile(fileName, tmpFile.Name(), thumbs)
 
 	if err != nil {
 		ErrorResponse(w, "Error detecting mime type!", http.StatusInternalServerError)
@@ -107,7 +108,13 @@ func (s *Server) initServer() {
 			return
 		}
 
-		s.uploadFile(uploadFile, w, header.Filename)
+		thumbs, err := parseThumbs(r)
+		if err != nil {
+			ErrorResponse(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		s.uploadFile(uploadFile, w, header.Filename, thumbs)
 	}
 
 	urlHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +125,13 @@ func (s *Server) initServer() {
 			return
 		}
 
-		s.uploadFile(uploadFile, w, "")
+		thumbs, err := parseThumbs(r)
+		if err != nil {
+			ErrorResponse(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		s.uploadFile(uploadFile, w, "", thumbs)
 	}
 
 	http.HandleFunc("/file", fileHandler)
@@ -159,4 +172,47 @@ func (s *Server) download(url string) (io.ReadCloser, error) {
 	}
 
 	return resp.Body, nil
+}
+
+func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
+	thumbString := r.FormValue("thumbs")
+	if thumbString == "" {
+		return []*uploadedfile.ThumbFile{}, nil
+	}
+
+	var t map[string]map[string]interface{}
+	err := json.Unmarshal([]byte(thumbString), &t)
+	if err != nil {
+		return nil, errors.New("Error parsing thumbnail JSON!")
+	}
+
+	var thumbs []*uploadedfile.ThumbFile
+	for name, thumb := range t {
+		width, wOk := thumb["width"].(float64)
+		if !wOk {
+			return nil, errors.New("Invalid thumbnail width!")
+		}
+
+		height, hOk := thumb["height"].(float64)
+		if !hOk {
+			return nil, errors.New("Invalid thumbnail height!")
+		}
+
+		shape, sOk := thumb["shape"].(string)
+		if !sOk {
+			return nil, errors.New("Invalid thumbnail shape!")
+		}
+
+		switch shape {
+		case "thumb":
+		case "square":
+		case "circle":
+		default:
+			return nil, errors.New("Invalid thumbnail shape!")
+		}
+
+		thumbs = append(thumbs, uploadedfile.NewThumbFile(int(width), int(height), name, shape, ""))
+	}
+
+	return thumbs, nil
 }

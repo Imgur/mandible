@@ -11,6 +11,7 @@ type UploadedFile struct {
 	path     string
 	mime     string
 	hash     string
+	thumbs   []*ThumbFile
 }
 
 var supportedTypes = map[string]bool{
@@ -20,7 +21,7 @@ var supportedTypes = map[string]bool{
 	"image/png":  true,
 }
 
-func NewUploadedFile(filename, path string) (*UploadedFile, error) {
+func NewUploadedFile(filename, path string, thumbs []*ThumbFile) (*UploadedFile, error) {
 	file, err := os.Open(path)
 
 	if err != nil {
@@ -45,6 +46,7 @@ func NewUploadedFile(filename, path string) (*UploadedFile, error) {
 		path,
 		filetype,
 		"",
+		thumbs,
 	}, nil
 }
 
