@@ -1,5 +1,18 @@
 {
 	"ImportPath": "github.com/gophergala/ImgurGo",
-	"GoVersion": "go1.2",
-	"Deps": []
+	"GoVersion": "go1.4.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/mitchellh/goamz/aws",
+			"Rev": "2441a8d0fab90553ec345cfdf3db24bb61ea61c3"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/goamz/s3",
+			"Rev": "2441a8d0fab90553ec345cfdf3db24bb61ea61c3"
+		},
+		{
+			"ImportPath": "github.com/vaughan0/go-ini",
+			"Rev": "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1"
+		}
+	]
 }
