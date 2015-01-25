@@ -39,6 +39,7 @@ func FixOrientation(filename string) (string, error) {
 
 	fmt.Printf("%s -auto-orient %s", filename, outfile)
 
+
 	err := runConvertCommand(args)
 	if err != nil {
 		return "", err
@@ -81,6 +82,88 @@ func ResizePercent(filename string, percent int) (string, error) {
 
 	fmt.Printf("%s -resize %d%% -density 72x72 %s \n", filename, percent, outfile)
 
+	err := runConvertCommand(args)
+	if err != nil {
+		return "", err
+	}
+
+	return outfile, nil
+}
+
+func SquareThumb(filename, name string, size int) (string, error) {
+	 //$image.'[0] -quality 94 -resize '.$width.'x'.$width.'^ -gravity center -crop '.$width.'x'.$width."+0+0 -density 72x72 -unsharp 0.5 JPG:$out";
+
+	outfile := fmt.Sprintf("%s_%s", filename, name)
+
+	args := []string{
+		fmt.Sprintf("%s[0]", filename),
+		"-quality",
+		"94",
+		"-resize",
+		fmt.Sprintf("%dx%d^", size, size),
+		"-gravity",
+		"center",
+		"-crop",
+		fmt.Sprintf("%dx%d+0+0", size, size),
+		"-density",
+		"72x72",
+		"-unsharp",
+		"0.5",
+		fmt.Sprintf("JPG:%s", outfile),
+	}
+
+	err := runConvertCommand(args)
+	if err != nil {
+		return "", err
+	}
+
+	return outfile, nil
+}
+
+func Thumb(filename, name string, width, height int) (string, error) {
+    //$command = self::CONVERT.$image."[0] -quality $quality -resize ".$width.'x'.$height."\> -density 72x72 JPG:$out";
+
+	outfile := fmt.Sprintf("%s_%s", filename, name)
+
+	args := []string{
+		fmt.Sprintf("%s[0]", filename),
+		"-quality",
+		"83",
+		"-resize",
+		fmt.Sprintf("%dx%d\\>", width, height),
+		"-density",
+		"72x72",
+		fmt.Sprintf("JPG:%s", outfile),
+	}
+	
+	err := runConvertCommand(args)
+	if err != nil {
+		return "", err
+	}
+
+	return outfile, nil
+}
+
+func CircleThumb(filename, name string, width int) (string, error) {
+	//convert -size 200x200 xc:none -fill walter.jpg -draw "circle 100,100 100,1" circle_thumb.png
+
+	outfile := fmt.Sprintf("%s_%s", filename, name)
+
+	args := []string{
+		"-size",
+		fmt.Sprintf("%dx%d", width, width),
+		"xc:none",
+		"-fill",
+		filename,
+		"-quality",
+		"83",
+		"-density",
+		"72x72",
+		"-draw",
+		"\"circle 100,100 100,1\"",
+		fmt.Sprintf("PNG:%s", outfile),
+	}
+	
 	err := runConvertCommand(args)
 	if err != nil {
 		return "", err

@@ -1,9 +1,8 @@
-package imageprocessor
+package uploadedfile
 
 import (
     "errors"
-    //"github.com/gophergala/ImgurGo/imageprocessor/gm"
-    "github.com/gophergala/ImgurGo/uploadedfile"
+    "github.com/gophergala/ImgurGo/imageprocessor/gm"
     "os"
     "fmt"
 )
@@ -62,7 +61,7 @@ func (this *ThumbFile) SetPath(path string) error {
     return nil
 }
 
-func (this *ThumbFile) Process(original *uploadedfile.UploadedFile) error {
+func (this *ThumbFile) Process(original *UploadedFile) error {
     switch this.shape {
     case "circle":
         return this.processCircle(original)
@@ -76,21 +75,40 @@ func (this *ThumbFile) Process(original *uploadedfile.UploadedFile) error {
     return errors.New("Invalid thumb shape " + this.shape)
 }
 
-func (this *ThumbFile) processSquare(original *uploadedfile.UploadedFile) error {
-    return errors.New("TODO")
-    //     filename, err := gm.SquareThumb(original.GetPath(), this.GetName(), this.GetWidth())
-    // if err != nil {
-    //     return err
-    // }
+func (this *ThumbFile) processSquare(original *UploadedFile) error {
+    filename, err := gm.SquareThumb(original.GetPath(), this.GetName(), this.GetWidth())
+    if err != nil {
+        return err
+    }
 
-    // this.SetPath(filename)
+    if err := this.SetPath(filename); err != nil {
+        return err
+    }
+
+    return nil;
 }
 
+func (this *ThumbFile) processCircle(original *UploadedFile) error {
+    filename, err := gm.CircleThumb(original.GetPath(), this.GetName(), this.GetWidth())
+    if err != nil {
+        return err
+    }
 
-func (this *ThumbFile) processCircle(original *uploadedfile.UploadedFile) error {
-    return errors.New("TODO")
+    if err := this.SetPath(filename); err != nil {
+        return err
+    }
+
+    return nil;
 }
 
-func (this *ThumbFile) processThumb(original *uploadedfile.UploadedFile) error {
-    return errors.New("TODO")
-}
+func (this *ThumbFile) processThumb(original *UploadedFile) error {
+    filename, err := gm.Thumb(original.GetPath(), this.GetName(), this.GetWidth(), this.GetHeight())
+    if err != nil {
+        return err
+    }
+
+    if err := this.SetPath(filename); err != nil {
+        return err
+    }
+
+    return nil;}
