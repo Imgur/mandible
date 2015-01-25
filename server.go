@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -9,10 +8,6 @@ import (
 	"net/http"
 	"os"
 )
-
-type URLUpload struct {
-	url string
-}
 
 type Server struct {
 	Config *Configuration
@@ -23,22 +18,10 @@ func CreateServer(c *Configuration) *Server {
 }
 
 func (s *Server) initServer() {
-	uploadHandler := func(w http.ResponseWriter, r *http.Request) {
+	fileHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		uploadType := r.FormValue("type")
-
-		var uploadFile multipart.File
-		var err error
-
-		if uploadType == "url" {
-			uploadFile, _, err = s.download(r.FormValue("image"))
-		} else if uploadType == "file" {
-			uploadFile, _, err = r.FormFile("image")
-		} else {
-			ErrorResponse(w, "Invalid upload type.", http.StatusBadRequest)
-			return
-		}
+		uploadFile, _, err := r.FormFile("image")
 
 		if err != nil {
 			ErrorResponse(w, "Error processing file!", http.StatusInternalServerError)
@@ -62,6 +45,13 @@ func (s *Server) initServer() {
 			return
 		}
 
+		_, err = io.Copy(tmpFile, uploadFile)
+
+		if err != nil {
+			ErrorResponse(w, "Unable to copy image to disk!", http.StatusInternalServerError)
+			return
+		}
+
 		// upload := FileUpload{
 		// 	header.Filename,
 		// 	os.TempDir() + tmpFile.Name(),
@@ -70,18 +60,22 @@ func (s *Server) initServer() {
 
 		resp := make(map[string]interface{})
 
-		// TODO: Build JSON response
+		// TODO: Build JSON respons
 
-		js, err := json.Marshal(resp)
-		if err != nil {
-			ErrorResponse(w, "Unable to build JSON response!", http.StatusInternalServerError)
-			return
-		}
-
-		w.Write(js)
+		Response(w, resp)
 	}
 
-	http.HandleFunc("/upload", uploadHandler)
+	urlHandler := func(w http.ResponseWriter, r *http.Request) {
+		_, _, err := s.download(r.FormValue("image"))
+
+		if err != nil {
+			ErrorResponse(w, "Error dowloading URL!", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	http.HandleFunc("/file", fileHandler)
+	http.HandleFunc("/url", urlHandler)
 
 	http.ListenAndServe(":8080", nil)
 }
