@@ -1,3 +1,7 @@
 language: go
 go:
   - tip
+before_script:
+  -  IMGUR_GO_CONF="config/default.conf.json" ImgurGo
+  -  sleep 1
+script: phantomjs tests/phantomjs/url.js
