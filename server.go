@@ -20,41 +20,41 @@ func CreateServer(c *Configuration) *Server {
 }
 
 func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter) {
-    defer uploadFile.Close()
+	defer uploadFile.Close()
 
-    tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
-    if err != nil {
-        fmt.Println(err)
-        ErrorResponse(w, "Unable to write to /tmp", http.StatusInternalServerError)
-        return
-    }
+	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
+	if err != nil {
+		fmt.Println(err)
+		ErrorResponse(w, "Unable to write to /tmp", http.StatusInternalServerError)
+		return
+	}
 
-    defer tmpFile.Close()
+	defer tmpFile.Close()
 
-    _, err = io.Copy(tmpFile, uploadFile)
+	_, err = io.Copy(tmpFile, uploadFile)
 
-    if err != nil {
-        fmt.Println(err)
-        ErrorResponse(w, "Unable to copy image to disk!", http.StatusInternalServerError)
-        return
-    }
+	if err != nil {
+		fmt.Println(err)
+		ErrorResponse(w, "Unable to copy image to disk!", http.StatusInternalServerError)
+		return
+	}
 
-    resp := make(map[string]interface{})
+	resp := make(map[string]interface{})
 
-    // TODO: Build JSON respons
+	// TODO: Build JSON respons
 
-    Response(w, resp)
+	Response(w, resp)
 }
 
 func (s *Server) initServer() {
 	fileHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-        // upload := FileUpload{
-        // 	header.Filename,
-        // 	os.TempDir() + tmpFile.Name(),
-        // 	header.Header.Get("Content-Type"),
-        // }
+		// upload := FileUpload{
+		// 	header.Filename,
+		// 	os.TempDir() + tmpFile.Name(),
+		// 	header.Header.Get("Content-Type"),
+		// }
 
 		uploadFile, _, err := r.FormFile("image")
 
@@ -64,7 +64,7 @@ func (s *Server) initServer() {
 			return
 		}
 
-        s._uploadFile(uploadFile, w)
+		s._uploadFile(uploadFile, w)
 	}
 
 	urlHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -72,9 +72,9 @@ func (s *Server) initServer() {
 
 		if err != nil {
 			ErrorResponse(w, "Error dowloading URL!", http.StatusInternalServerError)
-        }
+		}
 
-        s._uploadFile(uploadFile, w)
+		s._uploadFile(uploadFile, w)
 	}
 
 	http.HandleFunc("/file", fileHandler)
