@@ -66,12 +66,12 @@ func Factory(maxFileSize int64, file *uploadedfile.UploadedFile) (*ImageProcesso
 	}
 
 	async := asyncProcessType{}
-	
+
 	for _, t := range file.GetThumbs() {
 		async = append(async, t)
 	}
 
-	if(len(async) > 0) {
+	if len(async) > 0 {
 		processor = append(processor, async)
 	}
 
