@@ -54,6 +54,8 @@ func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter) {
 		return
 	}
 
+	upload.SetHash(<-hashGetter)
+
 	resp := make(map[string]interface{})
 
 	// TODO: Build JSON respons
