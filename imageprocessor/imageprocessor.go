@@ -24,10 +24,7 @@ func (this asyncProcessType) Process(image *uploadedfile.UploadedFile) error {
 
 	for _, processor := range this {
 		go func(p ProcessType) {
-			err := processor.Process(image)
-			if err != nil {
-				errs <- err
-			}
+			errs <- processor.Process(image)
 		}(processor)
 	}
 
@@ -70,7 +67,7 @@ func Factory(maxFileSize int64, file *uploadedfile.UploadedFile) (*ImageProcesso
 
 	async := asyncProcessType{}
 	
-	for _, t := range thumbs {
+	for _, t := range file.GetThumbs() {
 		async = append(async, t)
 	}
 

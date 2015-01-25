@@ -70,13 +70,24 @@ func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fil
 	}
 
 	upload.SetHash(s.hashGenerator.Get())
+
 	factory := Factory{s.Config}
 	obj := factory.NewStoreObject(upload.GetHash(), upload.GetMime(), "original")
 	obj, err = s.imageStore.Save(upload.GetPath(), obj)
-
 	if err != nil {
 		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
 		return
+	}
+
+	for _, t := range upload.GetThumbs() {
+		fmt.Println(t.GetPath())
+		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.GetName())
+		obj := factory.NewStoreObject(thumbName, upload.GetMime(), "t")
+		obj, err = s.imageStore.Save(t.GetPath(), obj)
+		if err != nil {
+			ErrorResponse(w, "Unable to save thumbnail!", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	size, err := upload.FileSize()
