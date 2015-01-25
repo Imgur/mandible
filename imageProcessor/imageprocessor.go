@@ -2,7 +2,6 @@ package imageprocessor
 
 import (
 	"crypto/rand"
-	"github.com/gophergala/imgurgo/imageprocessor/imagescaler"
 	"github.com/gophergala/imgurgo/uploadedfile"
 	"log"
 )
@@ -122,7 +121,7 @@ func Factory(file *uploadedfile.UploadedFile) (*ImageProcessor, error) {
 	processor := multiProcessType{}
 
 	if size > MAX_SIZE {
-		processor = append(processor, imagescaler.Factory(MAX_SIZE))
+		processor = append(processor, &ImageScaler{MAX_SIZE})
 	}
 
 	return &ImageProcessor{processor}, nil

@@ -41,6 +41,19 @@ func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter) {
 		return
 	}
 
+	upload := uploadedfile.NewUploadedFile("testfile.jpg", os.TempDir()+tmpFile.Name(), "image/jpeg")
+	processor, err := imageprocessor.Factory(upload)
+	if err != nil {
+		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
+		return
+	}
+
+	err = processor.Run(upload)
+	if err != nil {
+		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
+		return
+	}
+
 	resp := make(map[string]interface{})
 
 	// TODO: Build JSON respons
@@ -51,19 +64,6 @@ func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter) {
 func (s *Server) initServer() {
 	fileHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-
-		upload := uploadedfile.NewUploadedFile("testfile.jpg", os.TempDir()+tmpFile.Name(), "image/jpeg")
-		processor, err := imageprocessor.Factory(upload)
-		if err != nil {
-			ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
-			return
-		}
-
-		err = processor.Run(upload)
-		if err != nil {
-			ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
-			return
-		}
 
 		uploadFile, _, err := r.FormFile("image")
 

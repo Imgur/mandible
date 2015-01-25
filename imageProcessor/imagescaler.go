@@ -1,4 +1,4 @@
-package imagescaler
+package imageprocessor
 
 import (
 	"errors"
@@ -8,10 +8,6 @@ import (
 
 type ImageScaler struct {
 	targetSize int64
-}
-
-func Factory(targetSize int64) *ImageScaler {
-	return &ImageScaler{targetSize}
 }
 
 func (this *ImageScaler) Process(image *uploadedfile.UploadedFile) error {
