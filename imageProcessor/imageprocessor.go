@@ -2,7 +2,7 @@ package imageprocessor
 
 import (
 	"crypto/rand"
-	"github.com/gophergala/imgurgo/uploadedfile"
+	"github.com/gophergala/ImgurGo/uploadedfile"
 	"log"
 )
 

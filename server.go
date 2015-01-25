@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/gophergala/imgurgo/imageprocessor"
-	"github.com/gophergala/imgurgo/uploadedfile"
+	"github.com/gophergala/ImgurGo/imageprocessor"
+	"github.com/gophergala/ImgurGo/uploadedfile"
 	"io"
 	"io/ioutil"
 	"net/http"

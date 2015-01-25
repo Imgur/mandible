@@ -2,8 +2,8 @@ package imageprocessor
 
 import (
 	"errors"
-	"github.com/gophergala/imgurgo/imageprocessor/gm"
-	"github.com/gophergala/imgurgo/uploadedfile"
+	"github.com/gophergala/ImgurGo/imageprocessor/gm"
+	"github.com/gophergala/ImgurGo/uploadedfile"
 )
 
 type ImageScaler struct {
