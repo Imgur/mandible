@@ -37,8 +37,6 @@ func FixOrientation(filename string) (string, error) {
 		outfile,
 	}
 
-	fmt.Printf("%s -auto-orient %s \n", filename, outfile)
-
 	err := runConvertCommand(args)
 	if err != nil {
 		return "", err
@@ -59,8 +57,6 @@ func Quality(filename string, quality int) (string, error) {
 		outfile,
 	}
 
-	fmt.Printf("%s -quality %d -density 72x72 %s \n", filename, quality, outfile)
-
 	err := runConvertCommand(args)
 	if err != nil {
 		return "", err
@@ -78,8 +74,6 @@ func ResizePercent(filename string, percent int) (string, error) {
 		fmt.Sprintf("%d%%", percent),
 		outfile,
 	}
-
-	fmt.Printf("%s -resize %d%% -density 72x72 %s \n", filename, percent, outfile)
 
 	err := runConvertCommand(args)
 	if err != nil {
@@ -130,8 +124,6 @@ func Thumb(filename, name string, width, height int) (string, error) {
 		"72x72",
 		fmt.Sprintf("JPG:%s", outfile),
 	}
-
-	fmt.Printf("%s[0] -quality 83 -resize %dx%d\\> -density 72x72 JPG:%s \n", filename, width, height, outfile)
 
 	err := runConvertCommand(args)
 	if err != nil {
