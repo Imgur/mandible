@@ -66,8 +66,11 @@ func (this *ImageScaler) scaleJpeg(image *uploadedfile.UploadedFile) error {
 	}
 
 	for {
-		gm.ResizePercent(image.GetPath(), percent)
-
+		filename, err = gm.ResizePercent(image.GetPath(), percent)
+		if err != nil {
+			return err
+		}
+		
 		image.SetPath(filename)
 		size, err := image.FileSize()
 		if err != nil {

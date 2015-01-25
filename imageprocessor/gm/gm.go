@@ -34,11 +34,13 @@ func Quality(filename string, quality int) (string, error) {
 	args := []string{
 		filename,
 		"-quality",
-		string(quality),
+		fmt.Sprintf("%d", quality),
 		"-density",
 		"72x72",
 		outfile,
 	}
+
+	fmt.Printf("%s -quality %d -density 72x72 %s", filename, quality, outfile)
 
 	err := runConvertCommand(args)
 	if err != nil {
@@ -54,9 +56,11 @@ func ResizePercent(filename string, percent int) (string, error) {
 	args := []string{
 		filename,
 		"-resize",
-		fmt.Sprintf("%i%", percent),
+		fmt.Sprintf("%d%%", percent),
 		outfile,
 	}
+
+	fmt.Printf("%s -resize %d%% -density 72x72 %s \n", filename, percent, outfile)
 
 	err := runConvertCommand(args)
 	if err != nil {
@@ -73,6 +77,7 @@ func runConvertCommand(args []string) error {
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
+
 	cmd.Start()
 
 	cmdDone := make(chan error, 1)
@@ -89,6 +94,7 @@ func runConvertCommand(args []string) error {
 		if err != nil {
 			log.Println(stderr.String())
 		}
+
 		return err
 	}
 
