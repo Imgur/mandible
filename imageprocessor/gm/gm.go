@@ -37,7 +37,7 @@ func FixOrientation(filename string) (string, error) {
 		outfile,
 	}
 
-	fmt.Printf("%s -auto-orient %s", filename, outfile)
+	fmt.Printf("%s -auto-orient %s \n", filename, outfile)
 
 	err := runConvertCommand(args)
 	if err != nil {
@@ -59,7 +59,7 @@ func Quality(filename string, quality int) (string, error) {
 		outfile,
 	}
 
-	fmt.Printf("%s -quality %d -density 72x72 %s", filename, quality, outfile)
+	fmt.Printf("%s -quality %d -density 72x72 %s \n", filename, quality, outfile)
 
 	err := runConvertCommand(args)
 	if err != nil {
@@ -90,8 +90,6 @@ func ResizePercent(filename string, percent int) (string, error) {
 }
 
 func SquareThumb(filename, name string, size int) (string, error) {
-	//$image.'[0] -quality 94 -resize '.$width.'x'.$width.'^ -gravity center -crop '.$width.'x'.$width."+0+0 -density 72x72 -unsharp 0.5 JPG:$out";
-
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
 	args := []string{
@@ -120,8 +118,6 @@ func SquareThumb(filename, name string, size int) (string, error) {
 }
 
 func Thumb(filename, name string, width, height int) (string, error) {
-	//$command = self::CONVERT.$image."[0] -quality $quality -resize ".$width.'x'.$height."\> -density 72x72 JPG:$out";
-
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
 	args := []string{
@@ -129,11 +125,13 @@ func Thumb(filename, name string, width, height int) (string, error) {
 		"-quality",
 		"83",
 		"-resize",
-		fmt.Sprintf("%dx%d\\>", width, height),
+		fmt.Sprintf("%dx%d>", width, height),
 		"-density",
 		"72x72",
 		fmt.Sprintf("JPG:%s", outfile),
 	}
+
+	fmt.Printf("%s[0] -quality 83 -resize %dx%d\\> -density 72x72 JPG:%s \n", filename, width, height, outfile)
 
 	err := runConvertCommand(args)
 	if err != nil {
@@ -144,9 +142,12 @@ func Thumb(filename, name string, width, height int) (string, error) {
 }
 
 func CircleThumb(filename, name string, width int) (string, error) {
-	//convert -size 200x200 xc:none -fill walter.jpg -draw "circle 100,100 100,1" circle_thumb.png
-
 	outfile := fmt.Sprintf("%s_%s", filename, name)
+
+	filename, err := Thumb(filename, name, width*2, width*2)
+	if err != nil {
+		return "", err
+	}
 
 	args := []string{
 		"-size",
@@ -159,11 +160,11 @@ func CircleThumb(filename, name string, width int) (string, error) {
 		"-density",
 		"72x72",
 		"-draw",
-		"\"circle 100,100 100,1\"",
+		fmt.Sprintf("circle %d,%d %d,1", width/2, width/2, width/2),
 		fmt.Sprintf("PNG:%s", outfile),
 	}
 
-	err := runConvertCommand(args)
+	err = runConvertCommand(args)
 	if err != nil {
 		return "", err
 	}

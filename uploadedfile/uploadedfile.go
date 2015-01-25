@@ -89,6 +89,10 @@ func (this *UploadedFile) SetMime(mime string) {
 	this.mime = mime
 }
 
+func (this *UploadedFile) GetThumbs() []*ThumbFile {
+	return this.thumbs
+}
+
 func (this *UploadedFile) FileSize() (int64, error) {
 	f, err := os.Open(this.path)
 	if err != nil {
