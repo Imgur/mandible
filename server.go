@@ -41,7 +41,7 @@ func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter) {
 		return
 	}
 
-	upload := uploadedfile.NewUploadedFile("testfile.jpg", os.TempDir()+tmpFile.Name(), "image/jpeg")
+	upload := uploadedfile.NewUploadedFile("testfile.jpg", tmpFile.Name(), "image/jpeg")
 	processor, err := imageprocessor.Factory(s.Config.MaxFileSize, upload)
 	if err != nil {
 		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
