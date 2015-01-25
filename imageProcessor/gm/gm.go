@@ -3,9 +3,9 @@ package gm
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"os/exec"
-	"fmt"
 	"time"
 )
 
@@ -50,7 +50,7 @@ func Quality(filename string, quality int) (string, error) {
 
 func ResizePercent(filename string, percent int) (string, error) {
 	outfile := fmt.Sprintf("%s_rp", filename)
-	
+
 	args := []string{
 		filename,
 		"-resize",

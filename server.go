@@ -2,13 +2,13 @@ package main
 
 import (
 	"errors"
-	"github.com/gophergala/imgurgo/imageprocessor"
 	"fmt"
+	"github.com/gophergala/imgurgo/imageprocessor"
+	"github.com/gophergala/imgurgo/uploadedfile"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
-    "github.com/gophergala/imgurgo/uploadedfile"
 )
 
 type Server struct {
@@ -52,9 +52,7 @@ func (s *Server) initServer() {
 	fileHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-
-
-		upload := uploadedfile.NewUploadedFile("testfile.jpg", os.TempDir() + tmpFile.Name(), "image/jpeg")
+		upload := uploadedfile.NewUploadedFile("testfile.jpg", os.TempDir()+tmpFile.Name(), "image/jpeg")
 		processor, err := imageprocessor.Factory(upload)
 		if err != nil {
 			ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
@@ -66,7 +64,6 @@ func (s *Server) initServer() {
 			ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
 			return
 		}
-		
 
 		uploadFile, _, err := r.FormFile("image")
 
@@ -84,7 +81,7 @@ func (s *Server) initServer() {
 
 		if err != nil {
 			ErrorResponse(w, "Error dowloading URL!", http.StatusInternalServerError)
-            return
+			return
 		}
 
 		s._uploadFile(uploadFile, w)

@@ -2,9 +2,9 @@ package imageprocessor
 
 import (
 	"crypto/rand"
-	"log"
-	"github.com/gophergala/imgurgo/uploadedfile"
 	"github.com/gophergala/imgurgo/imageprocessor/imagescaler"
+	"github.com/gophergala/imgurgo/uploadedfile"
+	"log"
 )
 
 const MAX_SIZE = 1024 * 50
@@ -62,7 +62,7 @@ func init() {
 
 type multiProcessType []ProcessType
 
-func (this multiProcessType) Process(image *uploadedfile.UploadedFile) (error) {
+func (this multiProcessType) Process(image *uploadedfile.UploadedFile) error {
 	for _, processor := range this {
 		err := processor.Process(image)
 		if err != nil {
@@ -75,9 +75,9 @@ func (this multiProcessType) Process(image *uploadedfile.UploadedFile) (error) {
 
 type asyncProcessType []ProcessType
 
-func (this asyncProcessType) Process(image *uploadedfile.UploadedFile) (error) {
-	results  := make(chan bool, len(this))
-	errs     := make(chan error, len(this))
+func (this asyncProcessType) Process(image *uploadedfile.UploadedFile) error {
+	results := make(chan bool, len(this))
+	errs := make(chan error, len(this))
 
 	for _, processor := range this {
 		go func(p ProcessType) {
@@ -109,7 +109,7 @@ type ImageProcessor struct {
 	processor ProcessType
 }
 
-func (this *ImageProcessor) Run(image *uploadedfile.UploadedFile) (error) {
+func (this *ImageProcessor) Run(image *uploadedfile.UploadedFile) error {
 	return this.processor.Process(image)
 }
 

@@ -1,60 +1,59 @@
 package uploadedfile
 
 import (
-    "os"
+	"os"
 )
 
 type UploadedFile struct {
-    filename string
-    path     string
-    mime     string
+	filename string
+	path     string
+	mime     string
 }
 
-func NewUploadedFile(filename, path, mime string) (*UploadedFile) {
-    return &UploadedFile{
-        filename,
-        path,
-        mime,
-    }
+func NewUploadedFile(filename, path, mime string) *UploadedFile {
+	return &UploadedFile{
+		filename,
+		path,
+		mime,
+	}
 }
 
 func (this *UploadedFile) GetFilename() string {
-    return this.filename
+	return this.filename
 }
 
 func (this *UploadedFile) SetFilename(filename string) {
 
-    
-    this.filename = filename
+	this.filename = filename
 }
 
 func (this *UploadedFile) SetPath(path string) {
-    // TODO: find a better location for this
-    os.Remove(this.filename)
+	// TODO: find a better location for this
+	os.Remove(this.filename)
 
-    this.path = path
+	this.path = path
 }
 
 func (this *UploadedFile) GetPath() string {
-    return this.path
+	return this.path
 }
 
 func (this *UploadedFile) GetMime() string {
-    return this.mime
+	return this.mime
 }
 
 func (this *UploadedFile) FileSize() (int64, error) {
-    f, err := os.Open(this.filename)
-    if err != nil {
-        return 0, err
-    }
+	f, err := os.Open(this.filename)
+	if err != nil {
+		return 0, err
+	}
 
-    stats, err := f.Stat()
-    if err != nil {
-        return 0, err
-    }
+	stats, err := f.Stat()
+	if err != nil {
+		return 0, err
+	}
 
-    size := stats.Size()
+	size := stats.Size()
 
-    return size, nil
+	return size, nil
 }
