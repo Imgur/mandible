@@ -61,7 +61,7 @@ func (s *Server) _uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter) {
 	upload.SetHash(<-hashGetter)
 	factory := Factory{s.Config}
 	obj := factory.NewStoreObject(upload.GetHash(), upload.GetMime(), "original")
-	err = s.imageStore.Save(upload.GetPath(), obj)
+	obj, err = s.imageStore.Save(upload.GetPath(), obj)
 
 	if err != nil {
 		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
