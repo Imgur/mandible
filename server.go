@@ -75,11 +75,18 @@ func (s *Server) uploadFile(uploadFile io.ReadCloser, w http.ResponseWriter, fil
 		return
 	}
 
+	size, err := upload.FileSize()
+	if err != nil {
+		ErrorResponse(w, "Unable to fetch image metadata!", http.StatusInternalServerError)
+		return
+	}
+
 	resp := map[string]interface{}{
 		"link": obj.Url,
 		"mime": obj.MimeType,
 		"type": obj.Type,
 		"name": fileName,
+		"size": size,
 	}
 
 	Response(w, resp)
