@@ -5,7 +5,7 @@
   "env": {
       "BUILDPACK_URL": "https://github.com/ddollar/heroku-buildpack-multi",
       "IMGUR_GO_CONF": "config/default.conf.json",
-      "S3_BUCKET" : {
+      "S3_BUCKET": {
           "description": "AWS S3 Bucket",
           "required": false
       },
