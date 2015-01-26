@@ -174,9 +174,17 @@ func (s *Server) initServer() {
 		s.uploadFile(uploadFile, w, "", thumbs)
 	}
 
+	rootHandler := func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "<html><head><title>An open source image uploader by Imgur</title></head><body style=\"background-color: #2b2b2b; color: white\">")
+		fmt.Fprint(w, "Congratulations! Your image upload server is up and running. Head over to the <a style=\"color: #85bf25 \" href=\"https://github.com/gophergala/ImgurGo\">github</a> page for documentation")
+		fmt.Fprint(w, "<br/><br/><br/><img src=\"http://i.imgur.com/YbfUjs5.png?2\" />")
+		fmt.Fprint(w, "</body></html>")
+	}
+
 	http.HandleFunc("/file", fileHandler)
 	http.HandleFunc("/url", urlHandler)
 	http.HandleFunc("/base64", base64Handler)
+	http.HandleFunc("/", rootHandler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
