@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/s3"
 	"log"
+	"os"
 )
 
 type Factory struct {
@@ -31,6 +32,11 @@ func (this *Factory) NewImageStores() []imagestore.ImageStore {
 }
 
 func (this *Factory) NewS3ImageStore(config map[string]string) imagestore.ImageStore {
+	bucket := os.Getenv("S3_BUCKET")
+	if len(bucket) == 0 {
+		bucket = config["BucketName"]
+	}
+
 	auth, err := aws.EnvAuth()
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +46,7 @@ func (this *Factory) NewS3ImageStore(config map[string]string) imagestore.ImageS
 	mapper := imagestore.NewNamePathMapper(config["NamePathRegex"], config["NamePathMap"])
 
 	return imagestore.NewS3ImageStore(
-		config["BucketName"],
+		bucket,
 		config["StoreRoot"],
 		client,
 		mapper,

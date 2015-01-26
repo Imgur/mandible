@@ -6,7 +6,7 @@
     "Stores" : [
         {
             "Type" : "s3",
-            "BucketName" : "gophergala",
+            "BucketName" : "",
             "StoreRoot" : "",
             "Region" : "us-east-1",
             "NamePathRegex" : "",
