@@ -20,6 +20,15 @@ Processing Steps:
 - Compression
 - Thumbnail generation
 
+## Installation
+
+### S3 Storage Layer
+
+- Set the following environment variables
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+    - S3_BUCKET
+
 ## REST API:
 
 Interfacing with ImgurGo is extremely simple:
@@ -76,7 +85,7 @@ curl -i http://127.0.0.1:8080/url \
 ```
 ### Response:
 
-```javscript
+```javascript
 {
     "data": {
         "width": 380,
@@ -103,7 +112,7 @@ curl -i http://127.0.0.1:8080/file \
 ```
 ### Response:
 
-```javscript
+```javascript
 {
     "data": {
         "width": 354,
