@@ -2,7 +2,7 @@ package main
 
 import (
 	"crypto/rand"
-	"github.com/gophergala/ImgurGo/imagestore"
+	"github.com/Imgur/mandible/imagestore"
 	"log"
 )
 

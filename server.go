@@ -11,9 +11,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gophergala/ImgurGo/imageprocessor"
-	"github.com/gophergala/ImgurGo/imagestore"
-	"github.com/gophergala/ImgurGo/uploadedfile"
+	"github.com/Imgur/mandible/imageprocessor"
+	"github.com/Imgur/mandible/imagestore"
+	"github.com/Imgur/mandible/uploadedfile"
 )
 
 type Server struct {
@@ -176,7 +176,7 @@ func (s *Server) initServer() {
 
 	rootHandler := func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "<html><head><title>An open source image uploader by Imgur</title></head><body style=\"background-color: #2b2b2b; color: white\">")
-		fmt.Fprint(w, "Congratulations! Your image upload server is up and running. Head over to the <a style=\"color: #85bf25 \" href=\"https://github.com/gophergala/ImgurGo\">github</a> page for documentation")
+		fmt.Fprint(w, "Congratulations! Your image upload server is up and running. Head over to the <a style=\"color: #85bf25 \" href=\"https://github.com/Imgur/mandible\">github</a> page for documentation")
 		fmt.Fprint(w, "<br/><br/><br/><img src=\"http://i.imgur.com/YbfUjs5.png?2\" />")
 		fmt.Fprint(w, "</body></html>")
 	}
