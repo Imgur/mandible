@@ -1,7 +1,7 @@
 package imageprocessor
 
 import (
-	"github.com/gophergala/ImgurGo/uploadedfile"
+	"github.com/Imgur/mandible/uploadedfile"
 )
 
 type multiProcessType []ProcessType

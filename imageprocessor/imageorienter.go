@@ -1,8 +1,8 @@
 package imageprocessor
 
 import (
-	"github.com/gophergala/ImgurGo/imageprocessor/gm"
-	"github.com/gophergala/ImgurGo/uploadedfile"
+	"github.com/Imgur/mandible/imageprocessor/gm"
+	"github.com/Imgur/mandible/uploadedfile"
 )
 
 type ImageOrienter struct{}

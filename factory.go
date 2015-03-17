@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/gophergala/ImgurGo/imagestore"
+	"github.com/Imgur/mandible/imagestore"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/s3"
 	"log"

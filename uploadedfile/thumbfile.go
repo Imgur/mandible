@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gophergala/ImgurGo/imageprocessor/gm"
+	"github.com/Imgur/mandible/imageprocessor/gm"
 )
 
 type ThumbFile struct {
