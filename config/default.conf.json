@@ -13,6 +13,15 @@
             "NamePathMap" : "${ImageSize}/${ImageName}"
         },
         {
+            "Type" : "gcs",
+            "BucketName" : "",
+            "StoreRoot" : "",
+            "AppID" : "",
+            "KeyFile" : "appid.json",
+            "NamePathRegex" : "",
+            "NamePathMap" : "${ImageSize}/${ImageName}"
+        },
+        {
             "Type" : "local",
             "StoreRoot": "/Users/jarvis/imagestore",
             "NamePathRegex" : "^([a-zA-Z0-9])([a-zA-Z0-9]).*",
