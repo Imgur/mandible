@@ -1,20 +1,32 @@
-package main
+package imagestore
 
 import (
 	"crypto/rand"
-	"github.com/Imgur/mandible/imagestore"
 	"log"
+
+	"github.com/Imgur/mandible/config"
 )
 
 type HashGenerator struct {
 	hashGetter chan string
 	length     int
-	store      imagestore.ImageStore
+	store      ImageStore
+}
+
+func NewHashGenerator(store ImageStore, conf config.Configuration) *HashGenerator {
+	hashGen := &HashGenerator{
+		make(chan string),
+		conf.HashLength,
+		store,
+	}
+
+	hashGen.init()
+	return hashGen
 }
 
 func (this *HashGenerator) init() {
 	go func() {
-		storeObj := &imagestore.StoreObject{
+		storeObj := &StoreObject{
 			"",
 			"",
 			"original",

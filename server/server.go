@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/base64"
@@ -11,23 +11,24 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Imgur/mandible/config"
 	"github.com/Imgur/mandible/imageprocessor"
 	"github.com/Imgur/mandible/imagestore"
 	"github.com/Imgur/mandible/uploadedfile"
 )
 
 type Server struct {
-	Config        *Configuration
+	Config        *config.Configuration
 	HTTPClient    *http.Client
 	imageStore    imagestore.ImageStore
-	hashGenerator *HashGenerator
+	hashGenerator *imagestore.HashGenerator
 }
 
-func CreateServer(c *Configuration) *Server {
-	factory := Factory{c}
+func CreateServer(c *config.Configuration) *Server {
+	factory    := imagestore.NewFactory(c)
 	httpclient := &http.Client{}
-	stores := factory.NewImageStores()
-	store := stores[0]
+	stores     := factory.NewImageStores()
+	store      := stores[0]
 
 	hashGenerator := factory.NewHashGenerator(store)
 	return &Server{c, httpclient, store, hashGenerator}
@@ -75,7 +76,7 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 
 	upload.SetHash(s.hashGenerator.Get())
 
-	factory := Factory{s.Config}
+	factory := imagestore.NewFactory(s.Config)
 	obj := factory.NewStoreObject(upload.GetHash(), upload.GetMime(), "original")
 	obj, err = s.imageStore.Save(upload.GetPath(), obj)
 	if err != nil {
@@ -122,7 +123,7 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 	Response(w, resp)
 }
 
-func (s *Server) initServer() {
+func (s *Server) Start() {
 	fileHandler := func(w http.ResponseWriter, r *http.Request) {
 		uploadFile, header, err := r.FormFile("image")
 

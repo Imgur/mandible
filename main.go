@@ -2,12 +2,14 @@ package main
 
 import (
 	"os"
+    mandible "github.com/Imgur/mandible/server"
+    mandibleConf "github.com/Imgur/mandible/config"
 )
 
 func main() {
 	configFile := os.Getenv("IMGUR_GO_CONF")
 
-	config := NewConfiguration(configFile)
-	server := CreateServer(config)
-	server.initServer()
+	config := mandibleConf.NewConfiguration(configFile)
+	server := mandible.CreateServer(config)
+	server.Start()
 }
