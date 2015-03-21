@@ -1,9 +1,9 @@
 package main
 
 import (
+	mandibleConf "github.com/Imgur/mandible/config"
+	mandible "github.com/Imgur/mandible/server"
 	"os"
-    mandible "github.com/Imgur/mandible/server"
-    mandibleConf "github.com/Imgur/mandible/config"
 )
 
 func main() {
