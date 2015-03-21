@@ -3,25 +3,12 @@ package imagestore
 import (
 	"crypto/rand"
 	"log"
-
-	"github.com/Imgur/mandible/config"
 )
 
 type HashGenerator struct {
 	hashGetter chan string
 	length     int
 	store      ImageStore
-}
-
-func NewHashGenerator(store ImageStore, conf config.Configuration) *HashGenerator {
-	hashGen := &HashGenerator{
-		make(chan string),
-		conf.HashLength,
-		store,
-	}
-
-	hashGen.init()
-	return hashGen
 }
 
 func (this *HashGenerator) init() {
