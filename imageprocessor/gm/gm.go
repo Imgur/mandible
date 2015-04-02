@@ -6,10 +6,16 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strings"
 	"time"
 )
 
 const GM_COMMAND = "convert"
+
+func fileExtension(filename string) string {
+	pieces := strings.Split(filename, ".")
+	return pieces[len(pieces)-1]
+}
 
 func ConvertToJpeg(filename string) (string, error) {
 	outfile := fmt.Sprintf("%s_jpg", filename)
@@ -100,7 +106,7 @@ func SquareThumb(filename, name string, size int) (string, error) {
 		"72x72",
 		"-unsharp",
 		"0.5",
-		fmt.Sprintf("JPG:%s", outfile),
+		fmt.Sprintf("%s:%s", fileExtension(filename), outfile),
 	}
 
 	err := runConvertCommand(args)
@@ -122,7 +128,7 @@ func Thumb(filename, name string, width, height int) (string, error) {
 		fmt.Sprintf("%dx%d>", width, height),
 		"-density",
 		"72x72",
-		fmt.Sprintf("JPG:%s", outfile),
+		fmt.Sprintf("%s:%s", fileExtension(filename), outfile),
 	}
 
 	err := runConvertCommand(args)
