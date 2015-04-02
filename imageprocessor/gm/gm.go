@@ -12,9 +12,20 @@ import (
 
 const GM_COMMAND = "convert"
 
+func supportedFormats() []string {
+	return []string{"gif", "jpg", "png"}
+}
+
 func fileExtension(filename string) string {
 	pieces := strings.Split(filename, ".")
-	return pieces[len(pieces)-1]
+	ext := pieces[len(pieces)-1]
+	for _, format := range supportedFormats() {
+		if strings.EqualFold(format, ext) {
+			return format
+		}
+	}
+
+	return "jpg"
 }
 
 func ConvertToJpeg(filename string) (string, error) {
