@@ -16,7 +16,9 @@ func supportedFormats() []string {
 	return []string{"gif", "jpg", "png"}
 }
 
-func fileExtension(filename string) string {
+// Gets the most appropriate file extension for
+// the given image filename.
+func getExtension(filename string) string {
 	pieces := strings.Split(filename, ".")
 	ext := pieces[len(pieces)-1]
 	for _, format := range supportedFormats() {
@@ -117,7 +119,7 @@ func SquareThumb(filename, name string, size int) (string, error) {
 		"72x72",
 		"-unsharp",
 		"0.5",
-		fmt.Sprintf("%s:%s", fileExtension(filename), outfile),
+		fmt.Sprintf("%s:%s", getExtension(filename), outfile),
 	}
 
 	err := runConvertCommand(args)
@@ -139,7 +141,7 @@ func Thumb(filename, name string, width, height int) (string, error) {
 		fmt.Sprintf("%dx%d>", width, height),
 		"-density",
 		"72x72",
-		fmt.Sprintf("%s:%s", fileExtension(filename), outfile),
+		fmt.Sprintf("%s:%s", getExtension(filename), outfile),
 	}
 
 	err := runConvertCommand(args)
