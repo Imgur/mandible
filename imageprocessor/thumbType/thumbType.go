@@ -16,3 +16,13 @@ func (this ThumbType) ToString() string {
     return "JPG"
   }
 }
+
+func FromMime(mime string) ThumbType {
+  if mime == "image/gif" {
+    return GIF
+  } else if mime == "image/png" {
+    return PNG
+  } else {
+    return JPG
+  }
+}
