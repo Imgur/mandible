@@ -7,6 +7,8 @@ import (
 	"log"
 	"os/exec"
 	"time"
+
+	"github.com/Imgur/mandible/imageprocessor/thumbType"
 )
 
 const GM_COMMAND = "convert"
@@ -83,7 +85,7 @@ func ResizePercent(filename string, percent int) (string, error) {
 	return outfile, nil
 }
 
-func SquareThumb(filename, name string, size int) (string, error) {
+func SquareThumb(filename, name string, size int, format thumbType.ThumbType) (string, error) {
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
 	args := []string{
@@ -100,7 +102,7 @@ func SquareThumb(filename, name string, size int) (string, error) {
 		"72x72",
 		"-unsharp",
 		"0.5",
-		fmt.Sprintf("JPG:%s", outfile),
+		fmt.Sprintf("%s:%s", format.ToString(), outfile),
 	}
 
 	err := runConvertCommand(args)
@@ -111,7 +113,7 @@ func SquareThumb(filename, name string, size int) (string, error) {
 	return outfile, nil
 }
 
-func Thumb(filename, name string, width, height int) (string, error) {
+func Thumb(filename, name string, width, height int, format thumbType.ThumbType) (string, error) {
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
 	args := []string{
@@ -122,7 +124,7 @@ func Thumb(filename, name string, width, height int) (string, error) {
 		fmt.Sprintf("%dx%d>", width, height),
 		"-density",
 		"72x72",
-		fmt.Sprintf("JPG:%s", outfile),
+		fmt.Sprintf("%s:%s", format.ToString(), outfile),
 	}
 
 	err := runConvertCommand(args)
@@ -133,10 +135,10 @@ func Thumb(filename, name string, width, height int) (string, error) {
 	return outfile, nil
 }
 
-func CircleThumb(filename, name string, width int) (string, error) {
+func CircleThumb(filename, name string, width int, format thumbType.ThumbType) (string, error) {
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
-	filename, err := Thumb(filename, name, width*2, width*2)
+	filename, err := Thumb(filename, name, width*2, width*2, format)
 	if err != nil {
 		return "", err
 	}
@@ -153,7 +155,7 @@ func CircleThumb(filename, name string, width int) (string, error) {
 		"72x72",
 		"-draw",
 		fmt.Sprintf("circle %d,%d %d,1", width/2, width/2, width/2),
-		fmt.Sprintf("PNG:%s", outfile),
+		fmt.Sprintf("%s:%s", format.ToString(), outfile),
 	}
 
 	err = runConvertCommand(args)
