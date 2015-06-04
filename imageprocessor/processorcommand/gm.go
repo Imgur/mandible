@@ -1,12 +1,7 @@
-package gm
+package processorcommand
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
-	"log"
-	"os/exec"
-	"time"
 
 	"github.com/Imgur/mandible/imageprocessor/thumbType"
 )
@@ -22,7 +17,7 @@ func ConvertToJpeg(filename string) (string, error) {
 		"JPEG:" + outfile,
 	}
 
-	err := runConvertCommand(args)
+	err := runProcessorCommand(GM_COMMAND, args)
 	if err != nil {
 		return "", err
 	}
@@ -39,7 +34,7 @@ func FixOrientation(filename string) (string, error) {
 		outfile,
 	}
 
-	err := runConvertCommand(args)
+	err := runProcessorCommand(GM_COMMAND, args)
 	if err != nil {
 		return "", err
 	}
@@ -59,7 +54,7 @@ func Quality(filename string, quality int) (string, error) {
 		outfile,
 	}
 
-	err := runConvertCommand(args)
+	err := runProcessorCommand(GM_COMMAND, args)
 	if err != nil {
 		return "", err
 	}
@@ -77,7 +72,7 @@ func ResizePercent(filename string, percent int) (string, error) {
 		outfile,
 	}
 
-	err := runConvertCommand(args)
+	err := runProcessorCommand(GM_COMMAND, args)
 	if err != nil {
 		return "", err
 	}
@@ -105,7 +100,7 @@ func SquareThumb(filename, name string, size int, format thumbType.ThumbType) (s
 		fmt.Sprintf("%s:%s", format.ToString(), outfile),
 	}
 
-	err := runConvertCommand(args)
+	err := runProcessorCommand(GM_COMMAND, args)
 	if err != nil {
 		return "", err
 	}
@@ -127,7 +122,7 @@ func Thumb(filename, name string, width, height int, format thumbType.ThumbType)
 		fmt.Sprintf("%s:%s", format.ToString(), outfile),
 	}
 
-	err := runConvertCommand(args)
+	err := runProcessorCommand(GM_COMMAND, args)
 	if err != nil {
 		return "", err
 	}
@@ -158,47 +153,10 @@ func CircleThumb(filename, name string, width int, format thumbType.ThumbType) (
 		fmt.Sprintf("%s:%s", format.ToString(), outfile),
 	}
 
-	err = runConvertCommand(args)
+	err = runProcessorCommand(GM_COMMAND, args)
 	if err != nil {
 		return "", err
 	}
 
 	return outfile, nil
-}
-
-func runConvertCommand(args []string) error {
-	cmd := exec.Command(GM_COMMAND, args...)
-
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-
-	cmd.Start()
-
-	cmdDone := make(chan error, 1)
-	go func() {
-		cmdDone <- cmd.Wait()
-	}()
-
-	select {
-	case <-time.After(time.Duration(500000) * time.Millisecond):
-		killCmd(cmd)
-		<-cmdDone
-		return errors.New("Command timed out")
-	case err := <-cmdDone:
-		if err != nil {
-			log.Println(stderr.String())
-		}
-
-		return err
-	}
-
-	return nil
-}
-
-func killCmd(cmd *exec.Cmd) {
-	if err := cmd.Process.Kill(); err != nil {
-		log.Printf("Failed to kill command: %v", err)
-	}
 }

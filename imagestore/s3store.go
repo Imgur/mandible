@@ -1,8 +1,9 @@
 package imagestore
 
 import (
-	"github.com/mitchellh/goamz/s3"
 	"io/ioutil"
+
+	"github.com/mitchellh/goamz/s3"
 )
 
 type S3ImageStore struct {

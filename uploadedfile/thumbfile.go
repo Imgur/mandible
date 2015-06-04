@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Imgur/mandible/imageprocessor/gm"
+	"github.com/Imgur/mandible/imageprocessor/processorcommand"
 	"github.com/Imgur/mandible/imageprocessor/thumbType"
 )
 
@@ -88,7 +88,7 @@ func (this *ThumbFile) Process(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processSquare(original *UploadedFile) error {
-	filename, err := gm.SquareThumb(original.GetPath(), this.GetName(), this.GetWidth(), thumbType.FromMime(original.GetMime()))
+	filename, err := processorcommand.SquareThumb(original.GetPath(), this.GetName(), this.GetWidth(), thumbType.FromMime(original.GetMime()))
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (this *ThumbFile) processSquare(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processCircle(original *UploadedFile) error {
-	filename, err := gm.CircleThumb(original.GetPath(), this.GetName(), this.GetWidth(), thumbType.FromMime(original.GetMime()))
+	filename, err := processorcommand.CircleThumb(original.GetPath(), this.GetName(), this.GetWidth(), thumbType.FromMime(original.GetMime()))
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (this *ThumbFile) processCircle(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processThumb(original *UploadedFile) error {
-	filename, err := gm.Thumb(original.GetPath(), this.GetName(), this.GetWidth(), this.GetHeight(), thumbType.FromMime(original.GetMime()))
+	filename, err := processorcommand.Thumb(original.GetPath(), this.GetName(), this.GetWidth(), this.GetHeight(), thumbType.FromMime(original.GetMime()))
 	if err != nil {
 		return err
 	}

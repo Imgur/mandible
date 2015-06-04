@@ -3,7 +3,7 @@ package imageprocessor
 import (
 	"errors"
 
-	"github.com/Imgur/mandible/imageprocessor/gm"
+	"github.com/Imgur/mandible/imageprocessor/processorcommand"
 	"github.com/Imgur/mandible/uploadedfile"
 )
 
@@ -25,7 +25,7 @@ func (this *ImageScaler) Process(image *uploadedfile.UploadedFile) error {
 }
 
 func (this *ImageScaler) scalePng(image *uploadedfile.UploadedFile) error {
-	filename, err := gm.ConvertToJpeg(image.GetPath())
+	filename, err := processorcommand.ConvertToJpeg(image.GetPath())
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func (this *ImageScaler) scalePng(image *uploadedfile.UploadedFile) error {
 }
 
 func (this *ImageScaler) scaleJpeg(image *uploadedfile.UploadedFile) error {
-	filename, err := gm.Quality(image.GetPath(), 90)
+	filename, err := processorcommand.Quality(image.GetPath(), 90)
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (this *ImageScaler) scaleJpeg(image *uploadedfile.UploadedFile) error {
 		return nil
 	}
 
-	filename, err = gm.Quality(image.GetPath(), 70)
+	filename, err = processorcommand.Quality(image.GetPath(), 70)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (this *ImageScaler) scaleJpeg(image *uploadedfile.UploadedFile) error {
 	}
 
 	for {
-		filename, err = gm.ResizePercent(image.GetPath(), percent)
+		filename, err = processorcommand.ResizePercent(image.GetPath(), percent)
 		if err != nil {
 			return err
 		}
