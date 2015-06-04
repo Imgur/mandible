@@ -5,7 +5,7 @@ import (
 )
 
 func Jpegtran(filename string) (string, error) {
-	outfile := fmt.Sprintf("%s_opi", filename)
+	outfile := fmt.Sprintf("%s_opti", filename)
 
 	args := []string{
 		"-copy",
