@@ -1,12 +1,7 @@
 package processorcommand
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
-	"log"
-	"os/exec"
-	"time"
 
 	"github.com/Imgur/mandible/imageprocessor/thumbType"
 )

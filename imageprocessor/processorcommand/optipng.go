@@ -1,7 +1,6 @@
 package processorcommand
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -10,12 +9,12 @@ func Optipng(filename string) (string, error) {
 
 	args := []string{
 		"-fix",
-		"-out"
+		"-out",
 		outfile,
 		filename,
 	}
 
-	err := runProcessCommand("optipng", args)
+	err := runProcessorCommand("optipng", args)
 	if err != nil {
 		return "", err
 	}

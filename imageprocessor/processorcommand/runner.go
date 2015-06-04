@@ -3,15 +3,12 @@ package processorcommand
 import (
     "bytes"
     "errors"
-    "fmt"
     "log"
     "os/exec"
     "time"
-
-    "github.com/Imgur/mandible/imageprocessor/thumbType"
 )
 
-func runConvertCommand(command, args []string) error {
+func runProcessorCommand(command string, args []string) error {
     cmd := exec.Command(command, args...)
 
     var out bytes.Buffer

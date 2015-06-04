@@ -1,7 +1,6 @@
 package processorcommand
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -17,7 +16,7 @@ func Jpegtran(filename string) (string, error) {
 		outfile,
 	}
 
-	err := runProcessCommand("jpegtran", args)
+	err := runProcessorCommand("jpegtran", args)
 	if err != nil {
 		return "", err
 	}
