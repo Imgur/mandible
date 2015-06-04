@@ -1,6 +1,7 @@
 package imagestore
 
 import (
+	"io"
 	"io/ioutil"
 	"log"
 
@@ -32,8 +33,8 @@ func (this *GCSImageStore) Exists(obj *StoreObject) (bool, error) {
 	return true, nil
 }
 
-func (this *GCSImageStore) Save(src string, obj *StoreObject) (*StoreObject, error) {
-	data, err := ioutil.ReadFile(src)
+func (this *GCSImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, error) {
+	data, err := ioutil.ReadAll(src)
 	if err != nil {
 		log.Printf("error on read file: %s", err)
 		return nil, err

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
 	"os"
 
 	mandibleConf "github.com/Imgur/mandible/config"
@@ -12,5 +14,13 @@ func main() {
 
 	config := mandibleConf.NewConfiguration(configFile)
 	server := mandible.CreateServer(config)
-	server.Start()
+	muxer := http.NewServeMux()
+	server.Configure(muxer)
+
+	port := ":" + os.Getenv("PORT")
+	if port == ":" {
+		port = fmt.Sprintf(":%d", server.Config.Port)
+	}
+
+	http.ListenAndServe(port, muxer)
 }

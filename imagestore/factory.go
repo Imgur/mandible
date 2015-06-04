@@ -38,7 +38,7 @@ func (this *Factory) NewImageStores() []ImageStore {
 			store := this.NewLocalImageStore(configWrapper)
 			stores = append(stores, store)
 		default:
-			log.Fatal("Unsupported store %s", configWrapper["Type"])
+			log.Fatalf("Unsupported store %s", configWrapper["Type"])
 		}
 	}
 

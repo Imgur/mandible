@@ -7,6 +7,7 @@ import (
 	"path"
 )
 
+// A LocalImageStore stores images on the local disk.
 type LocalImageStore struct {
 	storeRoot      string
 	namePathMapper *NamePathMapper
@@ -27,17 +28,9 @@ func (this *LocalImageStore) Exists(obj *StoreObject) (bool, error) {
 	return true, nil
 }
 
-func (this *LocalImageStore) Save(src string, obj *StoreObject) (*StoreObject, error) {
-	// open input file
-	fi, err := os.Open(src)
-	if err != nil {
-		return nil, err
-	}
-
-	defer fi.Close()
-
+func (this *LocalImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, error) {
 	// make a read buffer
-	r := bufio.NewReader(fi)
+	r := bufio.NewReader(src)
 
 	// open output file
 	this.createParent(obj)

@@ -78,7 +78,15 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 
 	factory := imagestore.NewFactory(s.Config)
 	obj := factory.NewStoreObject(upload.GetHash(), upload.GetMime(), "original")
-	obj, err = s.imageStore.Save(upload.GetPath(), obj)
+
+	uploadFilepath := upload.GetPath()
+	uploadFileFd, err := os.Open(uploadFilepath)
+
+	if err != nil {
+		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
+	}
+
+	obj, err = s.imageStore.Save(uploadFileFd, obj)
 	if err != nil {
 		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
 		return
@@ -88,7 +96,16 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 	for _, t := range upload.GetThumbs() {
 		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.GetName())
 		tObj := factory.NewStoreObject(thumbName, upload.GetMime(), "t")
-		tObj, err = s.imageStore.Save(t.GetPath(), tObj)
+
+		tPath := t.GetPath()
+		tFile, err := os.Open(tPath)
+
+		if err != nil {
+			ErrorResponse(w, "Unable to save thumbnail!", http.StatusInternalServerError)
+			return
+		}
+
+		tObj, err = s.imageStore.Save(tFile, tObj)
 		if err != nil {
 			ErrorResponse(w, "Unable to save thumbnail!", http.StatusInternalServerError)
 			return
@@ -123,7 +140,7 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 	Response(w, resp)
 }
 
-func (s *Server) Start() {
+func (s *Server) Configure(muxer *http.ServeMux) {
 	fileHandler := func(w http.ResponseWriter, r *http.Request) {
 		uploadFile, header, err := r.FormFile("image")
 
@@ -182,17 +199,10 @@ func (s *Server) Start() {
 		fmt.Fprint(w, "</body></html>")
 	}
 
-	http.HandleFunc("/file", fileHandler)
-	http.HandleFunc("/url", urlHandler)
-	http.HandleFunc("/base64", base64Handler)
-	http.HandleFunc("/", rootHandler)
-
-	port := ":" + os.Getenv("PORT")
-	if port == ":" {
-		port = fmt.Sprintf(":%d", s.Config.Port)
-	}
-
-	http.ListenAndServe(port, nil)
+	muxer.HandleFunc("/file", fileHandler)
+	muxer.HandleFunc("/url", urlHandler)
+	muxer.HandleFunc("/base64", base64Handler)
+	muxer.HandleFunc("/", rootHandler)
 }
 
 func (s *Server) download(url string) (io.ReadCloser, error) {
