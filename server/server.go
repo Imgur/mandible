@@ -11,7 +11,10 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
+
+	"github.com/gorilla/mux"
 
 	"github.com/Imgur/mandible/config"
 	"github.com/Imgur/mandible/imageprocessor"
@@ -25,6 +28,7 @@ type Server struct {
 	ImageStore        imagestore.ImageStore
 	hashGenerator     *imagestore.HashGenerator
 	processorStrategy imageprocessor.ImageProcessorStrategy
+	authenticator     Authenticator
 }
 
 type ServerResponse struct {
@@ -62,6 +66,7 @@ type ImageResponse struct {
 	Height  int                    `json:"height"`
 	OCRText string                 `json:"ocrtext"`
 	Thumbs  map[string]interface{} `json:"thumbs"`
+	UserID  string                 `json:"user_id"`
 }
 
 type UserError struct {
@@ -76,10 +81,21 @@ func NewServer(c *config.Configuration, strategy imageprocessor.ImageProcessorSt
 	store := stores[0]
 
 	hashGenerator := factory.NewHashGenerator(store)
-	return &Server{c, httpclient, store, hashGenerator, strategy}
+	authenticator := &PassthroughAuthenticator{}
+	return &Server{c, httpclient, store, hashGenerator, strategy, authenticator}
 }
 
-func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*uploadedfile.ThumbFile) ServerResponse {
+func NewAuthenticatedServer(c *config.Configuration, strategy imageprocessor.ImageProcessorStrategy, auth Authenticator) *Server {
+	factory := imagestore.NewFactory(c)
+	httpclient := &http.Client{}
+	stores := factory.NewImageStores()
+	store := stores[0]
+
+	hashGenerator := factory.NewHashGenerator(store)
+	return &Server{c, httpclient, store, hashGenerator, strategy, auth}
+}
+
+func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*uploadedfile.ThumbFile, user *AuthenticatedUser) ServerResponse {
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
 	if err != nil {
 		fmt.Println(err)
@@ -199,6 +215,11 @@ func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*upl
 		}
 	}
 
+	var userID string
+	if user != nil {
+		userID = string(user.UserID)
+	}
+
 	resp := ImageResponse{
 		Link:    obj.Url,
 		Mime:    obj.MimeType,
@@ -209,6 +230,7 @@ func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*upl
 		Height:  height,
 		OCRText: upload.GetOCRText(),
 		Thumbs:  thumbsResp,
+		UserID:  userID,
 	}
 
 	return ServerResponse{
@@ -250,7 +272,9 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		return uploadFile, "", nil
 	}
 
-	uploadHandler := func(extractor fileExtractor) http.HandlerFunc {
+	type uploadEndpoint func(fileExtractor, *AuthenticatedUser) http.HandlerFunc
+
+	var uploadHandler uploadEndpoint = func(extractor fileExtractor, user *AuthenticatedUser) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			uploadFile, filename, uerr := extractor(r)
 			if uerr != nil {
@@ -273,7 +297,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				return
 			}
 
-			resp := s.uploadFile(uploadFile, filename, thumbs)
+			resp := s.uploadFile(uploadFile, filename, thumbs, user)
 
 			switch uploadFile.(type) {
 			case io.ReadCloser:
@@ -287,6 +311,37 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		}
 	}
 
+	authenticatedEndpoint := func(endpoint uploadEndpoint, extractor fileExtractor) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			requestVars := mux.Vars(r)
+			attemptedUserIdString, ok := requestVars["user_id"]
+
+			// They didn't send a user ID to a /user endpoint
+			if !ok {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			// They sent a string or something non-integery
+			attemptedUserId, err := strconv.Atoi(attemptedUserIdString)
+			if err != nil || attemptedUserId == 0 {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			user := s.authenticator.GetUser(r)
+
+			// Their HMAC was invalid or they are trying to upload to someone else's account
+			if user == nil || user.UserID != int64(attemptedUserId) {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			handler := endpoint(extractor, user)
+			handler(w, r)
+		}
+	}
+
 	rootHandler := func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "<html><head><title>An open source image uploader by Imgur</title></head><body style=\"background-color: #2b2b2b; color: white\">")
 		fmt.Fprint(w, "Congratulations! Your image upload server is up and running. Head over to the <a style=\"color: #85bf25 \" href=\"https://github.com/Imgur/mandible\">github</a> page for documentation")
@@ -294,10 +349,19 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		fmt.Fprint(w, "</body></html>")
 	}
 
-	muxer.HandleFunc("/file", uploadHandler(extractorFile))
-	muxer.HandleFunc("/url", uploadHandler(extractorUrl))
-	muxer.HandleFunc("/base64", uploadHandler(extractorBase64))
-	muxer.HandleFunc("/", rootHandler)
+	router := mux.NewRouter()
+
+	router.HandleFunc("/file", uploadHandler(extractorFile, nil))
+	router.HandleFunc("/url", uploadHandler(extractorUrl, nil))
+	router.HandleFunc("/base64", uploadHandler(extractorBase64, nil))
+
+	router.HandleFunc("/user/{user_id}/file", authenticatedEndpoint(uploadHandler, extractorBase64))
+	router.HandleFunc("/user/{user_id}/url", authenticatedEndpoint(uploadHandler, extractorUrl))
+	router.HandleFunc("/user/{user_id}/base64", authenticatedEndpoint(uploadHandler, extractorBase64))
+
+	router.HandleFunc("/", rootHandler)
+
+	muxer.Handle("/", router)
 }
 
 func (s *Server) download(url string) (io.ReadCloser, error) {
