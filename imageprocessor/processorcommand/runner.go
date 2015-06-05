@@ -35,8 +35,6 @@ func runProcessorCommand(command string, args []string) error {
 
 		return err
 	}
-
-	return nil
 }
 
 func killCmd(cmd *exec.Cmd) {

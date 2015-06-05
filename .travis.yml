@@ -1,3 +1,17 @@
 language: go
 go:
-  - tip
+    - tip
+before_install:
+    - go get github.com/axw/gocov/gocov
+    - go get github.com/mattn/goveralls
+    - go get golang.org/x/tools/cmd/goimports
+    - go get github.com/golang/lint/golint
+    - go get golang.org/x/tools/cmd/vet
+    - if ! go get code.google.com/p/go.tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
+install:
+    - if [ ! -e $TRAVIS_BUILD_DIR/../../Imgur ]; then ln -s $TRAVIS_BUILD_DIR/.. ../../Imgur; $(cd ../../Imgur/mandible; go get ./...); fi
+    - go get ./... # Run go get from that directory, but when we come back, come back to our forked dir
+script:
+    - ./goclean.sh
+after_script:
+    - goveralls -coverprofile=profile.cov -service travis-ci -repotoken $COVERALLS_TOKEN

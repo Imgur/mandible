@@ -6,6 +6,8 @@ A ready-to-deploy uploader that you can run on AWS EC2 or Heroku. It accepts an 
 
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
+[![Coverage Status](https://coveralls.io/repos/Imgur/mandible/badge.svg)](https://coveralls.io/r/Imgur/mandible)
+
 ## Features:
 Supported file types
 - JPG

@@ -1,7 +1,11 @@
 package imagestore
 
+import (
+	"io"
+)
+
 type ImageStore interface {
-	Save(src string, obj *StoreObject) (*StoreObject, error)
+	Save(src io.Reader, obj *StoreObject) (*StoreObject, error)
 	Exists(obj *StoreObject) (bool, error)
 }
 
