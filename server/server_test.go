@@ -110,7 +110,7 @@ func TestPostingBase64FilePutsTheFileInStorageAndReturnsJSON(t *testing.T) {
 		t.Fatalf("Unexpected error parsing response: %s", err.Error())
 	}
 
-	if !serverResp.Success {
+	if !*serverResp.Success {
 		t.Fatalf("Uploading GIF was unsuccessful")
 	}
 

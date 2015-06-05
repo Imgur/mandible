@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/Imgur/mandible/config"
@@ -27,9 +28,28 @@ type Server struct {
 }
 
 type ServerResponse struct {
-	Data    map[string]interface{} `json:"data"`
-	Status  int64                  `json:"status"`
-	Success bool                   `json:"success"`
+	Error   string      `json:"error,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
+	Status  int         `json:"status"`
+	Success *bool       `json:"success"` // the empty value is the nil pointer, because this is a computed property
+}
+
+func (resp *ServerResponse) Write(w http.ResponseWriter) {
+	respBytes, _ := resp.json()
+	w.WriteHeader(resp.Status)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(respBytes)
+}
+
+// The success property is a computed property on the response status
+// This can't implement the MarshalJSON() interface sadly because it would be recursive
+func (resp *ServerResponse) json() ([]byte, error) {
+	var success bool
+	success = (resp.Status == http.StatusOK)
+	resp.Success = &success
+	bytes, err := json.Marshal(resp)
+	resp.Success = nil
+	return bytes, err
 }
 
 type ImageResponse struct {
@@ -44,6 +64,11 @@ type ImageResponse struct {
 	Thumbs  map[string]interface{} `json:"thumbs"`
 }
 
+type UserError struct {
+	UserFacingMessage error
+	LogMessage        error
+}
+
 func NewServer(c *config.Configuration, strategy imageprocessor.ImageProcessorStrategy) *Server {
 	factory := imagestore.NewFactory(c)
 	httpclient := &http.Client{}
@@ -54,14 +79,15 @@ func NewServer(c *config.Configuration, strategy imageprocessor.ImageProcessorSt
 	return &Server{c, httpclient, store, hashGenerator, strategy}
 }
 
-func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileName string, thumbs []*uploadedfile.ThumbFile) {
-	w.Header().Set("Content-Type", "application/json")
-
+func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*uploadedfile.ThumbFile) ServerResponse {
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
 	if err != nil {
 		fmt.Println(err)
-		ErrorResponse(w, "Unable to write to /tmp", http.StatusInternalServerError)
-		return
+
+		return ServerResponse{
+			Error:  "Unable to write to /tmp",
+			Status: http.StatusInternalServerError,
+		}
 	}
 
 	defer tmpFile.Close()
@@ -70,30 +96,39 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 
 	if err != nil {
 		fmt.Println(err)
-		ErrorResponse(w, "Unable to copy image to disk!", http.StatusInternalServerError)
-		return
+
+		return ServerResponse{
+			Error:  "Unable to copy image to disk!",
+			Status: http.StatusInternalServerError,
+		}
 	}
 
 	upload, err := uploadedfile.NewUploadedFile(fileName, tmpFile.Name(), thumbs)
 	defer upload.Clean()
 
 	if err != nil {
-		ErrorResponse(w, "Error detecting mime type!", http.StatusInternalServerError)
-		return
+		return ServerResponse{
+			Error:  "Error detecting mime type!",
+			Status: http.StatusInternalServerError,
+		}
 	}
 
 	processor, err := s.processorStrategy(s.Config, upload)
 	if err != nil {
 		log.Printf("Error creating processor factory: %s", err.Error())
-		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
-		return
+		return ServerResponse{
+			Error:  "Unable to process image!",
+			Status: http.StatusInternalServerError,
+		}
 	}
 
 	err = processor.Run(upload)
 	if err != nil {
 		log.Printf("Error processing %+v: %s", upload, err.Error())
-		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
-		return
+		return ServerResponse{
+			Error:  "Unable to process image!",
+			Status: http.StatusInternalServerError,
+		}
 	}
 
 	upload.SetHash(s.hashGenerator.Get())
@@ -106,14 +141,19 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 
 	if err != nil {
 		log.Printf("Error opening processed output %+v at %s: %s", upload, uploadFilepath, err.Error())
-		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
+		return ServerResponse{
+			Error:  "Unable to save image!",
+			Status: http.StatusInternalServerError,
+		}
 	}
 
 	obj, err = s.ImageStore.Save(uploadFileFd, obj)
 	if err != nil {
 		log.Printf("Error saving processed output to store: %s", err.Error())
-		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
-		return
+		return ServerResponse{
+			Error:  "Unable to save image!",
+			Status: http.StatusInternalServerError,
+		}
 	}
 
 	thumbsResp := map[string]interface{}{}
@@ -125,14 +165,18 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 		tFile, err := os.Open(tPath)
 
 		if err != nil {
-			ErrorResponse(w, "Unable to save thumbnail!", http.StatusInternalServerError)
-			return
+			return ServerResponse{
+				Error:  "Unable to save thumbnail!",
+				Status: http.StatusInternalServerError,
+			}
 		}
 
 		tObj, err = s.ImageStore.Save(tFile, tObj)
 		if err != nil {
-			ErrorResponse(w, "Unable to save thumbnail!", http.StatusInternalServerError)
-			return
+			return ServerResponse{
+				Error:  "Unable to save thumbnail!",
+				Status: http.StatusInternalServerError,
+			}
 		}
 
 		thumbsResp[t.GetName()] = tObj.Url
@@ -140,15 +184,19 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 
 	size, err := upload.FileSize()
 	if err != nil {
-		ErrorResponse(w, "Unable to fetch image metadata!", http.StatusInternalServerError)
-		return
+		return ServerResponse{
+			Error:  "Unable to fetch image metadata!",
+			Status: http.StatusInternalServerError,
+		}
 	}
 
 	width, height, err := upload.Dimensions()
 
 	if err != nil {
-		ErrorResponse(w, err.Error(), http.StatusInternalServerError)
-		return
+		return ServerResponse{
+			Error:  "Error fetching upload dimensions: " + err.Error(),
+			Status: http.StatusInternalServerError,
+		}
 	}
 
 	resp := ImageResponse{
@@ -163,59 +211,80 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 		Thumbs:  thumbsResp,
 	}
 
-	Response(w, resp)
+	return ServerResponse{
+		Data:   resp,
+		Status: http.StatusOK,
+	}
 }
 
+type fileExtractor func(r *http.Request) (uploadFile io.Reader, filename string, uerr *UserError)
+
 func (s *Server) Configure(muxer *http.ServeMux) {
-	fileHandler := func(w http.ResponseWriter, r *http.Request) {
+
+	var extractorFile fileExtractor = func(r *http.Request) (uploadFile io.Reader, filename string, uerr *UserError) {
 		uploadFile, header, err := r.FormFile("image")
 
 		if err != nil {
-			fmt.Println(err)
-			ErrorResponse(w, "Error processing file!", http.StatusInternalServerError)
-			return
+			return nil, "", &UserError{LogMessage: err, UserFacingMessage: errors.New("Error processing file")}
 		}
 
-		thumbs, err := parseThumbs(r)
-		if err != nil {
-			ErrorResponse(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		s.uploadFile(uploadFile, w, header.Filename, thumbs)
-		uploadFile.Close()
+		return uploadFile, header.Filename, nil
 	}
 
-	urlHandler := func(w http.ResponseWriter, r *http.Request) {
-		uploadFile, err := s.download(r.FormValue("image"))
+	var extractorUrl fileExtractor = func(r *http.Request) (uploadFile io.Reader, filename string, uerr *UserError) {
+		url := r.FormValue("image")
+		uploadFile, err := s.download(url)
 
 		if err != nil {
-			ErrorResponse(w, "Error dowloading URL!", http.StatusInternalServerError)
-			return
+			return nil, "", &UserError{LogMessage: err, UserFacingMessage: errors.New("Error downloading URL!")}
 		}
 
-		thumbs, err := parseThumbs(r)
-		if err != nil {
-			ErrorResponse(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		s.uploadFile(uploadFile, w, "", thumbs)
-		uploadFile.Close()
+		return uploadFile, path.Base(url), nil
 	}
 
-	base64Handler := func(w http.ResponseWriter, r *http.Request) {
+	var extractorBase64 fileExtractor = func(r *http.Request) (uploadFile io.Reader, filename string, uerr *UserError) {
 		b64data := r.FormValue("image")
 
-		uploadFile := base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data))
+		uploadFile = base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data))
 
-		thumbs, err := parseThumbs(r)
-		if err != nil {
-			ErrorResponse(w, err.Error(), http.StatusBadRequest)
-			return
+		return uploadFile, "", nil
+	}
+
+	uploadHandler := func(extractor fileExtractor) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			uploadFile, filename, uerr := extractor(r)
+			if uerr != nil {
+				log.Printf("Error extracting files: %s", uerr.LogMessage.Error())
+				resp := ServerResponse{
+					Status: http.StatusBadRequest,
+					Error:  uerr.UserFacingMessage.Error(),
+				}
+				resp.Write(w)
+				return
+			}
+
+			thumbs, err := parseThumbs(r)
+			if err != nil {
+				resp := ServerResponse{
+					Status: http.StatusBadRequest,
+					Error:  "Error parsing thumbnails!",
+				}
+				resp.Write(w)
+				return
+			}
+
+			resp := s.uploadFile(uploadFile, filename, thumbs)
+
+			switch uploadFile.(type) {
+			case io.ReadCloser:
+				defer uploadFile.(io.ReadCloser).Close()
+				break
+			default:
+				break
+			}
+
+			resp.Write(w)
 		}
-
-		s.uploadFile(uploadFile, w, "", thumbs)
 	}
 
 	rootHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -225,9 +294,9 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		fmt.Fprint(w, "</body></html>")
 	}
 
-	muxer.HandleFunc("/file", fileHandler)
-	muxer.HandleFunc("/url", urlHandler)
-	muxer.HandleFunc("/base64", base64Handler)
+	muxer.HandleFunc("/file", uploadHandler(extractorFile))
+	muxer.HandleFunc("/url", uploadHandler(extractorUrl))
+	muxer.HandleFunc("/base64", uploadHandler(extractorBase64))
 	muxer.HandleFunc("/", rootHandler)
 }
 
