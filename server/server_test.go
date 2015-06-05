@@ -56,7 +56,6 @@ func TestRequestingTheFrontPageGetsSomeHTML(t *testing.T) {
 	if !strings.Contains(sbody, "<html>") {
 		t.Fatalf("Did I get HTML back? Didn't find <html>...")
 	}
-
 }
 
 func TestPostingBase64FilePutsTheFileInStorageAndReturnsJSON(t *testing.T) {
@@ -141,7 +140,7 @@ func TestPostingBase64FilePutsTheFileInStorageAndReturnsJSON(t *testing.T) {
 	}
 
 	if !exists {
-		t.Fatalf("Expected to find %s in the in-memory storage, instead absent. Dump: %s", imageResp.Hash, immStore)
+		t.Fatalf("Expected to find %s in the in-memory storage, instead absent. Dump: %+v", imageResp.Hash, immStore)
 	}
 
 	storedBodyReader, err := immStore.Get(&imagestore.StoreObject{Name: imageResp.Hash})
