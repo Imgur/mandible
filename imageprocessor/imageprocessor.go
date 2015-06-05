@@ -2,9 +2,10 @@ package imageprocessor
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/Imgur/mandible/config"
 	"github.com/Imgur/mandible/uploadedfile"
-	"strings"
 )
 
 type ProcessType interface {
@@ -43,6 +44,8 @@ func (this asyncProcessType) Process(image *uploadedfile.UploadedFile) error {
 			err := p.Process(image)
 			if err != nil {
 				errs <- fmt.Errorf("Error asynchronously processing on %s: %s", p.String(), err.Error())
+			} else {
+				errs <- nil
 			}
 		}(processor)
 	}
@@ -99,6 +102,7 @@ var EverythingStrategy = func(cfg *config.Configuration, file *uploadedfile.Uplo
 
 	async := asyncProcessType{}
 
+	async = append(async, DuelOCRStratagy())
 	for _, t := range file.GetThumbs() {
 		async = append(async, t)
 	}

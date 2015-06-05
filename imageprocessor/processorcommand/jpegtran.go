@@ -9,11 +9,11 @@ func Jpegtran(filename string) (string, error) {
 
 	args := []string{
 		"-copy",
-		"-all",
+		"all",
 		"-optimize",
-		filename,
-		">",
+		"-outfile",
 		outfile,
+		filename,
 	}
 
 	err := runProcessorCommand("jpegtran", args)
