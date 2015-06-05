@@ -33,7 +33,7 @@ func (this *OCRResult) removeNonWords(blob string) string {
 	}
 	defer speller.Delete()
 
-	single_char_words := regexp.MustCompile("(a|i|o)")
+	single_char_words := regexp.MustCompile("(a|i)")
 	number_regex := regexp.MustCompile("\\d{3,}")
 	word_regexp := regexp.MustCompile("\\b(\\w+)\\b")
 	words := word_regexp.FindAllString(blob, -1)
@@ -97,7 +97,7 @@ func (this MultiOCRCommand) Run(image string) (*OCRResult, error) {
 		}(command)
 	}
 
-	max := 0
+	max := -1
 	var best *OCRResult
 
 	for i := 0; i < len(this); i++ {
