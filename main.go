@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -11,7 +12,7 @@ import (
 )
 
 func main() {
-	configFile := os.Getenv("IMGUR_GO_CONF")
+	configFile := os.Getenv("MANDIBLE_CONF")
 
 	config := mandibleConf.NewConfiguration(configFile)
 	server := mandible.NewServer(config, processors.EverythingStrategy)
@@ -22,6 +23,8 @@ func main() {
 	if port == ":" {
 		port = fmt.Sprintf(":%d", server.Config.Port)
 	}
+
+	log.Printf("Listening on Port: %s", port)
 
 	http.ListenAndServe(port, muxer)
 }

@@ -33,14 +33,15 @@ type ServerResponse struct {
 }
 
 type ImageResponse struct {
-	Link   string                 `json:"link"`
-	Mime   string                 `json:"mime"`
-	Name   string                 `json:"name"`
-	Hash   string                 `json:"hash"`
-	Size   int64                  `json:"size"`
-	Width  int                    `json:"width"`
-	Height int                    `json:"height"`
-	Thumbs map[string]interface{} `json:"thumbs"`
+	Link    string                 `json:"link"`
+	Mime    string                 `json:"mime"`
+	Name    string                 `json:"name"`
+	Hash    string                 `json:"hash"`
+	Size    int64                  `json:"size"`
+	Width   int                    `json:"width"`
+	Height  int                    `json:"height"`
+	OCRText string                 `json:"ocrtext"`
+	Thumbs  map[string]interface{} `json:"thumbs"`
 }
 
 func NewServer(c *config.Configuration, strategy imageprocessor.ImageProcessorStrategy) *Server {
@@ -151,14 +152,15 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 	}
 
 	resp := ImageResponse{
-		Link:   obj.Url,
-		Mime:   obj.MimeType,
-		Hash:   upload.GetHash(),
-		Name:   fileName,
-		Size:   size,
-		Width:  width,
-		Height: height,
-		Thumbs: thumbsResp,
+		Link:    obj.Url,
+		Mime:    obj.MimeType,
+		Hash:    upload.GetHash(),
+		Name:    fileName,
+		Size:    size,
+		Width:   width,
+		Height:  height,
+		OCRText: upload.GetOCRText(),
+		Thumbs:  thumbsResp,
 	}
 
 	Response(w, resp)

@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/Imgur/mandible/config"
-	"github.com/Imgur/mandible/imageprocessor"
-	"github.com/Imgur/mandible/imagestore"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
+
+	"github.com/Imgur/mandible/config"
+	"github.com/Imgur/mandible/imageprocessor"
+	"github.com/Imgur/mandible/imagestore"
 )
 
 func TestRequestingTheFrontPageGetsSomeHTML(t *testing.T) {

@@ -15,6 +15,7 @@ type UploadedFile struct {
 	path     string
 	mime     string
 	hash     string
+	ocrText  string
 	thumbs   []*ThumbFile
 }
 
@@ -50,6 +51,7 @@ func NewUploadedFile(filename, path string, thumbs []*ThumbFile) (*UploadedFile,
 		path,
 		filetype,
 		"",
+		"",
 		thumbs,
 	}, nil
 }
@@ -68,6 +70,14 @@ func (this *UploadedFile) GetHash() string {
 
 func (this *UploadedFile) SetHash(hash string) {
 	this.hash = hash
+}
+
+func (this *UploadedFile) GetOCRText() string {
+	return this.ocrText
+}
+
+func (this *UploadedFile) SetOCRText(text string) {
+	this.ocrText = text
 }
 
 func (this *UploadedFile) SetPath(path string) {
