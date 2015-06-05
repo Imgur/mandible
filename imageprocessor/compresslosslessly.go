@@ -25,6 +25,10 @@ func (this *CompressLosslessly) Process(image *uploadedfile.UploadedFile) error 
 	return errors.New("Unsuported filetype")
 }
 
+func (this *CompressLosslessly) String() string {
+	return "Lossy compressor"
+}
+
 func (this *CompressLosslessly) compressPng(image *uploadedfile.UploadedFile) error {
 	filename, err := processorcommand.Optipng(image.GetPath())
 	if err != nil {

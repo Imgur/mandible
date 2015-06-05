@@ -6,6 +6,7 @@ import (
 	"os"
 
 	mandibleConf "github.com/Imgur/mandible/config"
+	processors "github.com/Imgur/mandible/imageprocessor"
 	mandible "github.com/Imgur/mandible/server"
 )
 
@@ -13,7 +14,7 @@ func main() {
 	configFile := os.Getenv("IMGUR_GO_CONF")
 
 	config := mandibleConf.NewConfiguration(configFile)
-	server := mandible.CreateServer(config)
+	server := mandible.NewServer(config, processors.EverythingStrategy)
 	muxer := http.NewServeMux()
 	server.Configure(muxer)
 

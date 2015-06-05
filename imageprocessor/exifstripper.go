@@ -19,3 +19,7 @@ func (this *ExifStripper) Process(image *uploadedfile.UploadedFile) error {
 
 	return nil
 }
+
+func (this *ExifStripper) String() string {
+	return "EXIF stripper"
+}

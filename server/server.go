@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -18,20 +19,38 @@ import (
 )
 
 type Server struct {
-	Config        *config.Configuration
-	HTTPClient    *http.Client
-	imageStore    imagestore.ImageStore
-	hashGenerator *imagestore.HashGenerator
+	Config            *config.Configuration
+	HTTPClient        *http.Client
+	ImageStore        imagestore.ImageStore
+	hashGenerator     *imagestore.HashGenerator
+	processorStrategy imageprocessor.ImageProcessorStrategy
 }
 
-func CreateServer(c *config.Configuration) *Server {
+type ServerResponse struct {
+	Data    map[string]interface{} `json:"data"`
+	Status  int64                  `json:"status"`
+	Success bool                   `json:"success"`
+}
+
+type ImageResponse struct {
+	Link   string                 `json:"link"`
+	Mime   string                 `json:"mime"`
+	Name   string                 `json:"name"`
+	Hash   string                 `json:"hash"`
+	Size   int64                  `json:"size"`
+	Width  int                    `json:"width"`
+	Height int                    `json:"height"`
+	Thumbs map[string]interface{} `json:"thumbs"`
+}
+
+func NewServer(c *config.Configuration, strategy imageprocessor.ImageProcessorStrategy) *Server {
 	factory := imagestore.NewFactory(c)
 	httpclient := &http.Client{}
 	stores := factory.NewImageStores()
 	store := stores[0]
 
 	hashGenerator := factory.NewHashGenerator(store)
-	return &Server{c, httpclient, store, hashGenerator}
+	return &Server{c, httpclient, store, hashGenerator, strategy}
 }
 
 func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileName string, thumbs []*uploadedfile.ThumbFile) {
@@ -62,14 +81,16 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 		return
 	}
 
-	processor, err := imageprocessor.Factory(s.Config.MaxFileSize, upload)
+	processor, err := s.processorStrategy(s.Config, upload)
 	if err != nil {
+		log.Printf("Error creating processor factory: %s", fileName, err.Error())
 		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
 		return
 	}
 
 	err = processor.Run(upload)
 	if err != nil {
+		log.Printf("Error processing %s: %s", upload, err.Error())
 		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
 		return
 	}
@@ -83,11 +104,13 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 	uploadFileFd, err := os.Open(uploadFilepath)
 
 	if err != nil {
+		log.Printf("Error opening processed output %s at %s: %s", upload, uploadFilepath, err.Error())
 		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
 	}
 
-	obj, err = s.imageStore.Save(uploadFileFd, obj)
+	obj, err = s.ImageStore.Save(uploadFileFd, obj)
 	if err != nil {
+		log.Printf("Error saving processed output to store: %s", err.Error())
 		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
 		return
 	}
@@ -105,7 +128,7 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 			return
 		}
 
-		tObj, err = s.imageStore.Save(tFile, tObj)
+		tObj, err = s.ImageStore.Save(tFile, tObj)
 		if err != nil {
 			ErrorResponse(w, "Unable to save thumbnail!", http.StatusInternalServerError)
 			return
@@ -127,14 +150,15 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 		return
 	}
 
-	resp := map[string]interface{}{
-		"link":   obj.Url,
-		"mime":   obj.MimeType,
-		"name":   fileName,
-		"size":   size,
-		"width":  width,
-		"height": height,
-		"thumbs": thumbsResp,
+	resp := ImageResponse{
+		Link:   obj.Url,
+		Mime:   obj.MimeType,
+		Hash:   upload.GetHash(),
+		Name:   fileName,
+		Size:   size,
+		Width:  width,
+		Height: height,
+		Thumbs: thumbsResp,
 	}
 
 	Response(w, resp)
