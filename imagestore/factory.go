@@ -37,6 +37,9 @@ func (this *Factory) NewImageStores() []ImageStore {
 		case "local":
 			store := this.NewLocalImageStore(configWrapper)
 			stores = append(stores, store)
+		case "memory":
+			store := NewInMemoryImageStore()
+			stores = append(stores, store)
 		default:
 			log.Fatalf("Unsupported store %s", configWrapper["Type"])
 		}

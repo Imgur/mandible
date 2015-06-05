@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// Provides a continuous stream of random image "hashes" of a fixed length that is unique (does not exist in the store).
 type HashGenerator struct {
 	hashGetter chan string
 	length     int

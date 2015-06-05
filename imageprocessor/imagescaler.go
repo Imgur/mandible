@@ -24,6 +24,10 @@ func (this *ImageScaler) Process(image *uploadedfile.UploadedFile) error {
 	return errors.New("Unsuported filetype")
 }
 
+func (this *ImageScaler) String() string {
+	return "Image scaler"
+}
+
 func (this *ImageScaler) scalePng(image *uploadedfile.UploadedFile) error {
 	filename, err := processorcommand.ConvertToJpeg(image.GetPath())
 	if err != nil {

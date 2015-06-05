@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func Response(w http.ResponseWriter, data map[string]interface{}, status ...int) {
+func Response(w http.ResponseWriter, data interface{}, status ...int) {
 	var responseStatus int
 	if len(status) > 0 {
 		responseStatus = status[0]

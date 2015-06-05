@@ -1,8 +1,16 @@
 package imageprocessor
 
 import (
+	"fmt"
+	"github.com/Imgur/mandible/config"
 	"github.com/Imgur/mandible/uploadedfile"
+	"strings"
 )
+
+type ProcessType interface {
+	Process(image *uploadedfile.UploadedFile) error
+	String() string
+}
 
 type multiProcessType []ProcessType
 
@@ -10,11 +18,19 @@ func (this multiProcessType) Process(image *uploadedfile.UploadedFile) error {
 	for _, processor := range this {
 		err := processor.Process(image)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error multiprocessing on %s: %s", processor.String(), err.Error())
 		}
 	}
 
 	return nil
+}
+
+func (this multiProcessType) String() string {
+	processes := make([]string, 0)
+	for _, p := range this {
+		processes = append(processes, p.String())
+	}
+	return "Multiple processes <" + strings.Join(processes, ", ") + ">"
 }
 
 type asyncProcessType []ProcessType
@@ -24,7 +40,10 @@ func (this asyncProcessType) Process(image *uploadedfile.UploadedFile) error {
 
 	for _, processor := range this {
 		go func(p ProcessType) {
-			errs <- p.Process(image)
+			err := p.Process(image)
+			if err != nil {
+				errs <- fmt.Errorf("Error asynchronously processing on %s: %s", p.String(), err.Error())
+			}
 		}(processor)
 	}
 
@@ -40,8 +59,12 @@ func (this asyncProcessType) Process(image *uploadedfile.UploadedFile) error {
 	return nil
 }
 
-type ProcessType interface {
-	Process(image *uploadedfile.UploadedFile) error
+func (this asyncProcessType) String() string {
+	processes := make([]string, 0)
+	for _, p := range this {
+		processes = append(processes, p.String())
+	}
+	return "Async processes <" + strings.Join(processes, ", ") + ">"
 }
 
 type ImageProcessor struct {
@@ -52,7 +75,14 @@ func (this *ImageProcessor) Run(image *uploadedfile.UploadedFile) error {
 	return this.processor.Process(image)
 }
 
-func Factory(maxFileSize int64, file *uploadedfile.UploadedFile) (*ImageProcessor, error) {
+type ImageProcessorStrategy func(*config.Configuration, *uploadedfile.UploadedFile) (*ImageProcessor, error)
+
+// Just do nothing to the file after it's uploaded...
+var PassthroughStrategy = func(cfg *config.Configuration, file *uploadedfile.UploadedFile) (*ImageProcessor, error) {
+	return &ImageProcessor{multiProcessType{}}, nil
+}
+
+var EverythingStrategy = func(cfg *config.Configuration, file *uploadedfile.UploadedFile) (*ImageProcessor, error) {
 	size, err := file.FileSize()
 	if err != nil {
 		return &ImageProcessor{}, err
@@ -63,8 +93,8 @@ func Factory(maxFileSize int64, file *uploadedfile.UploadedFile) (*ImageProcesso
 	processor = append(processor, &CompressLosslessly{})
 	processor = append(processor, &ExifStripper{})
 
-	if size > maxFileSize {
-		processor = append(processor, &ImageScaler{maxFileSize})
+	if size > cfg.MaxFileSize {
+		processor = append(processor, &ImageScaler{cfg.MaxFileSize})
 	}
 
 	async := asyncProcessType{}

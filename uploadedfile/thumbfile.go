@@ -87,6 +87,10 @@ func (this *ThumbFile) Process(original *UploadedFile) error {
 	return errors.New("Invalid thumb shape " + this.shape)
 }
 
+func (this *ThumbFile) String() string {
+	return fmt.Sprintf("Thumbnail of <%s>", this.name)
+}
+
 func (this *ThumbFile) processSquare(original *UploadedFile) error {
 	filename, err := processorcommand.SquareThumb(original.GetPath(), this.GetName(), this.GetWidth(), thumbType.FromMime(original.GetMime()))
 	if err != nil {

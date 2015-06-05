@@ -17,3 +17,7 @@ func (this *ImageOrienter) Process(image *uploadedfile.UploadedFile) error {
 
 	return nil
 }
+
+func (this *ImageOrienter) String() string {
+	return "Image orienter"
+}
