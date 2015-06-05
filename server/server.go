@@ -83,14 +83,14 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 
 	processor, err := s.processorStrategy(s.Config, upload)
 	if err != nil {
-		log.Printf("Error creating processor factory: %s", fileName, err.Error())
+		log.Printf("Error creating processor factory: %s", err.Error())
 		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
 		return
 	}
 
 	err = processor.Run(upload)
 	if err != nil {
-		log.Printf("Error processing %s: %s", upload, err.Error())
+		log.Printf("Error processing %+v: %s", upload, err.Error())
 		ErrorResponse(w, "Unable to process image!", http.StatusInternalServerError)
 		return
 	}
@@ -104,7 +104,7 @@ func (s *Server) uploadFile(uploadFile io.Reader, w http.ResponseWriter, fileNam
 	uploadFileFd, err := os.Open(uploadFilepath)
 
 	if err != nil {
-		log.Printf("Error opening processed output %s at %s: %s", upload, uploadFilepath, err.Error())
+		log.Printf("Error opening processed output %+v at %s: %s", upload, uploadFilepath, err.Error())
 		ErrorResponse(w, "Unable to save image!", http.StatusInternalServerError)
 	}
 
