@@ -33,18 +33,18 @@ func (this *OCRResult) removeNonWords(blob string) string {
 	}
 	defer speller.Delete()
 
-	single_char_words := regexp.MustCompile("(a|i)")
-	number_regex := regexp.MustCompile("\\d{3,}")
-	word_regexp := regexp.MustCompile("\\b(\\w+)\\b")
-	words := word_regexp.FindAllString(blob, -1)
+	singleCharWords := regexp.MustCompile("(a|i)")
+	numberRegex := regexp.MustCompile("\\d{3,}")
+	wordRegexp := regexp.MustCompile("\\b(\\w+)\\b")
+	words := wordRegexp.FindAllString(blob, -1)
 
 	str := ""
 
 	for _, word := range words {
-		if number_regex.MatchString(word) {
+		if numberRegex.MatchString(word) {
 			str += " " + word
 		} else if len(word) == 1 {
-			if single_char_words.MatchString(word) {
+			if singleCharWords.MatchString(word) {
 				str += " " + word
 			}
 		} else if speller.Check(word) {
