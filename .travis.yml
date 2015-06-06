@@ -3,6 +3,7 @@ go:
     - tip
 before_install:
     - sudo apt-get install -qq aspell aspell-en libaspell-dev tesseract-ocr tesseract-ocr-eng
+    - sudo wget https://github.com/johnlinp/meme-ocr/raw/master/tessdata/joh.traineddata -O /usr/local/share/tessdata/meme.trainedata
     - go get github.com/axw/gocov/gocov
     - go get github.com/mattn/goveralls
     - go get golang.org/x/tools/cmd/goimports
