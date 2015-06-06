@@ -60,10 +60,6 @@ func (this *OCRResult) getBestString() string {
 	ocrWordCount := this.wordCount(this.Text)
 	cleanWordCount := this.wordCount(cleanString)
 
-	if ocrWordCount <= 1 {
-		return this.Text
-	}
-
 	percentKept := float64(cleanWordCount) / float64(ocrWordCount)
 
 	if percentKept > .90 {
@@ -77,7 +73,15 @@ func (this *OCRResult) wordCount(blob string) int {
 	word_regexp := regexp.MustCompile("\\b(\\w+)\\b")
 	words := word_regexp.FindAllString(blob, -1)
 
-	return len(words)
+	// don't let single char words count towards the overal word count. Gets thrown off by poor OCR results
+	count := 0
+	for _, word := range words {
+		if len(word) > 1 {
+			count++
+		}
+	}
+
+	return count
 }
 
 type MultiOCRCommand []OCRCommand

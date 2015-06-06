@@ -2,7 +2,7 @@ language: go
 go:
     - tip
 before_install:
-    - sudo apt-get install -qq aspell aspell-en libaspell-dev
+    - sudo apt-get install -qq aspell aspell-en libaspell-dev tesseract
     - go get github.com/axw/gocov/gocov
     - go get github.com/mattn/goveralls
     - go get golang.org/x/tools/cmd/goimports
