@@ -1,0 +1,14 @@
+{
+    "Port": 8080,
+    "MaxFileSize": 20971520,
+    "HashLength": 7,
+    "UserAgent": "Mandible (https://github.com/Imgur/Mandible)",
+    "Stores" : [
+        {
+            "Type" : "local",
+            "StoreRoot": "/tmp/imagestore",
+            "NamePathRegex" : "^([a-zA-Z0-9])([a-zA-Z0-9]).*",
+            "NamePathMap" : "${ImageSize}/${1}/${2}/${ImageName}"
+        }
+    ]
+}
