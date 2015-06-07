@@ -15,6 +15,7 @@ func TestStandardOCR(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Could not initialize standard OCR test")
 	}
+	defer image.Clean()
 
 	ocrStratagy := StandardOCRStratagy()
 	ocrStratagy.Process(image)
@@ -29,6 +30,7 @@ func TestDuelOCR(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Could not initialize standard OCR test")
 	}
+	defer image.Clean()
 
 	ocrStratagy := DuelOCRStratagy()
 	ocrStratagy.Process(image)
