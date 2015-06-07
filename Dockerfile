@@ -11,8 +11,6 @@ CMD ["go-wrapper", "run"]
 RUN mkdir -p /etc/mandible/
 COPY docker/conf.json /etc/mandible/
 
-EXPOSE 8080
-
 COPY . /go/src/app
 RUN go-wrapper download
 RUN go-wrapper install
