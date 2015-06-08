@@ -329,11 +329,12 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				return
 			}
 
-			user := s.authenticator.GetUser(r)
+			user, err := s.authenticator.GetUser(r)
 
 			// Their HMAC was invalid or they are trying to upload to someone else's account
-			if user == nil || user.UserID != int64(attemptedUserId) {
+			if user == nil || err != nil || user.UserID != int64(attemptedUserId) {
 				w.WriteHeader(http.StatusUnauthorized)
+				log.Printf("Authentication error: %s", err.Error())
 				return
 			}
 

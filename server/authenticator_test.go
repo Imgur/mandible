@@ -14,9 +14,12 @@ func TestPassthroughAuthenticatorAlwaysReturnsNilUser(t *testing.T) {
 	req, _ := http.NewRequest("POST", "http://127.0.0.1/user/123/url", nil)
 
 	authenticator := &PassthroughAuthenticator{}
-	user := authenticator.GetUser(req)
+	user, err := authenticator.GetUser(req)
 	if user != nil {
 		t.Fatalf("Expected authenticator of the passthrough authenticator to be nil, instead %+v", user)
+	}
+	if err != ErrNoAuthentication {
+		t.Fatalf("Unexpected error: %s", err.Error())
 	}
 }
 
@@ -37,9 +40,13 @@ func TestHMACAuthenticatorOnValidRequest(t *testing.T) {
 	req.Header.Set("X-Authorization-HMAC", string(messageMac))
 
 	authenticator := NewHMACAuthenticatorSHA256([]byte("foobar"))
-	user := authenticator.GetUser(req)
+	authenticator.SetTime(time.Date(2015, time.June, 01, 0, 0, 0, 0, time.UTC))
+	user, err := authenticator.GetUser(req)
 	if user == nil {
 		t.Fatalf("Expected authenticator of of a valid response to not return nil")
+	}
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err.Error())
 	}
 }
 
@@ -49,9 +56,12 @@ func TestHMACAuthenticatorOnEmptyHeader(t *testing.T) {
 	req.Header.Set("Authorization", "")
 
 	authenticator := NewHMACAuthenticatorSHA256([]byte("foobar"))
-	user := authenticator.GetUser(req)
+	user, err := authenticator.GetUser(req)
 	if user != nil {
 		t.Fatalf("Expected authenticator with no auth response to return nil")
+	}
+	if err != ErrEmptyAuth {
+		t.Fatalf("Unexpected error: %s", err.Error())
 	}
 }
 
@@ -73,8 +83,42 @@ func TestHMACAuthenticatorOnInvalidRequest(t *testing.T) {
 	req.Header.Set("X-Authorization-HMAC", string(messageMac))
 
 	authenticator := NewHMACAuthenticatorSHA256([]byte("foobar"))
-	user := authenticator.GetUser(req)
+	authenticator.SetTime(time.Date(2015, time.June, 01, 0, 0, 0, 0, time.UTC))
+	user, err := authenticator.GetUser(req)
 	if user != nil {
 		t.Fatalf("Expected authenticator of of an invalid response to return nil")
+	}
+	if err != ErrMACMismatch {
+		t.Fatalf("Unexpected error: %s", err.Error())
+	}
+}
+
+func TestHMACAuthenticatorOnExpiredGrant(t *testing.T) {
+	grantedTime := time.Date(2015, time.June, 01, 0, 0, 0, 0, time.UTC)
+	requestTime := time.Date(2017, time.June, 01, 0, 0, 0, 0, time.UTC)
+	message := AuthenticatedUser{
+		UserID:               123,
+		GrantTime:            grantedTime,
+		GrantDurationSeconds: 5,
+	}
+	messageBytes, _ := json.Marshal(&message)
+	messageMacWriter := hmac.New(sha256.New, []byte("foobar"))
+	messageMacWriter.Write(messageBytes)
+	messageMac := base64.StdEncoding.EncodeToString(messageMacWriter.Sum(nil))
+
+	req, _ := http.NewRequest("POST", "http://127.0.0.1/user/123/url", nil)
+
+	req.Header.Set("Authorization", string(messageBytes))
+	req.Header.Set("X-Authorization-HMAC", string(messageMac))
+
+	authenticator := NewHMACAuthenticatorSHA256([]byte("foobar"))
+	authenticator.SetTime(requestTime)
+
+	user, err := authenticator.GetUser(req)
+	if user != nil {
+		t.Fatalf("Expected authenticator of of an invalid response to return nil")
+	}
+	if err != ErrExpiredGrant {
+		t.Fatalf("Unexpected error: %s", err.Error())
 	}
 }
