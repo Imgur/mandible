@@ -18,11 +18,19 @@ Pluggable storage layers
 - S3
 - Local
 
+Pluggable authentication scheme
+- Time-grant HMAC
+
 Processing Steps:
 - Compression
 - Thumbnail generation
 
 ## Installation
+
+### (Optional) Authentication
+
+- Set the following environment variable
+    - AUTHENTICATION_HMAC_KEY
 
 ### S3 Storage Layer
 
@@ -131,3 +139,58 @@ curl -i http://127.0.0.1:8080/file \
     "success": true
 }
 ```
+
+### Authenticated upload
+
+Uses HTTP headers `Authentication` and `X-Authentication-HMAC`. Generate HMACs by base64-encoding a JSON blob like below. [Example MAC generator](http://play.golang.org/p/3otGr8LBZt). 
+Supplying the client with the Authentication blob and MAC is out of scope for this project. In the future we will support symmetric and asymmetric encryption of the authentication blobs.
+
+#### Request to my own account with proper authorization:
+
+```
+curl -i http://127.0.0.1:8080/user/1/url \
+-d 'image=http://i.imgur.com/s9zxmYe.jpg' \
+-H 'Authorization: {"user_id":1,"grant_time":"2010-06-01T00:00:00Z","grant_duration_sec":31536000}' \
+-H 'X-Authorization-HMAC: tCtGb04n4nvd/94+Xd6vAx9+pJw51ZmX1vH7E+BlTtc='
+```
+
+#### Response:
+```javascript
+{"data":{"link":"/tmp/original/J/a/Jafq9IH","mime":"image/jpeg","name":"s9zxmYe.jpg","hash":"Jafq9IH","size":81881,"width":380,"height":430,"ocrtext":"change\np.roject .\n\n  \n  \n\n  forg@ot to git p.ull before\n- .-+#~+):,-r,ad)q..,i,ng so/ /","thumbs":{},"user_id":"\u0001"},"status":200,"success":true}
+```
+
+#### Request to other user's account:
+
+```
+curl -i http://127.0.0.1:8080/user/2/url \
+-d 'image=http://i.imgur.com/s9zxmYe.jpg' \
+-H 'Authorization: {"user_id":1,"grant_time":"2010-06-01T00:00:00Z","grant_duration_sec":31536000}' \
+-H 'X-Authorization-HMAC: tCtGb04n4nvd/94+Xd6vAx9+pJw51ZmX1vH7E+BlTtc='
+```
+
+#### Response:
+```
+HTTP/1.1 401 Unauthorized
+Date: Mon, 08 Jun 2015 21:04:41 GMT
+Content-Length: 0
+Content-Type: text/plain; charset=utf-8
+```
+
+
+#### HMAC prevents account forgery
+
+```
+curl -i http://127.0.0.1:8080/user/1/url \
+-d 'image=http://i.imgur.com/s9zxmYe.jpg' \
+-H 'Authorization: {"user_id":1,"grant_time":"2010-06-01T00:00:00Z","grant_duration_sec":31536000}' \
+-H 'X-Authorization-HMAC: foobar'
+```
+
+#### Response:
+```javascript
+HTTP/1.1 401 Unauthorized
+Date: Mon, 08 Jun 2015 21:04:41 GMT
+Content-Length: 0
+Content-Type: text/plain; charset=utf-8
+```
+
