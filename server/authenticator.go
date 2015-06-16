@@ -20,7 +20,7 @@ var (
 )
 
 type AuthenticatedUser struct {
-	UserID               int64     `json:"user_id"`
+	UserID               string    `json:"user_id"`
 	GrantTime            time.Time `json:"grant_time"`
 	GrantDurationSeconds int64     `json:"grant_duration_sec"`
 }
@@ -71,7 +71,7 @@ func (auth *HMACAuthenticator) GetUser(req *http.Request) (*AuthenticatedUser, e
 		err := json.Unmarshal(authHeader, &authUser)
 		// Valid JSON but no shared values will unmarshal to the zero valued authenticated user; only pass back
 		// a non-zero-valued authenticated user
-		if err == nil && authUser.UserID != 0 {
+		if err == nil && authUser.UserID != "" {
 			if authUser.GrantTime.IsZero() {
 				return nil, ErrNoGrantTime
 			} else if authUser.GrantTime.Add(time.Duration(authUser.GrantDurationSeconds) * time.Second).Before(auth.now) {

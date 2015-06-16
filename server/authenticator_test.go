@@ -25,8 +25,8 @@ func TestPassthroughAuthenticatorAlwaysReturnsNilUser(t *testing.T) {
 
 func TestHMACAuthenticatorOnValidRequest(t *testing.T) {
 	message := AuthenticatedUser{
-		UserID:               123,
-		GrantTime:            time.Date(2015, time.June, 01, 0, 0, 0, 0, time.UTC),
+		UserID:               "123",
+		GrantTime:            time.Now(),
 		GrantDurationSeconds: 365 * 24 * 3600,
 	}
 	messageBytes, _ := json.Marshal(&message)
@@ -40,7 +40,7 @@ func TestHMACAuthenticatorOnValidRequest(t *testing.T) {
 	req.Header.Set("X-Authorization-HMAC", string(messageMac))
 
 	authenticator := NewHMACAuthenticatorSHA256([]byte("foobar"))
-	authenticator.SetTime(time.Date(2015, time.June, 01, 0, 0, 0, 0, time.UTC))
+	authenticator.SetTime(time.Now())
 	user, err := authenticator.GetUser(req)
 	if user == nil {
 		t.Fatalf("Expected authenticator of of a valid response to not return nil")
@@ -67,8 +67,8 @@ func TestHMACAuthenticatorOnEmptyHeader(t *testing.T) {
 
 func TestHMACAuthenticatorOnInvalidRequest(t *testing.T) {
 	message := AuthenticatedUser{
-		UserID:               123,
-		GrantTime:            time.Date(2015, time.June, 01, 0, 0, 0, 0, time.UTC),
+		UserID:               "123",
+		GrantTime:            time.Now(),
 		GrantDurationSeconds: 365 * 24 * 3600,
 	}
 	messageBytes, _ := json.Marshal(&message)
@@ -83,7 +83,7 @@ func TestHMACAuthenticatorOnInvalidRequest(t *testing.T) {
 	req.Header.Set("X-Authorization-HMAC", string(messageMac))
 
 	authenticator := NewHMACAuthenticatorSHA256([]byte("foobar"))
-	authenticator.SetTime(time.Date(2015, time.June, 01, 0, 0, 0, 0, time.UTC))
+	authenticator.SetTime(time.Now())
 	user, err := authenticator.GetUser(req)
 	if user != nil {
 		t.Fatalf("Expected authenticator of of an invalid response to return nil")
@@ -94,10 +94,10 @@ func TestHMACAuthenticatorOnInvalidRequest(t *testing.T) {
 }
 
 func TestHMACAuthenticatorOnExpiredGrant(t *testing.T) {
-	grantedTime := time.Date(2015, time.June, 01, 0, 0, 0, 0, time.UTC)
-	requestTime := time.Date(2017, time.June, 01, 0, 0, 0, 0, time.UTC)
+	grantedTime := time.Now()
+	requestTime := time.Now().Add(time.Hour)
 	message := AuthenticatedUser{
-		UserID:               123,
+		UserID:               "123",
 		GrantTime:            grantedTime,
 		GrantDurationSeconds: 5,
 	}

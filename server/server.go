@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -311,20 +310,14 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		}
 	}
 
+	// Wrap an existing upload endpoint with authentication, returning a new endpoint that 4xxs unless authentication is passed.
 	authenticatedEndpoint := func(endpoint uploadEndpoint, extractor fileExtractor) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			requestVars := mux.Vars(r)
 			attemptedUserIdString, ok := requestVars["user_id"]
 
 			// They didn't send a user ID to a /user endpoint
-			if !ok {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			// They sent a string or something non-integery
-			attemptedUserId, err := strconv.Atoi(attemptedUserIdString)
-			if err != nil || attemptedUserId == 0 {
+			if !ok || attemptedUserIdString == "" {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
@@ -332,7 +325,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 			user, err := s.authenticator.GetUser(r)
 
 			// Their HMAC was invalid or they are trying to upload to someone else's account
-			if user == nil || err != nil || user.UserID != int64(attemptedUserId) {
+			if user == nil || err != nil || user.UserID != attemptedUserIdString {
 				w.WriteHeader(http.StatusUnauthorized)
 				log.Printf("Authentication error: %s", err.Error())
 				return
