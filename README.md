@@ -1,8 +1,6 @@
-# mandible
+# mandible ![TravisStatus](https://travis-ci.org/Imgur/mandible.svg) [![Coverage Status](https://coveralls.io/repos/Imgur/mandible/badge.svg)](https://coveralls.io/r/Imgur/mandible)
 
 A ready-to-deploy uploader that you can run on AWS EC2 or Heroku. It accepts an image via a REST interface and returns information about a file. Also, supports processing steps such as compression and thumbnail generation.
-
-![TravisStatus](https://travis-ci.org/Imgur/mandible.svg) [![Coverage Status](https://coveralls.io/repos/Imgur/mandible/badge.svg)](https://coveralls.io/r/Imgur/mandible)
 
 
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
