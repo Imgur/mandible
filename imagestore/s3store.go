@@ -46,7 +46,7 @@ func (this *S3ImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, e
 		return nil, err
 	}
 
-	obj.Url = "https://s3.amazonaws.com/" + this.bucketName + this.toPath(obj)
+	obj.Url = bucket.URL(this.toPath(obj))
 	return obj, nil
 }
 
