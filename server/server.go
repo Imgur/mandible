@@ -264,7 +264,8 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 	}
 
 	var extractorBase64 fileExtractor = func(r *http.Request) (uploadFile io.Reader, filename string, uerr *UserError) {
-		b64data := r.FormValue("image")
+		input := r.FormValue("image")
+		b64data := input[strings.IndexByte(input, ',')+1:]
 
 		uploadFile = base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data))
 
