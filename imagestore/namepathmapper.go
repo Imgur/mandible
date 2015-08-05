@@ -23,11 +23,11 @@ func NewNamePathMapper(expr string, mapping string) *NamePathMapper {
 }
 
 func (this *NamePathMapper) mapToPath(obj *StoreObject) string {
-	repl := strings.Replace(this.replace, "${ImageName}", obj.Name, -1)
-	repl = strings.Replace(repl, "${ImageSize}", obj.Type, -1)
+	repl := strings.Replace(this.replace, "${ImageName}", obj.Id, -1)
+	repl = strings.Replace(repl, "${ImageSize}", obj.Size, -1)
 
 	if this.regex != nil {
-		return this.regex.ReplaceAllString(obj.Name, repl)
+		return this.regex.ReplaceAllString(obj.Id, repl)
 	}
 
 	return repl

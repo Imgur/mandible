@@ -2,7 +2,7 @@ FROM golang:1.4
 ENV PORT 80
 EXPOSE 80
 RUN apt-get update && apt-get install -yqq aspell aspell-en libaspell-dev tesseract-ocr tesseract-ocr-eng imagemagick optipng exiftool libjpeg-progs
-RUN wget https://github.com/johnlinp/meme-ocr/raw/master/tessdata/joh.traineddata -O /usr/share/tesseract-ocr/tessdata/meme.traineddata
+ADD docker/meme.traineddata /usr/share/tesseract-ocr/tessdata/meme.traineddata
 RUN mkdir -p /etc/mandible /tmp/imagestore
 ADD docker/conf.json /etc/mandible/conf.json
 ENV MANDIBLE_CONF /etc/mandible/conf.json

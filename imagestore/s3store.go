@@ -3,6 +3,7 @@ package imagestore
 import (
 	"io"
 	"io/ioutil"
+	"strings"
 
 	"github.com/mitchellh/goamz/s3"
 )
@@ -48,6 +49,16 @@ func (this *S3ImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, e
 
 	obj.Url = bucket.URL(this.toPath(obj))
 	return obj, nil
+}
+
+func (this *S3ImageStore) Get(obj *StoreObject) (io.Reader, error) {
+	bucket := this.client.Bucket(this.bucketName)
+	data, err := bucket.Get(this.toPath(obj))
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.NewReader(string(data)), nil
 }
 
 func (this *S3ImageStore) toPath(obj *StoreObject) string {

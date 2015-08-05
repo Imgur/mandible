@@ -1,7 +1,6 @@
 package imagestore
 
 import (
-	"bufio"
 	"io"
 	"os"
 	"path"
@@ -29,9 +28,6 @@ func (this *LocalImageStore) Exists(obj *StoreObject) (bool, error) {
 }
 
 func (this *LocalImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, error) {
-	// make a read buffer
-	r := bufio.NewReader(src)
-
 	// open output file
 	this.createParent(obj)
 	fo, err := os.Create(this.toPath(obj))
@@ -41,34 +37,22 @@ func (this *LocalImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject
 
 	defer fo.Close()
 
-	// make a write buffer
-	w := bufio.NewWriter(fo)
-
-	// make a buffer to keep chunks that are read
-	buf := make([]byte, 1024)
-	for {
-		// read a chunk
-		n, err := r.Read(buf)
-		if err != nil && err != io.EOF {
-			return nil, err
-		}
-
-		if n == 0 {
-			break
-		}
-
-		// write a chunk
-		if _, err := w.Write(buf[:n]); err != nil {
-			return nil, err
-		}
-	}
-
-	if err = w.Flush(); err != nil {
+	_, err = io.Copy(fo, src)
+	if err != nil {
 		return nil, err
 	}
 
 	obj.Url = this.toPath(obj)
 	return obj, nil
+}
+
+func (this *LocalImageStore) Get(obj *StoreObject) (io.Reader, error) {
+	reader, err := os.Open(this.toPath(obj)); 
+	if err != nil {
+	    return nil, err
+	}
+
+	return reader, nil
 }
 
 func (this *LocalImageStore) createParent(obj *StoreObject) {

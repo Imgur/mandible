@@ -104,11 +104,11 @@ func (this *Factory) NewLocalImageStore(conf map[string]string) ImageStore {
 	return NewLocalImageStore(conf["StoreRoot"], mapper)
 }
 
-func (this *Factory) NewStoreObject(name string, mime string, imgType string) *StoreObject {
+func (this *Factory) NewStoreObject(id string, mime string, size string) *StoreObject {
 	return &StoreObject{
-		Name:     name,
+		Id:       id,
 		MimeType: mime,
-		Type:     imgType,
+		Size:     size,
 	}
 }
 

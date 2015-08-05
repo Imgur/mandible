@@ -95,30 +95,15 @@ func NewAuthenticatedServer(c *config.Configuration, strategy imageprocessor.Ima
 }
 
 func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*uploadedfile.ThumbFile, user *AuthenticatedUser) ServerResponse {
-	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
+	tmpFile, err := saveToTmp(uploadFile)
 	if err != nil {
-		fmt.Println(err)
-
 		return ServerResponse{
-			Error:  "Unable to write to /tmp",
+			Error:  "Error saving to disk!",
 			Status: http.StatusInternalServerError,
 		}
 	}
 
-	defer tmpFile.Close()
-
-	_, err = io.Copy(tmpFile, uploadFile)
-
-	if err != nil {
-		fmt.Println(err)
-
-		return ServerResponse{
-			Error:  "Unable to copy image to disk!",
-			Status: http.StatusInternalServerError,
-		}
-	}
-
-	upload, err := uploadedfile.NewUploadedFile(fileName, tmpFile.Name(), thumbs)
+	upload, err := uploadedfile.NewUploadedFile(fileName, tmpFile, thumbs)
 	defer upload.Clean()
 
 	if err != nil {
@@ -171,30 +156,12 @@ func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*upl
 		}
 	}
 
-	thumbsResp := map[string]interface{}{}
-	for _, t := range upload.GetThumbs() {
-		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.GetName())
-		tObj := factory.NewStoreObject(thumbName, upload.GetMime(), "t")
-
-		tPath := t.GetPath()
-		tFile, err := os.Open(tPath)
-
-		if err != nil {
-			return ServerResponse{
-				Error:  "Unable to save thumbnail!",
-				Status: http.StatusInternalServerError,
-			}
+	thumbsResp, err := s.buildThumbResponse(upload)
+	if err != nil {
+		return ServerResponse{
+			Error:  "Unable to process thumbnail!",
+			Status: http.StatusInternalServerError,
 		}
-
-		tObj, err = s.ImageStore.Save(tFile, tObj)
-		if err != nil {
-			return ServerResponse{
-				Error:  "Unable to save thumbnail!",
-				Status: http.StatusInternalServerError,
-			}
-		}
-
-		thumbsResp[t.GetName()] = tObj.Url
 	}
 
 	size, err := upload.FileSize()
@@ -336,6 +303,88 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		}
 	}
 
+	thumbnailHandler := func(w http.ResponseWriter, r *http.Request) {
+		imageID := r.FormValue("uid")
+
+		factory := imagestore.NewFactory(s.Config)
+		tObj := factory.NewStoreObject(imageID, "", "original")
+
+		storeReader, err := s.ImageStore.Get(tObj)
+		if err != nil {
+			resp := ServerResponse{
+				Status: http.StatusBadRequest,
+				Error:  fmt.Sprintf("Error retrieving image with ID: %s", imageID),
+			}
+			resp.Write(w)
+			return
+		}
+
+		storeFile, err := saveToTmp(storeReader)
+		if err != nil {
+			resp := ServerResponse{
+				Status: http.StatusBadRequest,
+				Error:  "Error parsing thumbnails!",
+			}
+			resp.Write(w)
+			return
+		}
+
+		thumbs, err := parseThumbs(r)
+		if err != nil {
+			resp := ServerResponse{
+				Status: http.StatusBadRequest,
+				Error:  "Error parsing thumbnails!",
+			}
+			resp.Write(w)
+			return
+		}
+
+		upload, err := uploadedfile.NewUploadedFile("", storeFile, thumbs)
+		if err != nil {
+			log.Printf("Error processing %+v: %s", storeFile, err.Error())
+			resp := ServerResponse{
+				Error:  "Unable to process thumbnail!",
+				Status: http.StatusInternalServerError,
+			}
+			resp.Write(w)
+			return
+		}
+		upload.SetHash(imageID)
+
+		processor, _ := imageprocessor.ThumbnailStrategy(s.Config, upload)
+		err = processor.Run(upload)
+		if err != nil {
+			log.Printf("Error processing %+v: %s", upload, err.Error())
+			resp := ServerResponse{
+				Error:  "Unable to process thumbnail!",
+				Status: http.StatusInternalServerError,
+			}
+			resp.Write(w)
+			return
+		}
+
+		_, err = s.buildThumbResponse(upload)
+		if err != nil {
+			log.Printf("Error processing %+v: %s", upload, err.Error())
+			resp := ServerResponse{
+				Error:  "Unable to process thumbnail!",
+				Status: http.StatusInternalServerError,
+			}
+			resp.Write(w)
+			return
+		}
+
+		// resp := ServerResponse{
+		// 	Data:   thumbsResp,
+		// 	Status: http.StatusOK,
+		// }
+		// resp.Write(w)
+
+		ts := upload.GetThumbs()
+		t  := ts[0]
+		http.ServeFile(w, r, t.GetPath())
+	}
+
 	rootHandler := func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "<html><head><title>An open source image uploader by Imgur</title></head><body style=\"background-color: #2b2b2b; color: white\">")
 		fmt.Fprint(w, "Congratulations! Your image upload server is up and running. Head over to the <a style=\"color: #85bf25 \" href=\"https://github.com/Imgur/mandible\">github</a> page for documentation")
@@ -353,9 +402,35 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 	router.HandleFunc("/user/{user_id}/url", authenticatedEndpoint(uploadHandler, extractorUrl))
 	router.HandleFunc("/user/{user_id}/base64", authenticatedEndpoint(uploadHandler, extractorBase64))
 
+	router.HandleFunc("/thumbnail", thumbnailHandler)
+
 	router.HandleFunc("/", rootHandler)
 
 	muxer.Handle("/", router)
+}
+
+func (s *Server) buildThumbResponse(upload *uploadedfile.UploadedFile) (map[string]interface{}, error) {
+	factory := imagestore.NewFactory(s.Config)
+	thumbsResp := map[string]interface{}{}
+
+	for _, t := range upload.GetThumbs() {
+		tObj := factory.NewStoreObject(upload.GetHash(), upload.GetMime(), t.GetName())
+
+		tPath := t.GetPath()
+		tFile, err := os.Open(tPath)
+		if err != nil {
+			return nil, err
+		}
+
+		tObj, err = s.ImageStore.Save(tFile, tObj)
+		if err != nil {
+			return nil, err
+		}
+
+		thumbsResp[t.GetName()] = tObj.Url
+	}
+
+	return thumbsResp, nil
 }
 
 func (s *Server) download(url string) (io.ReadCloser, error) {
@@ -428,4 +503,24 @@ func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
 	}
 
 	return thumbs, nil
+}
+
+func saveToTmp(upload io.Reader) (string, error) {
+	tmpFile, err := ioutil.TempFile(os.TempDir(), "image")
+	if err != nil {
+		fmt.Println(err)
+
+		return "", err
+	}
+
+	defer tmpFile.Close()
+
+	_, err = io.Copy(tmpFile, upload)
+	if err != nil {
+		fmt.Println(err)
+
+		return "", err
+	}
+
+	return tmpFile.Name(), nil
 }

@@ -23,7 +23,7 @@ func NewInMemoryImageStore() *InMemoryImageStore {
 func (this *InMemoryImageStore) Exists(obj *StoreObject) (bool, error) {
 	this.rw.Lock()
 
-	_, ok := this.files[obj.Name]
+	_, ok := this.files[obj.Id]
 
 	this.rw.Unlock()
 
@@ -37,7 +37,7 @@ func (this *InMemoryImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObj
 	}
 
 	this.rw.Lock()
-	this.files[obj.Name] = string(data)
+	this.files[obj.Id] = string(data)
 	this.rw.Unlock()
 
 	return obj, nil
@@ -45,7 +45,7 @@ func (this *InMemoryImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObj
 
 func (this *InMemoryImageStore) Get(obj *StoreObject) (io.Reader, error) {
 	this.rw.Lock()
-	data, ok := this.files[obj.Name]
+	data, ok := this.files[obj.Id]
 	this.rw.Unlock()
 
 	if !ok {

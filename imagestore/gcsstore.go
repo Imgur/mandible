@@ -55,6 +55,16 @@ func (this *GCSImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, 
 	return obj, nil
 }
 
+func (this *GCSImageStore) Get(obj *StoreObject) (io.Reader, error) {
+	reader, err := storage.NewReader(this.ctx, this.bucketName, this.toPath(obj))
+	if err != nil {
+		log.Printf("error on read file: %s", err)
+	    return nil, err
+	}
+
+	return reader, nil
+}
+
 func (this *GCSImageStore) toPath(obj *StoreObject) string {
 	if this.storeRoot != "" {
 		return this.storeRoot + "/" + this.namePathMapper.mapToPath(obj)

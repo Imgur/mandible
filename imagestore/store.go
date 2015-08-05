@@ -7,6 +7,7 @@ import (
 type ImageStore interface {
 	Save(src io.Reader, obj *StoreObject) (*StoreObject, error)
 	Exists(obj *StoreObject) (bool, error)
+    Get(obj *StoreObject) (io.Reader, error)
 }
 
 type ImageStores []ImageStore
