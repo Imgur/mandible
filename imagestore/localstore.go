@@ -47,9 +47,9 @@ func (this *LocalImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject
 }
 
 func (this *LocalImageStore) Get(obj *StoreObject) (io.Reader, error) {
-	reader, err := os.Open(this.toPath(obj)); 
+	reader, err := os.Open(this.toPath(obj))
 	if err != nil {
-	    return nil, err
+		return nil, err
 	}
 
 	return reader, nil
