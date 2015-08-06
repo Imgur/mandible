@@ -309,6 +309,25 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		factory := imagestore.NewFactory(s.Config)
 		tObj := factory.NewStoreObject(imageID, "", "original")
 
+		thumbs, err := parseThumbs(r)
+		if err != nil {
+			resp := ServerResponse{
+				Status: http.StatusBadRequest,
+				Error:  "Error parsing thumbnails!",
+			}
+			resp.Write(w)
+			return
+		}
+
+		if len(thumbs) != 1 {
+			resp := ServerResponse{
+				Status: http.StatusBadRequest,
+				Error:  "Wrong number of thumbnails, expected 1",
+			}
+			resp.Write(w)
+			return
+		}
+
 		storeReader, err := s.ImageStore.Get(tObj)
 		if err != nil {
 			resp := ServerResponse{
@@ -320,16 +339,6 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		}
 
 		storeFile, err := saveToTmp(storeReader)
-		if err != nil {
-			resp := ServerResponse{
-				Status: http.StatusBadRequest,
-				Error:  "Error parsing thumbnails!",
-			}
-			resp.Write(w)
-			return
-		}
-
-		thumbs, err := parseThumbs(r)
 		if err != nil {
 			resp := ServerResponse{
 				Status: http.StatusBadRequest,
@@ -363,25 +372,22 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 			return
 		}
 
-		_, err = s.buildThumbResponse(upload)
+		ts := upload.GetThumbs()
+		t  := ts[0]
+
+		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.GetName())
+		tObj = factory.NewStoreObject(thumbName, upload.GetMime(), "thumbnail")
+		err = tObj.Store(t, s.ImageStore)
 		if err != nil {
-			log.Printf("Error processing %+v: %s", upload, err.Error())
+			log.Printf("Error storing %+v: %s", t, err.Error())
 			resp := ServerResponse{
-				Error:  "Unable to process thumbnail!",
+				Error:  "Unable to store thumbnail!",
 				Status: http.StatusInternalServerError,
 			}
 			resp.Write(w)
 			return
 		}
 
-		// resp := ServerResponse{
-		// 	Data:   thumbsResp,
-		// 	Status: http.StatusOK,
-		// }
-		// resp.Write(w)
-
-		ts := upload.GetThumbs()
-		t  := ts[0]
 		http.ServeFile(w, r, t.GetPath())
 	}
 
@@ -414,19 +420,13 @@ func (s *Server) buildThumbResponse(upload *uploadedfile.UploadedFile) (map[stri
 	thumbsResp := map[string]interface{}{}
 
 	for _, t := range upload.GetThumbs() {
-		tObj := factory.NewStoreObject(upload.GetHash(), upload.GetMime(), t.GetName())
-
-		tPath := t.GetPath()
-		tFile, err := os.Open(tPath)
+		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.GetName())
+		tObj := factory.NewStoreObject(thumbName, upload.GetMime(), "thumbnail")
+		err := tObj.Store(t, s.ImageStore)
 		if err != nil {
 			return nil, err
 		}
-
-		tObj, err = s.ImageStore.Save(tFile, tObj)
-		if err != nil {
-			return nil, err
-		}
-
+		
 		thumbsResp[t.GetName()] = tObj.Url
 	}
 
