@@ -42,7 +42,7 @@ func (this *S3ImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, e
 		return nil, err
 	}
 
-	err = bucket.Put(this.toPath(obj), data, obj.MimeType, s3.PublicReadWrite)
+	err = bucket.Put(this.toPath(obj), data, obj.MimeType, s3.BucketOwnerFull)
 	if err != nil {
 		return nil, err
 	}
