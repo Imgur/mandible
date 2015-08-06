@@ -133,7 +133,7 @@ func Thumb(filename, name string, width, height int, format thumbType.ThumbType)
 func CircleThumb(filename, name string, width int, format thumbType.ThumbType) (string, error) {
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
-	filename, err := Thumb(filename, name, width*2, width*2, format)
+	filename, err := SquareThumb(filename, name, width*2, format)
 	if err != nil {
 		return "", err
 	}
@@ -150,7 +150,7 @@ func CircleThumb(filename, name string, width int, format thumbType.ThumbType) (
 		"72x72",
 		"-draw",
 		fmt.Sprintf("circle %d,%d %d,1", width/2, width/2, width/2),
-		fmt.Sprintf("%s:%s", format.ToString(), outfile),
+		fmt.Sprintf("PNG:%s", outfile),
 	}
 
 	err = runProcessorCommand(GM_COMMAND, args)
