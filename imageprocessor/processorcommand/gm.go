@@ -133,7 +133,7 @@ func Thumb(filename, name string, width, height int, format thumbType.ThumbType)
 func CircleThumb(filename, name string, width int, format thumbType.ThumbType) (string, error) {
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
-	filename, err := SquareThumb(filename, name, width*2, format)
+	filename, err := SquareThumb(filename, name, width, format)
 	if err != nil {
 		return "", err
 	}
