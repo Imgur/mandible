@@ -99,6 +99,10 @@ func (this *UploadedFile) SetMime(mime string) {
 	this.mime = mime
 }
 
+func (this *UploadedFile) SetThumbs(thumbs []*ThumbFile) {
+	this.thumbs = thumbs
+}
+
 func (this *UploadedFile) GetThumbs() []*ThumbFile {
 	return this.thumbs
 }
@@ -123,7 +127,7 @@ func (this *UploadedFile) Clean() {
 	os.Remove(this.path)
 
 	for _, thumb := range this.thumbs {
-		os.Remove(thumb.path)
+		os.Remove(thumb.GetPath())
 	}
 }
 
