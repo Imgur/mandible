@@ -478,9 +478,9 @@ func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
 
 	var thumbs []*uploadedfile.ThumbFile
 	for name, thumb := range t {
-		width, wOk     := thumb["width"].(float64)
+		width, wOk := thumb["width"].(float64)
 		maxWidth, mwOk := thumb["max_width"].(float64)
-		height, hOk     := thumb["height"].(float64)
+		height, hOk := thumb["height"].(float64)
 		maxHeight, mhOk := thumb["max_height"].(float64)
 		if !wOk && !mwOk && !hOk && !mhOk {
 			return nil, errors.New("One of [width, max_width, height, max_height] must be set")
@@ -500,11 +500,11 @@ func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
 			return nil, errors.New("Invalid thumbnail shape!")
 		}
 
-		cropGravity, _  := thumb["crop_gravity"].(string)
-		cropHeight, _   := thumb["crop_height"].(float64)
-		cropWidth, _    := thumb["crop_width"].(float64)
-		quality, _      := thumb["quality"].(float64)
-		cropRatio, _    := thumb["crop_ratio"].(string)
+		cropGravity, _ := thumb["crop_gravity"].(string)
+		cropHeight, _ := thumb["crop_height"].(float64)
+		cropWidth, _ := thumb["crop_width"].(float64)
+		quality, _ := thumb["quality"].(float64)
+		cropRatio, _ := thumb["crop_ratio"].(string)
 
 		thumbs = append(thumbs, uploadedfile.NewThumbFile(int(width), int(maxWidth), int(height), int(maxHeight), name, shape, "", cropGravity, int(cropWidth), int(cropHeight), cropRatio, int(quality)))
 	}

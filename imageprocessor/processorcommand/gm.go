@@ -2,7 +2,6 @@ package processorcommand
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/Imgur/mandible/imageprocessor/thumbType"
 )
@@ -187,7 +186,6 @@ func CustomThumb(filename, name string, width, height int, cropGravity string, c
 	}
 
 	args = append(args, fmt.Sprintf("%s:%s", format.ToString(), outfile))
-fmt.Println(strings.Join(args, " "))
 	err := runProcessorCommand(GM_COMMAND, args)
 	if err != nil {
 		return "", err

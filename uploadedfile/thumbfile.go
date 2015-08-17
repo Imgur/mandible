@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strconv"
 
-
 	"github.com/Imgur/mandible/imageprocessor/processorcommand"
 	"github.com/Imgur/mandible/imageprocessor/thumbType"
 )
@@ -31,14 +30,13 @@ type ThumbFile struct {
 	quality     int
 	format      string
 	localPath   string
-	storeURI    string 
+	storeURI    string
 }
 
 func NewThumbFile(width, maxWidth, height, maxHeight int, name, shape, path, cropGravity string, cropWidth, cropHeight int, cropRatio string, quality int) *ThumbFile {
 	if quality == 0 {
 		quality = defaultQuality
 	}
-
 
 	return &ThumbFile{
 		name,
@@ -168,7 +166,7 @@ func (this *ThumbFile) ComputeWidth(original *UploadedFile) int {
 		return 0
 	}
 
-	if(this.GetMaxWidth() > 0) {
+	if this.GetMaxWidth() > 0 {
 		width = int(math.Min(float64(oWidth), float64(this.GetMaxWidth())))
 	}
 
@@ -183,7 +181,7 @@ func (this *ThumbFile) ComputeHeight(original *UploadedFile) int {
 		return 0
 	}
 
-	if(this.GetMaxHeight() > 0) {
+	if this.GetMaxHeight() > 0 {
 		height = int(math.Min(float64(oHeight), float64(this.GetMaxHeight())))
 	}
 
@@ -199,7 +197,7 @@ func (this *ThumbFile) ComputeCrop(original *UploadedFile) (int, int, error) {
 
 	wRatio, werr := strconv.ParseFloat(matches[1], 64)
 	hRatio, herr := strconv.ParseFloat(matches[2], 64)
-	if(werr != nil || herr != nil) {
+	if werr != nil || herr != nil {
 		return 0, 0, errors.New("Invalid crop_ratio")
 	}
 
@@ -281,12 +279,12 @@ func (this *ThumbFile) processThumb(original *UploadedFile) error {
 
 func (this *ThumbFile) processCustom(original *UploadedFile) error {
 	cropWidth := this.GetCropWidth()
-	cropHeight := this.GetCropHeight()	
+	cropHeight := this.GetCropHeight()
 	var err error
 
-	if(this.GetCropRatio() != "") {
+	if this.GetCropRatio() != "" {
 		cropWidth, cropHeight, err = this.ComputeCrop(original)
-		if(err != nil) {
+		if err != nil {
 			return err
 		}
 	}
