@@ -347,6 +347,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 			resp.Write(w)
 			return
 		}
+		defer os.Remove(storeFile)
 
 		upload, err := uploadedfile.NewUploadedFile("", storeFile, thumbs)
 		if err != nil {
@@ -359,6 +360,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 			return
 		}
 		upload.SetHash(imageID)
+		defer upload.Clean()
 
 		processor, _ := imageprocessor.ThumbnailStrategy(s.Config, upload)
 		err = processor.Run(upload)
