@@ -154,7 +154,7 @@ func (this *MemeOCR) Run(image string) (*OCRResult, error) {
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Meme tesseract command failed with error = %v", err))
 	}
-	defer os.Remove(outText)
+	defer os.Remove(outText + ".txt")
 
 	text, err := ioutil.ReadFile(outText + ".txt")
 	if err != nil {
@@ -193,7 +193,7 @@ func (this *StandardOCR) Run(image string) (*OCRResult, error) {
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Standard tesseract command failed with error = %v", err))
 	}
-	defer os.Remove(outText)
+	defer os.Remove(outText + ".txt")
 
 	text, err := ioutil.ReadFile(outText + ".txt")
 	if err != nil {
