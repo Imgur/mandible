@@ -337,6 +337,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 			resp.Write(w)
 			return
 		}
+		defer storeReader.Close()
 
 		storeFile, err := saveToTmp(storeReader)
 		if err != nil {

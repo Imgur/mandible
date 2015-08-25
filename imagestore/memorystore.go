@@ -43,7 +43,7 @@ func (this *InMemoryImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObj
 	return obj, nil
 }
 
-func (this *InMemoryImageStore) Get(obj *StoreObject) (io.Reader, error) {
+func (this *InMemoryImageStore) Get(obj *StoreObject) (io.ReadCloser, error) {
 	this.rw.Lock()
 	data, ok := this.files[obj.Id]
 	this.rw.Unlock()
@@ -52,5 +52,7 @@ func (this *InMemoryImageStore) Get(obj *StoreObject) (io.Reader, error) {
 		return nil, errors.New("File doesn't exist")
 	}
 
-	return strings.NewReader(data), nil
+	reader := strings.NewReader(data)
+	readCloser := ioutil.NopCloser(reader)
+	return readCloser, nil
 }

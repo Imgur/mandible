@@ -55,7 +55,7 @@ func (this *GCSImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, 
 	return obj, nil
 }
 
-func (this *GCSImageStore) Get(obj *StoreObject) (io.Reader, error) {
+func (this *GCSImageStore) Get(obj *StoreObject) (io.ReadCloser, error) {
 	reader, err := storage.NewReader(this.ctx, this.bucketName, this.toPath(obj))
 	if err != nil {
 		log.Printf("error on read file: %s", err)
