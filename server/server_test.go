@@ -137,7 +137,7 @@ func TestPostingBase64FilePutsTheFileInStorageAndReturnsJSON(t *testing.T) {
 	}
 
 	immStore := server.ImageStore.(*imagestore.InMemoryImageStore)
-	exists, err := immStore.Exists(&imagestore.StoreObject{Name: imageResp.Hash})
+	exists, err := immStore.Exists(&imagestore.StoreObject{Id: imageResp.Hash})
 	if err != nil {
 		t.Fatalf("Unexpected error checking if %s exists in in-memory image store: %s", imageResp.Hash, err.Error())
 	}
@@ -146,7 +146,7 @@ func TestPostingBase64FilePutsTheFileInStorageAndReturnsJSON(t *testing.T) {
 		t.Fatalf("Expected to find %s in the in-memory storage, instead absent. Dump: %+v", imageResp.Hash, immStore)
 	}
 
-	storedBodyReader, err := immStore.Get(&imagestore.StoreObject{Name: imageResp.Hash})
+	storedBodyReader, err := immStore.Get(&imagestore.StoreObject{Id: imageResp.Hash})
 	if err != nil {
 		t.Fatalf("Unexpected error fetching %s from in-memory image store: %s", imageResp.Hash, err.Error())
 	}

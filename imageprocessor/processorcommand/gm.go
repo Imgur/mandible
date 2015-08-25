@@ -133,7 +133,7 @@ func Thumb(filename, name string, width, height int, format thumbType.ThumbType)
 func CircleThumb(filename, name string, width int, format thumbType.ThumbType) (string, error) {
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
-	filename, err := Thumb(filename, name, width*2, width*2, format)
+	filename, err := SquareThumb(filename, name, width, format)
 	if err != nil {
 		return "", err
 	}
@@ -150,10 +150,43 @@ func CircleThumb(filename, name string, width int, format thumbType.ThumbType) (
 		"72x72",
 		"-draw",
 		fmt.Sprintf("circle %d,%d %d,1", width/2, width/2, width/2),
-		fmt.Sprintf("%s:%s", format.ToString(), outfile),
+		fmt.Sprintf("PNG:%s", outfile),
 	}
 
 	err = runProcessorCommand(GM_COMMAND, args)
+	if err != nil {
+		return "", err
+	}
+
+	return outfile, nil
+}
+
+func CustomThumb(filename, name string, width, height int, cropGravity string, cropWidth, cropHeight, quality int, format thumbType.ThumbType) (string, error) {
+	outfile := fmt.Sprintf("%s_%s", filename, name)
+
+	args := []string{
+		fmt.Sprintf("%s[0]", filename),
+		"-quality",
+		fmt.Sprintf("%d", quality),
+		"-resize",
+		fmt.Sprintf("%dx%d^", width, height),
+		"-density",
+		"72x72",
+		"-unsharp",
+		"0.5",
+	}
+
+	if cropGravity != "" {
+		args = append(args,
+			"-gravity",
+			fmt.Sprintf("%s", cropGravity),
+			"-crop",
+			fmt.Sprintf("%dx%d+0+0", cropWidth, cropHeight),
+		)
+	}
+
+	args = append(args, fmt.Sprintf("%s:%s", format.ToString(), outfile))
+	err := runProcessorCommand(GM_COMMAND, args)
 	if err != nil {
 		return "", err
 	}

@@ -139,7 +139,7 @@ func NewMemeOCR() *MemeOCR {
 }
 
 func (this *MemeOCR) Run(image string) (*OCRResult, error) {
-	imageTif := fmt.Sprintf("%s_meme.tif", image)
+	imageTif := fmt.Sprintf("%s_meme.jpg", image)
 	outText := fmt.Sprintf("%s_meme", image)
 	preprocessingArgs := []string{image, "-resize", "400%", "-fill", "black", "-fuzz", "10%", "+opaque", "#FFFFFF", imageTif}
 	tesseractArgs := []string{"-l", "meme", imageTif, outText}
@@ -177,7 +177,7 @@ func NewStandardOCR() *StandardOCR {
 }
 
 func (this *StandardOCR) Run(image string) (*OCRResult, error) {
-	imageTif := fmt.Sprintf("%s_standard.tif", image)
+	imageTif := fmt.Sprintf("%s_standard.jpg", image)
 	outText := fmt.Sprintf("%s_standard", image)
 
 	preprocessingArgs := []string{image, "-resize", "400%", "-type", "Grayscale", imageTif}

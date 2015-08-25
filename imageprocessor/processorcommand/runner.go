@@ -24,7 +24,7 @@ func runProcessorCommand(command string, args []string) error {
 	}()
 
 	select {
-	case <-time.After(time.Duration(500000) * time.Millisecond):
+	case <-time.After(time.Duration(60) * time.Second):
 		killCmd(cmd)
 		<-cmdDone
 		return errors.New("Command timed out")

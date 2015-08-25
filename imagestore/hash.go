@@ -62,7 +62,7 @@ func (this *HashGenerator) init() {
 
 			}
 
-			storeObj.Name = str
+			storeObj.Id = str
 
 			exists, _ := this.store.Exists(storeObj)
 			if !exists {

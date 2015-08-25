@@ -41,13 +41,23 @@ func (this *S3ImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, e
 		return nil, err
 	}
 
-	err = bucket.Put(this.toPath(obj), data, obj.MimeType, s3.PublicReadWrite)
+	err = bucket.Put(this.toPath(obj), data, obj.MimeType, s3.BucketOwnerFull)
 	if err != nil {
 		return nil, err
 	}
 
 	obj.Url = bucket.URL(this.toPath(obj))
 	return obj, nil
+}
+
+func (this *S3ImageStore) Get(obj *StoreObject) (io.ReadCloser, error) {
+	bucket := this.client.Bucket(this.bucketName)
+	data, err := bucket.GetReader(this.toPath(obj))
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 func (this *S3ImageStore) toPath(obj *StoreObject) string {

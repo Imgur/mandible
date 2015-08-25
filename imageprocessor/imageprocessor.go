@@ -85,6 +85,15 @@ var PassthroughStrategy = func(cfg *config.Configuration, file *uploadedfile.Upl
 	return &ImageProcessor{multiProcessType{}}, nil
 }
 
+var ThumbnailStrategy = func(cfg *config.Configuration, file *uploadedfile.UploadedFile) (*ImageProcessor, error) {
+	processor := asyncProcessType{}
+	for _, t := range file.GetThumbs() {
+		processor = append(processor, t)
+	}
+
+	return &ImageProcessor{processor}, nil
+}
+
 var EverythingStrategy = func(cfg *config.Configuration, file *uploadedfile.UploadedFile) (*ImageProcessor, error) {
 	size, err := file.FileSize()
 	if err != nil {
