@@ -3,7 +3,6 @@ package imagestore
 import (
 	"io/ioutil"
 	"log"
-	"os"
 
 	"github.com/Imgur/mandible/config"
 	"github.com/mitchellh/goamz/aws"
@@ -49,12 +48,9 @@ func (this *Factory) NewImageStores() []ImageStore {
 }
 
 func (this *Factory) NewS3ImageStore(conf map[string]string) ImageStore {
-	bucket := os.Getenv("S3_BUCKET")
-	if len(bucket) == 0 {
-		bucket = conf["BucketName"]
-	}
+	bucket := conf["BucketName"]
 
-	auth, err := aws.EnvAuth()
+	auth, err := aws.GetAuth(conf["AWSKey"], conf["AWSSecret"])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,10 +79,7 @@ func (this *Factory) NewGCSImageStore(conf map[string]string) ImageStore {
 		log.Fatal(err)
 	}
 
-	bucket := os.Getenv("GCS_BUCKET")
-	if len(bucket) == 0 {
-		bucket = conf["BucketName"]
-	}
+	bucket := conf["BucketName"]
 
 	ctx := gcloud.NewContext(conf["AppID"], cloudConf.Client(oauth2.NoContext))
 	mapper := NewNamePathMapper(conf["NamePathRegex"], conf["NamePathMap"])

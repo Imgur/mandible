@@ -28,10 +28,7 @@ func main() {
 	muxer := http.NewServeMux()
 	server.Configure(muxer)
 
-	port := ":" + os.Getenv("PORT")
-	if port == ":" {
-		port = fmt.Sprintf(":%d", server.Config.Port)
-	}
+	port := fmt.Sprintf(":%d", server.Config.Port)
 
 	log.Printf("Listening on Port: %s", port)
 

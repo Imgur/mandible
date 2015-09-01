@@ -25,17 +25,46 @@ Processing Steps:
 
 ## Installation
 
+### Docker
+
+Pull down the mandible config file and edit it: 
+
+`wget https://raw.githubusercontent.com/Imgur/mandible/master/config/default.conf.json -O ~/mandible/conf.json`
+`vim ~/mandible/config.json`
+
+To start mandible (port settings could change based on your conf.json):
+
+`docker run --name mandible -v ~/mandible:/etc/mandible -d -p 80:8080 imgur/mandible`
+
+To stop mandible:
+
+`docker stop mandible`
+
+To run it again:
+
+`docker run mandible`
+
 ### (Optional) Authentication
 
 - Set the following environment variable
     - AUTHENTICATION_HMAC_KEY
 
 ### S3 Storage Layer
+Add the following to the `Stores` array in your conf.json file:
 
-- Set the following environment variables
-    - AWS_ACCESS_KEY_ID
-    - AWS_SECRET_ACCESS_KEY
-    - S3_BUCKET
+```
+    {
+        "Type" : "s3",
+        "BucketName" : "",
+        "AWSKey": "",
+        "AWSSecret": "",
+        "StoreRoot" : "",
+        "Region" : "us-east-1",
+        "NamePathRegex" : "",
+        "NamePathMap" : "${ImageSize}/${ImageName}"
+    }
+```
+
 
 ## REST API:
 

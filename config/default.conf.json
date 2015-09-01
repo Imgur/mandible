@@ -7,6 +7,8 @@
         {
             "Type" : "s3",
             "BucketName" : "",
+            "AWSKey": "",
+            "AWSSecret": "",
             "StoreRoot" : "",
             "Region" : "us-east-1",
             "NamePathRegex" : "",
