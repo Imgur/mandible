@@ -1,4 +1,4 @@
-FROM golang:1.4
+FROM golang:1.5
 RUN apt-get update && apt-get install -yqq aspell aspell-en libaspell-dev tesseract-ocr tesseract-ocr-eng imagemagick optipng exiftool libjpeg-progs
 ADD docker/meme.traineddata /usr/share/tesseract-ocr/tessdata/meme.traineddata
 RUN mkdir -p /etc/mandible /tmp/imagestore
