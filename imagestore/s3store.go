@@ -60,6 +60,10 @@ func (this *S3ImageStore) Get(obj *StoreObject) (io.ReadCloser, error) {
 	return data, nil
 }
 
+func (this *S3ImageStore) String() string {
+	return "S3Store"
+}
+
 func (this *S3ImageStore) toPath(obj *StoreObject) string {
 	return this.storeRoot + "/" + this.namePathMapper.mapToPath(obj)
 }

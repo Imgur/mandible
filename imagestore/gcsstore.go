@@ -65,6 +65,10 @@ func (this *GCSImageStore) Get(obj *StoreObject) (io.ReadCloser, error) {
 	return reader, nil
 }
 
+func (this *GCSImageStore) String() string {
+	return "GCSStore"
+}
+
 func (this *GCSImageStore) toPath(obj *StoreObject) string {
 	if this.storeRoot != "" {
 		return this.storeRoot + "/" + this.namePathMapper.mapToPath(obj)

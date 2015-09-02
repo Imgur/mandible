@@ -19,6 +19,7 @@ func (this *StoreObject) Store(s StorableObject, store ImageStore) error {
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
 	obj, err := store.Save(file, this)
 	if err != nil {

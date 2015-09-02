@@ -77,21 +77,19 @@ func NewServer(c *config.Configuration, strategy imageprocessor.ImageProcessorSt
 	factory := imagestore.NewFactory(c)
 	httpclient := &http.Client{}
 	stores := factory.NewImageStores()
-	store := stores[0]
 
-	hashGenerator := factory.NewHashGenerator(store)
+	hashGenerator := factory.NewHashGenerator(stores)
 	authenticator := &PassthroughAuthenticator{}
-	return &Server{c, httpclient, store, hashGenerator, strategy, authenticator}
+	return &Server{c, httpclient, stores, hashGenerator, strategy, authenticator}
 }
 
 func NewAuthenticatedServer(c *config.Configuration, strategy imageprocessor.ImageProcessorStrategy, auth Authenticator) *Server {
 	factory := imagestore.NewFactory(c)
 	httpclient := &http.Client{}
 	stores := factory.NewImageStores()
-	store := stores[0]
 
-	hashGenerator := factory.NewHashGenerator(store)
-	return &Server{c, httpclient, store, hashGenerator, strategy, auth}
+	hashGenerator := factory.NewHashGenerator(stores)
+	return &Server{c, httpclient, stores, hashGenerator, strategy, auth}
 }
 
 func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*uploadedfile.ThumbFile, user *AuthenticatedUser) ServerResponse {

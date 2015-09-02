@@ -56,3 +56,7 @@ func (this *InMemoryImageStore) Get(obj *StoreObject) (io.ReadCloser, error) {
 	readCloser := ioutil.NopCloser(reader)
 	return readCloser, nil
 }
+
+func (this *InMemoryImageStore) String() string {
+	return "InMemoryStore"
+}

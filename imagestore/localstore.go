@@ -1,6 +1,7 @@
 package imagestore
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -37,11 +38,14 @@ func (this *LocalImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject
 
 	defer fo.Close()
 
-	_, err = io.Copy(fo, src)
+	fmt.Println("Saving File " + this.toPath(obj))
+	size, err := io.Copy(fo, src)
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil, err
 	}
 
+	fmt.Println("Saved File " + this.toPath(obj) + " of size " + string(size))
 	obj.Url = this.toPath(obj)
 	return obj, nil
 }
@@ -53,6 +57,10 @@ func (this *LocalImageStore) Get(obj *StoreObject) (io.ReadCloser, error) {
 	}
 
 	return reader, nil
+}
+
+func (this *LocalImageStore) String() string {
+	return "LocalStore"
 }
 
 func (this *LocalImageStore) createParent(obj *StoreObject) {

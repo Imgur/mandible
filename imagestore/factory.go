@@ -22,8 +22,8 @@ func NewFactory(conf *config.Configuration) *Factory {
 	return &Factory{conf}
 }
 
-func (this *Factory) NewImageStores() []ImageStore {
-	stores := []ImageStore{}
+func (this *Factory) NewImageStores() ImageStore {
+	stores := MultiImageStore{}
 
 	for _, configWrapper := range this.conf.Stores {
 		switch configWrapper["Type"] {
