@@ -135,17 +135,7 @@ func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*upl
 	obj := factory.NewStoreObject(upload.GetHash(), upload.GetMime(), "original")
 
 	uploadFilepath := upload.GetPath()
-	uploadFileFd, err := os.Open(uploadFilepath)
-
-	if err != nil {
-		log.Printf("Error opening processed output %+v at %s: %s", upload, uploadFilepath, err.Error())
-		return ServerResponse{
-			Error:  "Unable to save image!",
-			Status: http.StatusInternalServerError,
-		}
-	}
-
-	obj, err = s.ImageStore.Save(uploadFileFd, obj)
+	obj, err = s.ImageStore.Save(uploadFilepath, obj)
 	if err != nil {
 		log.Printf("Error saving processed output to store: %s", err.Error())
 		return ServerResponse{

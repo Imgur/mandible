@@ -1,7 +1,6 @@
 package imagestore
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path"
@@ -28,7 +27,13 @@ func (this *LocalImageStore) Exists(obj *StoreObject) (bool, error) {
 	return true, nil
 }
 
-func (this *LocalImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, error) {
+func (this *LocalImageStore) Save(src string, obj *StoreObject) (*StoreObject, error) {
+	srcFd, err := os.Open(src)
+	if err != nil {
+		return nil, err
+	}
+	defer srcFd.Close()
+
 	// open output file
 	this.createParent(obj)
 	fo, err := os.Create(this.toPath(obj))
@@ -38,14 +43,11 @@ func (this *LocalImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject
 
 	defer fo.Close()
 
-	fmt.Println("Saving File " + this.toPath(obj))
-	size, err := io.Copy(fo, src)
+	_, err = io.Copy(fo, srcFd)
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, err
 	}
 
-	fmt.Println("Saved File " + this.toPath(obj) + " of size " + string(size))
 	obj.Url = this.toPath(obj)
 	return obj, nil
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type ImageStore interface {
-	Save(src io.Reader, obj *StoreObject) (*StoreObject, error)
+	Save(src string, obj *StoreObject) (*StoreObject, error)
 	Exists(obj *StoreObject) (bool, error)
 	Get(obj *StoreObject) (io.ReadCloser, error)
 	String() string
@@ -14,7 +14,7 @@ type ImageStore interface {
 
 type MultiImageStore []ImageStore
 
-func (this MultiImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, error) {
+func (this MultiImageStore) Save(src string, obj *StoreObject) (*StoreObject, error) {
 	errs := make(chan error, len(this))
 
 	for _, store := range this {

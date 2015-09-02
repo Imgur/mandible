@@ -4,6 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"golang.org/x/net/context"
 	"google.golang.org/cloud/storage"
@@ -33,8 +34,14 @@ func (this *GCSImageStore) Exists(obj *StoreObject) (bool, error) {
 	return true, nil
 }
 
-func (this *GCSImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, error) {
-	data, err := ioutil.ReadAll(src)
+func (this *GCSImageStore) Save(src string, obj *StoreObject) (*StoreObject, error) {
+	srcFd, err := os.Open(src)
+	if err != nil {
+		return nil, err
+	}
+	defer srcFd.Close()
+
+	data, err := ioutil.ReadAll(srcFd)
 	if err != nil {
 		log.Printf("error on read file: %s", err)
 		return nil, err
