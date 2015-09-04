@@ -29,21 +29,30 @@ Processing Steps:
 
 Pull down the mandible config file and edit it: 
 
-`wget https://raw.githubusercontent.com/Imgur/mandible/master/config/default.conf.json -O ~/mandible/conf.json`
-`vim ~/mandible/config.json`
+```
+wget https://raw.githubusercontent.com/Imgur/mandible/master/config/default.conf.json -O ~/mandible/conf.json
+```
+```
+vim ~/mandible/config.json
+```
 
 To start mandible (port settings could change based on your conf.json):
 
-`docker run --name mandible -v ~/mandible:/etc/mandible -d -p 80:8080 imgur/mandible`
+```
+docker run --name mandible -v ~/mandible:/etc/mandible -d -p 80:8080 imgur/mandible
+```
 
 To stop mandible:
 
-`docker stop mandible`
+```
+docker stop mandible
+```
 
 To run it again:
 
-`docker run mandible`
-
+```
+docker run mandible
+```
 ### (Optional) Authentication
 
 - Set the following environment variable
