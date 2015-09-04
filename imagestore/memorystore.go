@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"os"
 	"strings"
 	"sync"
 )
@@ -30,8 +31,14 @@ func (this *InMemoryImageStore) Exists(obj *StoreObject) (bool, error) {
 	return ok, nil
 }
 
-func (this *InMemoryImageStore) Save(src io.Reader, obj *StoreObject) (*StoreObject, error) {
-	data, err := ioutil.ReadAll(src)
+func (this *InMemoryImageStore) Save(src string, obj *StoreObject) (*StoreObject, error) {
+	srcFd, err := os.Open(src)
+	if err != nil {
+		return nil, err
+	}
+	defer srcFd.Close()
+
+	data, err := ioutil.ReadAll(srcFd)
 	if err != nil {
 		return nil, err
 	}
@@ -55,4 +62,8 @@ func (this *InMemoryImageStore) Get(obj *StoreObject) (io.ReadCloser, error) {
 	reader := strings.NewReader(data)
 	readCloser := ioutil.NopCloser(reader)
 	return readCloser, nil
+}
+
+func (this *InMemoryImageStore) String() string {
+	return "InMemoryStore"
 }

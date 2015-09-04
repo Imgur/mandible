@@ -136,7 +136,7 @@ func TestPostingBase64FilePutsTheFileInStorageAndReturnsJSON(t *testing.T) {
 		t.Fatalf("Expected image MIME type to be image/gif, instead %s", imageResp.Mime)
 	}
 
-	immStore := server.ImageStore.(*imagestore.InMemoryImageStore)
+	immStore := server.ImageStore
 	exists, err := immStore.Exists(&imagestore.StoreObject{Id: imageResp.Hash})
 	if err != nil {
 		t.Fatalf("Unexpected error checking if %s exists in in-memory image store: %s", imageResp.Hash, err.Error())

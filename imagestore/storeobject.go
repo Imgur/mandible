@@ -1,7 +1,5 @@
 package imagestore
 
-import "os"
-
 type StorableObject interface {
 	GetPath() string
 }
@@ -15,12 +13,8 @@ type StoreObject struct {
 
 func (this *StoreObject) Store(s StorableObject, store ImageStore) error {
 	path := s.GetPath()
-	file, err := os.Open(path)
-	if err != nil {
-		return err
-	}
 
-	obj, err := store.Save(file, this)
+	obj, err := store.Save(path, this)
 	if err != nil {
 		return err
 	}

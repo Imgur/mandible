@@ -22,28 +22,34 @@ func NewFactory(conf *config.Configuration) *Factory {
 	return &Factory{conf}
 }
 
-func (this *Factory) NewImageStores() []ImageStore {
-	stores := []ImageStore{}
+func (this *Factory) NewImageStores() ImageStore {
+	stores := MultiImageStore{}
+	var store ImageStore
 
 	for _, configWrapper := range this.conf.Stores {
 		switch configWrapper["Type"] {
 		case "s3":
-			store := this.NewS3ImageStore(configWrapper)
+			store = this.NewS3ImageStore(configWrapper)
 			stores = append(stores, store)
 		case "gcs":
-			store := this.NewGCSImageStore(configWrapper)
+			store = this.NewGCSImageStore(configWrapper)
 			stores = append(stores, store)
 		case "local":
-			store := this.NewLocalImageStore(configWrapper)
+			store = this.NewLocalImageStore(configWrapper)
 			stores = append(stores, store)
 		case "memory":
-			store := NewInMemoryImageStore()
+			store = NewInMemoryImageStore()
 			stores = append(stores, store)
 		default:
 			log.Fatalf("Unsupported store %s", configWrapper["Type"])
 		}
 	}
 
+	if len(this.conf.Stores) == 1 {
+		return store
+	}
+
+	// return a MultiImageStore type if more then 1 store was specified in the config
 	return stores
 }
 
