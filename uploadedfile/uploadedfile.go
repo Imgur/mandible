@@ -127,7 +127,7 @@ func (this *UploadedFile) Clean() {
 	os.Remove(this.path)
 
 	for _, thumb := range this.thumbs {
-		os.Remove(thumb.GetPath())
+		os.Remove(thumb.LocalPath)
 	}
 }
 

@@ -367,7 +367,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		ts := upload.GetThumbs()
 		t := ts[0]
 
-		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.GetName())
+		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.Name)
 		tObj = factory.NewStoreObject(thumbName, upload.GetMime(), "thumbnail")
 		err = tObj.Store(t, s.ImageStore)
 		if err != nil {
@@ -412,14 +412,14 @@ func (s *Server) buildThumbResponse(upload *uploadedfile.UploadedFile) (map[stri
 	thumbsResp := map[string]interface{}{}
 
 	for _, t := range upload.GetThumbs() {
-		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.GetName())
+		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.Name)
 		tObj := factory.NewStoreObject(thumbName, upload.GetMime(), "thumbnail")
 		err := tObj.Store(t, s.ImageStore)
 		if err != nil {
 			return nil, err
 		}
 
-		thumbsResp[t.GetName()] = tObj.Url
+		thumbsResp[t.Name] = tObj.Url
 	}
 
 	return thumbsResp, nil
