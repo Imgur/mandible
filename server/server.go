@@ -495,8 +495,9 @@ func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
 		cropWidth, _ := thumb["crop_width"].(float64)
 		quality, _ := thumb["quality"].(float64)
 		cropRatio, _ := thumb["crop_ratio"].(string)
+		desiredFormat, _ := thumb["format"].(string)
 
-		thumbs = append(thumbs, uploadedfile.NewThumbFile(int(width), int(maxWidth), int(height), int(maxHeight), name, shape, "", cropGravity, int(cropWidth), int(cropHeight), cropRatio, int(quality)))
+		thumbs = append(thumbs, uploadedfile.NewThumbFile(int(width), int(maxWidth), int(height), int(maxHeight), name, shape, "", cropGravity, int(cropWidth), int(cropHeight), cropRatio, int(quality), desiredFormat))
 	}
 
 	return thumbs, nil

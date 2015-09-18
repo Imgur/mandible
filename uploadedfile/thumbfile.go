@@ -17,42 +17,44 @@ var (
 )
 
 type ThumbFile struct {
-	Name        string
-	Width       int
-	MaxWidth    int
-	Height      int
-	MaxHeight   int
-	Shape       string
-	CropGravity string
-	CropWidth   int
-	CropHeight  int
-	CropRatio   string
-	Quality     int
-	Format      string
-	LocalPath   string
-	StoreURI    string
+	Name          string
+	Width         int
+	MaxWidth      int
+	Height        int
+	MaxHeight     int
+	Shape         string
+	CropGravity   string
+	CropWidth     int
+	CropHeight    int
+	CropRatio     string
+	Quality       int
+	Format        string
+	LocalPath     string
+	StoreURI      string
+	DesiredFormat string
 }
 
-func NewThumbFile(width, maxWidth, height, maxHeight int, name, shape, path, cropGravity string, cropWidth, cropHeight int, cropRatio string, quality int) *ThumbFile {
+func NewThumbFile(width, maxWidth, height, maxHeight int, name, shape, path, cropGravity string, cropWidth, cropHeight int, cropRatio string, quality int, desiredFormat string) *ThumbFile {
 	if quality == 0 {
 		quality = defaultQuality
 	}
 
 	return &ThumbFile{
-		Name:        name,
-		Width:       width,
-		MaxWidth:    maxWidth,
-		Height:      height,
-		MaxHeight:   maxHeight,
-		Shape:       shape,
-		CropGravity: cropGravity,
-		CropWidth:   cropWidth,
-		CropHeight:  cropHeight,
-		CropRatio:   cropRatio,
-		Quality:     quality,
-		Format:      "",
-		LocalPath:   path,
-		StoreURI:    "",
+		Name:          name,
+		Width:         width,
+		MaxWidth:      maxWidth,
+		Height:        height,
+		MaxHeight:     maxHeight,
+		Shape:         shape,
+		CropGravity:   cropGravity,
+		CropWidth:     cropWidth,
+		CropHeight:    cropHeight,
+		CropRatio:     cropRatio,
+		Quality:       quality,
+		Format:        "",
+		LocalPath:     path,
+		StoreURI:      "",
+		DesiredFormat: desiredFormat,
 	}
 }
 
@@ -68,6 +70,14 @@ func (this *ThumbFile) SetPath(path string) error {
 
 func (this *ThumbFile) GetPath() string {
 	return this.LocalPath
+}
+
+func (this *ThumbFile) GetOutputFormat(original *UploadedFile) thumbType.ThumbType {
+	if this.DesiredFormat != "" {
+		return thumbType.FromString(this.DesiredFormat)
+	}
+
+	return thumbType.FromMime(original.GetMime())
 }
 
 func (this *ThumbFile) ComputeWidth(original *UploadedFile) int {
@@ -151,7 +161,7 @@ func (this *ThumbFile) String() string {
 }
 
 func (this *ThumbFile) processSquare(original *UploadedFile) error {
-	filename, err := processorcommand.SquareThumb(original.GetPath(), this.Name, this.Width, thumbType.FromMime(original.GetMime()))
+	filename, err := processorcommand.SquareThumb(original.GetPath(), this.Name, this.Width, this.GetOutputFormat(original))
 	if err != nil {
 		return err
 	}
@@ -164,7 +174,7 @@ func (this *ThumbFile) processSquare(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processCircle(original *UploadedFile) error {
-	filename, err := processorcommand.CircleThumb(original.GetPath(), this.Name, this.Width, thumbType.FromMime(original.GetMime()))
+	filename, err := processorcommand.CircleThumb(original.GetPath(), this.Name, this.Width, this.GetOutputFormat(original))
 	if err != nil {
 		return err
 	}
@@ -177,7 +187,7 @@ func (this *ThumbFile) processCircle(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processThumb(original *UploadedFile) error {
-	filename, err := processorcommand.Thumb(original.GetPath(), this.Name, this.Width, this.Height, thumbType.FromMime(original.GetMime()))
+	filename, err := processorcommand.Thumb(original.GetPath(), this.Name, this.Width, this.Height, this.GetOutputFormat(original))
 	if err != nil {
 		return err
 	}
@@ -201,7 +211,7 @@ func (this *ThumbFile) processCustom(original *UploadedFile) error {
 		}
 	}
 
-	filename, err := processorcommand.CustomThumb(original.GetPath(), this.Name, this.ComputeWidth(original), this.ComputeHeight(original), this.CropGravity, cropWidth, cropHeight, this.Quality, thumbType.FromMime(original.GetMime()))
+	filename, err := processorcommand.CustomThumb(original.GetPath(), this.Name, this.ComputeWidth(original), this.ComputeHeight(original), this.CropGravity, cropWidth, cropHeight, this.Quality, this.GetOutputFormat(original))
 	if err != nil {
 		return err
 	}
