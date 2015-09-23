@@ -17,6 +17,8 @@ var (
 )
 
 type ThumbFile struct {
+	localPath string
+
 	Name          string
 	Width         int
 	MaxWidth      int
@@ -29,7 +31,6 @@ type ThumbFile struct {
 	CropRatio     string
 	Quality       int
 	Format        string
-	LocalPath     string
 	StoreURI      string
 	DesiredFormat string
 }
@@ -40,6 +41,8 @@ func NewThumbFile(width, maxWidth, height, maxHeight int, name, shape, path, cro
 	}
 
 	return &ThumbFile{
+		localPath: path,
+
 		Name:          name,
 		Width:         width,
 		MaxWidth:      maxWidth,
@@ -52,7 +55,6 @@ func NewThumbFile(width, maxWidth, height, maxHeight int, name, shape, path, cro
 		CropRatio:     cropRatio,
 		Quality:       quality,
 		Format:        "",
-		LocalPath:     path,
 		StoreURI:      "",
 		DesiredFormat: desiredFormat,
 	}
@@ -63,13 +65,13 @@ func (this *ThumbFile) SetPath(path string) error {
 		return errors.New(fmt.Sprintf("Error when creating thumbnail %s", this.Name))
 	}
 
-	this.LocalPath = path
+	this.localPath = path
 
 	return nil
 }
 
 func (this *ThumbFile) GetPath() string {
-	return this.LocalPath
+	return this.localPath
 }
 
 func (this *ThumbFile) GetOutputFormat(original *UploadedFile) thumbType.ThumbType {
