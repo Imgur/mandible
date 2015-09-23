@@ -467,37 +467,37 @@ func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
 	}
 
 	var thumbs []*uploadedfile.ThumbFile
-	for name, thumb := range t {
-		width, wOk := thumb["width"].(float64)
-		maxWidth, mwOk := thumb["max_width"].(float64)
-		height, hOk := thumb["height"].(float64)
-		maxHeight, mhOk := thumb["max_height"].(float64)
-		if !wOk && !mwOk && !hOk && !mhOk {
-			return nil, errors.New("One of [width, max_width, height, max_height] must be set")
-		}
+	for name, rawThumb := range t {
+		// TODO create struct and marshal
+		width, _ := rawThumb["width"].(float64)
+		maxWidth, _ := rawThumb["max_width"].(float64)
+		height, _ := rawThumb["height"].(float64)
+		maxHeight, _ := rawThumb["max_height"].(float64)
+		shape, _ := rawThumb["shape"].(string)
+		cropGravity, _ := rawThumb["crop_gravity"].(string)
+		cropHeight, _ := rawThumb["crop_height"].(float64)
+		cropWidth, _ := rawThumb["crop_width"].(float64)
+		quality, _ := rawThumb["quality"].(float64)
+		cropRatio, _ := rawThumb["crop_ratio"].(string)
+		desiredFormat, _ := rawThumb["format"].(string)
 
-		shape, sOk := thumb["shape"].(string)
-		if !sOk {
-			return nil, errors.New("Invalid thumbnail shape!")
-		}
+		thumb := uploadedfile.NewThumbFile(
+			int(width),
+			int(maxWidth),
+			int(height),
+			int(maxHeight),
+			name,
+			shape,
+			"",
+			cropGravity,
+			int(cropWidth),
+			int(cropHeight),
+			cropRatio,
+			int(quality),
+			desiredFormat,
+		)
 
-		switch shape {
-		case "thumb":
-		case "square":
-		case "circle":
-		case "custom":
-		default:
-			return nil, errors.New("Invalid thumbnail shape!")
-		}
-
-		cropGravity, _ := thumb["crop_gravity"].(string)
-		cropHeight, _ := thumb["crop_height"].(float64)
-		cropWidth, _ := thumb["crop_width"].(float64)
-		quality, _ := thumb["quality"].(float64)
-		cropRatio, _ := thumb["crop_ratio"].(string)
-		desiredFormat, _ := thumb["format"].(string)
-
-		thumbs = append(thumbs, uploadedfile.NewThumbFile(int(width), int(maxWidth), int(height), int(maxHeight), name, shape, "", cropGravity, int(cropWidth), int(cropHeight), cropRatio, int(quality), desiredFormat))
+		thumbs = append(thumbs, thumb)
 	}
 
 	return thumbs, nil

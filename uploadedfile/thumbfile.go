@@ -152,10 +152,9 @@ func (this *ThumbFile) Process(original *UploadedFile) error {
 		return this.processSquare(original)
 	case "custom":
 		return this.processCustom(original)
-
+	default:
+		return this.processFull(original)
 	}
-
-	return errors.New("Invalid thumb shape " + this.Shape)
 }
 
 func (this *ThumbFile) String() string {
@@ -214,6 +213,19 @@ func (this *ThumbFile) processCustom(original *UploadedFile) error {
 	}
 
 	filename, err := processorcommand.CustomThumb(original.GetPath(), this.Name, this.ComputeWidth(original), this.ComputeHeight(original), this.CropGravity, cropWidth, cropHeight, this.Quality, this.GetOutputFormat(original))
+	if err != nil {
+		return err
+	}
+
+	if err := this.SetPath(filename); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (this *ThumbFile) processFull(original *UploadedFile) error {
+	filename, err := processorcommand.Full(original.GetPath(), this.Name, this.Width, this.Height, this.GetOutputFormat(original))
 	if err != nil {
 		return err
 	}
