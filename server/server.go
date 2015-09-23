@@ -146,6 +146,7 @@ func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*upl
 
 	thumbsResp, err := s.buildThumbResponse(upload)
 	if err != nil {
+		log.Printf("Error processing %+v: %s", upload, err.Error())
 		return ServerResponse{
 			Error:  "Unable to process thumbnail!",
 			Status: http.StatusInternalServerError,
