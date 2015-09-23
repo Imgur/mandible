@@ -194,7 +194,7 @@ func CustomThumb(filename, name string, width, height int, cropGravity string, c
 	return outfile, nil
 }
 
-func Full(filename string, name string, width int, height int, format thumbType.ThumbType) (string, error) {
+func Full(filename string, name string, format thumbType.ThumbType) (string, error) {
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
 	args := []string{

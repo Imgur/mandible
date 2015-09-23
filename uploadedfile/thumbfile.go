@@ -225,7 +225,7 @@ func (this *ThumbFile) processCustom(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processFull(original *UploadedFile) error {
-	filename, err := processorcommand.Full(original.GetPath(), this.Name, this.Width, this.Height, this.GetOutputFormat(original))
+	filename, err := processorcommand.Full(original.GetPath(), this.Name, this.GetOutputFormat(original))
 	if err != nil {
 		return err
 	}
