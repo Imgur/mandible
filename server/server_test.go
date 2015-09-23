@@ -332,7 +332,7 @@ func TestGetFullWebpThumb(t *testing.T) {
 	}
 
 	if int64(len(storedBodyBytes)) >= imageResp.Size {
-		t.Fatalf("Expected thumbnail to be smaller than original image, %s vs %s", int64(len(storedBodyBytes)), imageResp.Size)
+		t.Fatalf("Expected thumbnail to be smaller than original image, %v vs %v", int64(len(storedBodyBytes)), imageResp.Size)
 	}
 }
 
@@ -436,6 +436,6 @@ func TestGetSizedWebpThumb(t *testing.T) {
 	}
 
 	if len(storedBodyBytesSmall) >= len(storedBodyBytes) {
-		t.Fatalf("Expected thumbnail to be smaller than original image, %s vs %s", len(storedBodyBytesSmall), len(storedBodyBytes))
+		t.Fatalf("Expected thumbnail to be smaller than original image, %v vs %v", len(storedBodyBytesSmall), len(storedBodyBytes))
 	}
 }
