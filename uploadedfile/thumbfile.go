@@ -86,20 +86,12 @@ func (this *ThumbFile) GetOutputFormat(original *UploadedFile) thumbType.ThumbTy
 func (this *ThumbFile) ComputeWidth(original *UploadedFile) int {
 	width := this.Width
 
-	if width > maxImageSideSize {
-		return 0
-	}
-
 	oWidth, _, err := original.Dimensions()
 	if err != nil {
 		return 0
 	}
 
 	if this.MaxWidth > 0 {
-		if this.MaxWidth > maxImageSideSize {
-			return 0
-		}
-
 		width = int(math.Min(float64(oWidth), float64(this.MaxWidth)))
 	}
 
@@ -109,20 +101,12 @@ func (this *ThumbFile) ComputeWidth(original *UploadedFile) int {
 func (this *ThumbFile) ComputeHeight(original *UploadedFile) int {
 	height := this.Height
 
-	if height > maxImageSideSize {
-		return 0
-	}
-
 	_, oHeight, err := original.Dimensions()
 	if err != nil {
 		return 0
 	}
 
 	if this.MaxHeight > 0 {
-		if height > maxImageSideSize {
-			return 0
-		}
-
 		height = int(math.Min(float64(oHeight), float64(this.MaxHeight)))
 	}
 
@@ -258,14 +242,14 @@ func (this *ThumbFile) processCustom(original *UploadedFile) error {
 
 	width := this.ComputeWidth(original)
 	height := this.ComputeHeight(original)
-	if width == 0 {
+	if width == 0 || width > maxImageSideSize {
 		return errors.New("Invalid width")
 	}
-	if height == 0 {
+	if height == 0 || width > maxImageSideSize {
 		return errors.New("Invalid height")
 	}
 
-	filename, err := processorcommand.CustomThumb(original.GetPath(), this.Name, this.ComputeWidth(original), this.ComputeHeight(original), this.CropGravity, cropWidth, cropHeight, this.Quality, this.GetOutputFormat(original))
+	filename, err := processorcommand.CustomThumb(original.GetPath(), this.Name, width, height, this.CropGravity, cropWidth, cropHeight, this.Quality, this.GetOutputFormat(original))
 	if err != nil {
 		return err
 	}
