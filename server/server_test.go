@@ -545,7 +545,6 @@ func TestTooSmall(t *testing.T) {
 	}
 
 	var serverResp ServerResponse
-	var imageResp ImageResponse
 	err = json.Unmarshal(body, &serverResp)
 	if err != nil {
 		t.Fatalf("Unexpected error parsing response: %s", err.Error())
