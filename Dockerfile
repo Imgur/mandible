@@ -6,6 +6,7 @@ ENV MANDIBLE_CONF /etc/mandible/conf.json
 ADD . /go/src/github.com/Imgur/mandible
 WORKDIR /go/src/github.com/Imgur/mandible
 RUN go get golang.org/x/tools/cmd/vet
+RUN go get github.com/mattn/goveralls
 RUN go get -v ./...
 RUN go install -v ./...
 CMD ["mandible"]
