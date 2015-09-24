@@ -3,5 +3,8 @@ sudo: required
 services:
   - docker
 
-script:
+before_install:
   - docker build -t imgur/mandible .
+
+script:
+  - docker run -e "COVERALLS_TOKEN=$COVERALLS_TOKEN" imgur/mandible /bin/sh -c "cd /go/src/github.com/Imgur/mandible && ./goclean.sh"
