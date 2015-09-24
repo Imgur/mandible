@@ -3,11 +3,6 @@ sudo: required
 services:
   - docker
 
-before_install:
-  - docker build -t imgur/mandible .
-
 script:
-  - docker run imgur/mandible /bin/sh -c "\
-      cd /go/src/github.com/Imgur/mandible; \
-      ./goclean.sh; \
-      goveralls -coverprofile=profile.cov -service travis-ci -repotoken $COVERALLS_TOKEN"
+  - docker build -t imgur/mandible .
+  # goveralls -coverprofile=profile.cov -service travis-ci -repotoken $COVERALLS_TOKEN"
