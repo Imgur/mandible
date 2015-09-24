@@ -355,10 +355,12 @@ func TestGetSizedWebpThumb(t *testing.T) {
 			"format": "webp",
 		},
 		"webpthumb": map[string]interface{}{
-			"format": "webp",
-			"shape":  "custom",
-			"width":  "10",
-			"height": "10",
+			"format":     "webp",
+			"shape":      "custom",
+			"width":      10,
+			"height":     10,
+			"max_width":  10,
+			"max_height": 10,
 		},
 	})
 
