@@ -548,8 +548,6 @@ func TestTooSmall(t *testing.T) {
 	if *serverResp.Success {
 		t.Fatalf("Uploading small image was successful")
 	}
-
-	t.Fatalf("break tests to see if travis works correctly with docker")
 }
 
 var (
