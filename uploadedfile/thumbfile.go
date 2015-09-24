@@ -256,6 +256,15 @@ func (this *ThumbFile) processCustom(original *UploadedFile) error {
 		}
 	}
 
+	width := this.ComputeWidth(original)
+	height := this.ComputeHeight(original)
+	if width == 0 {
+		return errors.New("Invalid width")
+	}
+	if height == 0 {
+		return errors.New("Invalid height")
+	}
+
 	filename, err := processorcommand.CustomThumb(original.GetPath(), this.Name, this.ComputeWidth(original), this.ComputeHeight(original), this.CropGravity, cropWidth, cropHeight, this.Quality, this.GetOutputFormat(original))
 	if err != nil {
 		return err

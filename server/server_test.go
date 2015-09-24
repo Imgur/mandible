@@ -478,7 +478,7 @@ func TestTooLarge(t *testing.T) {
 
 	t.Logf("Response to /base64 was: %s", body)
 
-	if res.StatusCode != 200 {
+	if res.StatusCode != 500 {
 		t.Fatalf("Unexpected status code %d", res.StatusCode)
 	}
 
@@ -488,7 +488,6 @@ func TestTooLarge(t *testing.T) {
 		t.Fatalf("Unexpected error parsing response: %s", err.Error())
 	}
 
-	t.Logf("%v+", serverResp)
 	if *serverResp.Success {
 		t.Fatalf("Uploading large image was successful")
 	}
@@ -536,7 +535,7 @@ func TestTooSmall(t *testing.T) {
 
 	t.Logf("Response to /base64 was: %s", body)
 
-	if res.StatusCode != 200 {
+	if res.StatusCode != 500 {
 		t.Fatalf("Unexpected status code %d", res.StatusCode)
 	}
 
