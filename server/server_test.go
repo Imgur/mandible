@@ -274,14 +274,14 @@ func TestGetFullWebpThumb(t *testing.T) {
 
 	res, err := http.PostForm(ts.URL+"/url", values)
 	if err != nil {
-		t.Fatalf("Error when uploading base64 GIF: %s", err.Error())
+		t.Fatalf("Error when uploading url: %s", err.Error())
 	}
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		t.Fatalf("Failed to read response body: %s", err.Error())
 	}
 
-	t.Logf("Response to /base64 was: %s", body)
+	t.Logf("Response to /url was: %s", body)
 
 	if res.StatusCode != 200 {
 		t.Fatalf("Unexpected status code %d", res.StatusCode)
@@ -372,14 +372,14 @@ func TestGetSizedWebpThumb(t *testing.T) {
 
 	res, err := http.PostForm(ts.URL+"/url", values)
 	if err != nil {
-		t.Fatalf("Error when uploading base64 GIF: %s", err.Error())
+		t.Fatalf("Error when uploading url: %s", err.Error())
 	}
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		t.Fatalf("Failed to read response body: %s", err.Error())
 	}
 
-	t.Logf("Response to /base64 was: %s", body)
+	t.Logf("Response to /url was: %s", body)
 
 	if res.StatusCode != 200 {
 		t.Fatalf("Unexpected status code %d", res.StatusCode)
@@ -437,5 +437,121 @@ func TestGetSizedWebpThumb(t *testing.T) {
 
 	if len(storedBodyBytesSmall) >= len(storedBodyBytes) {
 		t.Fatalf("Expected thumbnail to be smaller than original image, %v vs %v", len(storedBodyBytesSmall), len(storedBodyBytes))
+	}
+}
+
+func TestTooLarge(t *testing.T) {
+	cfg := &config.Configuration{
+		MaxFileSize: 99999999999,
+		HashLength:  7,
+		UserAgent:   "Foobar",
+		Stores:      make([]map[string]string, 0),
+		Port:        8888,
+	}
+
+	memcfg := make(map[string]string)
+	memcfg["Type"] = "memory"
+	cfg.Stores = append(cfg.Stores, memcfg)
+	server := NewServer(cfg, imageprocessor.ThumbnailStrategy)
+	muxer := http.NewServeMux()
+	server.Configure(muxer)
+	ts := httptest.NewServer(muxer)
+	defer ts.Close()
+
+	thumbsJson, _ := json.Marshal(map[string]interface{}{
+		"webp": map[string]interface{}{
+			"format": "webp",
+			"shape":  "custom",
+			"width":  "20000",
+			"height": "20000",
+		},
+	})
+
+	values := make(url.Values)
+	values.Add("image", "https://i.imgur.com/RxCogg0.jpg")
+	values.Add("thumbs", string(thumbsJson))
+
+	res, err := http.PostForm(ts.URL+"/url", values)
+	if err != nil {
+		t.Fatalf("Error when uploading uel: %s", err.Error())
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("Failed to read response body: %s", err.Error())
+	}
+
+	t.Logf("Response to /url was: %s", body)
+
+	if res.StatusCode != 200 {
+		t.Fatalf("Unexpected status code %d", res.StatusCode)
+	}
+
+	var serverResp ServerResponse
+	err = json.Unmarshal(body, &serverResp)
+	if err != nil {
+		t.Fatalf("Unexpected error parsing response: %s", err.Error())
+	}
+
+	t.Logf("%v+", serverResp)
+	if *serverResp.Success {
+		t.Fatalf("Uploading large image was successful")
+	}
+}
+
+func TestTooSmall(t *testing.T) {
+	cfg := &config.Configuration{
+		MaxFileSize: 99999999999,
+		HashLength:  7,
+		UserAgent:   "Foobar",
+		Stores:      make([]map[string]string, 0),
+		Port:        8888,
+	}
+
+	memcfg := make(map[string]string)
+	memcfg["Type"] = "memory"
+	cfg.Stores = append(cfg.Stores, memcfg)
+	server := NewServer(cfg, imageprocessor.ThumbnailStrategy)
+	muxer := http.NewServeMux()
+	server.Configure(muxer)
+	ts := httptest.NewServer(muxer)
+	defer ts.Close()
+
+	thumbsJson, _ := json.Marshal(map[string]interface{}{
+		"webp": map[string]interface{}{
+			"format": "webp",
+			"shape":  "custom",
+			"width":  0,
+			"height": 0,
+		},
+	})
+
+	values := make(url.Values)
+	values.Add("image", "https://i.imgur.com/RxCogg0.jpg")
+	values.Add("thumbs", string(thumbsJson))
+
+	res, err := http.PostForm(ts.URL+"/url", values)
+	if err != nil {
+		t.Fatalf("Error when uploading url: %s", err.Error())
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("Failed to read response body: %s", err.Error())
+	}
+
+	t.Logf("Response to /url was: %s", body)
+
+	if res.StatusCode != 200 {
+		t.Fatalf("Unexpected status code %d", res.StatusCode)
+	}
+
+	var serverResp ServerResponse
+	var imageResp ImageResponse
+	err = json.Unmarshal(body, &serverResp)
+	if err != nil {
+		t.Fatalf("Unexpected error parsing response: %s", err.Error())
+	}
+
+	if *serverResp.Success {
+		t.Fatalf("Uploading small image was successful")
 	}
 }

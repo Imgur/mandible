@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	defaultQuality = 83
+	defaultQuality   = 83
+	maxImageSideSize = 10000
 )
 
 type ThumbFile struct {
@@ -85,12 +86,20 @@ func (this *ThumbFile) GetOutputFormat(original *UploadedFile) thumbType.ThumbTy
 func (this *ThumbFile) ComputeWidth(original *UploadedFile) int {
 	width := this.Width
 
+	if width > maxImageSideSize {
+		return 0
+	}
+
 	oWidth, _, err := original.Dimensions()
 	if err != nil {
 		return 0
 	}
 
 	if this.MaxWidth > 0 {
+		if this.MaxWidth > maxImageSideSize {
+			return 0
+		}
+
 		width = int(math.Min(float64(oWidth), float64(this.MaxWidth)))
 	}
 
@@ -100,12 +109,20 @@ func (this *ThumbFile) ComputeWidth(original *UploadedFile) int {
 func (this *ThumbFile) ComputeHeight(original *UploadedFile) int {
 	height := this.Height
 
+	if height > maxImageSideSize {
+		return 0
+	}
+
 	_, oHeight, err := original.Dimensions()
 	if err != nil {
 		return 0
 	}
 
 	if this.MaxHeight > 0 {
+		if height > maxImageSideSize {
+			return 0
+		}
+
 		height = int(math.Min(float64(oHeight), float64(this.MaxHeight)))
 	}
 
@@ -162,6 +179,13 @@ func (this *ThumbFile) String() string {
 }
 
 func (this *ThumbFile) processSquare(original *UploadedFile) error {
+	if this.Width == 0 {
+		return errors.New("Width cannot be 0")
+	}
+	if this.Width > maxImageSideSize {
+		return errors.New("Width too large")
+	}
+
 	filename, err := processorcommand.SquareThumb(original.GetPath(), this.Name, this.Width, this.GetOutputFormat(original))
 	if err != nil {
 		return err
@@ -175,6 +199,13 @@ func (this *ThumbFile) processSquare(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processCircle(original *UploadedFile) error {
+	if this.Width == 0 {
+		return errors.New("Width cannot be 0")
+	}
+	if this.Width > maxImageSideSize {
+		return errors.New("Width too large")
+	}
+
 	filename, err := processorcommand.CircleThumb(original.GetPath(), this.Name, this.Width, this.GetOutputFormat(original))
 	if err != nil {
 		return err
@@ -188,6 +219,19 @@ func (this *ThumbFile) processCircle(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processThumb(original *UploadedFile) error {
+	if this.Width == 0 {
+		return errors.New("Width cannot be 0")
+	}
+	if this.Width > maxImageSideSize {
+		return errors.New("Width too large")
+	}
+	if this.Height == 0 {
+		return errors.New("Height cannot be 0")
+	}
+	if this.Height > maxImageSideSize {
+		return errors.New("Height too large")
+	}
+
 	filename, err := processorcommand.Thumb(original.GetPath(), this.Name, this.Width, this.Height, this.GetOutputFormat(original))
 	if err != nil {
 		return err
