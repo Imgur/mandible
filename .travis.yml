@@ -5,4 +5,3 @@ services:
 
 script:
   - docker build -t imgur/mandible .
-  # goveralls -coverprofile=profile.cov -service travis-ci -repotoken $COVERALLS_TOKEN"
