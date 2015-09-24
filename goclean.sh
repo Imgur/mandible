@@ -35,5 +35,4 @@ done
 
 go tool cover -func profile.cov
 
-env
-[ ${COVERALLS_TOKEN} ] && goveralls -coverprofile=profile.cov -service travis-ci -repotoken $COVERALLS_TOKEN"
+[ ${COVERALLS_TOKEN} ] && goveralls -coverprofile=profile.cov -service travis-ci -repotoken $COVERALLS_TOKEN
