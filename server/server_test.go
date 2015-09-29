@@ -458,8 +458,8 @@ func TestTooLarge(t *testing.T) {
 		"webp": map[string]interface{}{
 			"format": "webp",
 			"shape":  "custom",
-			"width":  "20000",
-			"height": "20000",
+			"width":  20000,
+			"height": 20000,
 		},
 	})
 

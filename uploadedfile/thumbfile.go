@@ -245,7 +245,7 @@ func (this *ThumbFile) processCustom(original *UploadedFile) error {
 	if width == 0 || width > maxImageSideSize {
 		return errors.New("Invalid width")
 	}
-	if height == 0 || width > maxImageSideSize {
+	if height == 0 || height > maxImageSideSize {
 		return errors.New("Invalid height")
 	}
 

@@ -461,41 +461,42 @@ func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
 		return []*uploadedfile.ThumbFile{}, nil
 	}
 
-	var t map[string]map[string]interface{}
-	err := json.Unmarshal([]byte(thumbString), &t)
+	type ThumbRequest struct {
+		Width         int    `json:"width"`
+		MaxWidth      int    `json:"max_width"`
+		Height        int    `json:"height"`
+		MaxHeight     int    `json:"max_height"`
+		Shape         string `json:"shape"`
+		CropGravity   string `json:"crop_gravity"`
+		CropHeight    int    `json:"crop_height"`
+		CropWidth     int    `json:"crop_width"`
+		Quality       int    `json:"quality"`
+		CropRatio     string `json:"crop_ratio"`
+		DesiredFormat string `json:"format"`
+	}
+	var thumbRequests map[string]ThumbRequest
+	err := json.Unmarshal([]byte(thumbString), &thumbRequests)
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil, errors.New("Error parsing thumbnail JSON!")
 	}
 
 	var thumbs []*uploadedfile.ThumbFile
-	for name, rawThumb := range t {
-		// TODO create struct and marshal
-		width, _ := rawThumb["width"].(float64)
-		maxWidth, _ := rawThumb["max_width"].(float64)
-		height, _ := rawThumb["height"].(float64)
-		maxHeight, _ := rawThumb["max_height"].(float64)
-		shape, _ := rawThumb["shape"].(string)
-		cropGravity, _ := rawThumb["crop_gravity"].(string)
-		cropHeight, _ := rawThumb["crop_height"].(float64)
-		cropWidth, _ := rawThumb["crop_width"].(float64)
-		quality, _ := rawThumb["quality"].(float64)
-		cropRatio, _ := rawThumb["crop_ratio"].(string)
-		desiredFormat, _ := rawThumb["format"].(string)
-
+	for name, thumbRequest := range thumbRequests {
 		thumb := uploadedfile.NewThumbFile(
-			int(width),
-			int(maxWidth),
-			int(height),
-			int(maxHeight),
+			thumbRequest.Width,
+			thumbRequest.MaxWidth,
+			thumbRequest.Height,
+			thumbRequest.MaxHeight,
 			name,
-			shape,
-			"",
-			cropGravity,
-			int(cropWidth),
-			int(cropHeight),
-			cropRatio,
-			int(quality),
-			desiredFormat,
+			thumbRequest.Shape,
+			"", // shape
+			thumbRequest.CropGravity,
+			thumbRequest.CropWidth,
+			thumbRequest.CropHeight,
+			thumbRequest.CropRatio,
+			thumbRequest.Quality,
+			thumbRequest.DesiredFormat,
 		)
 
 		thumbs = append(thumbs, thumb)
