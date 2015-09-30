@@ -242,10 +242,10 @@ func (this *ThumbFile) processCustom(original *UploadedFile) error {
 
 	width := this.ComputeWidth(original)
 	height := this.ComputeHeight(original)
-	if width == 0 || width > maxImageSideSize {
+	if (width == 0 || width > maxImageSideSize) && this.CropRatio == "" {
 		return errors.New("Invalid width")
 	}
-	if height == 0 || height > maxImageSideSize {
+	if (height == 0 || height > maxImageSideSize) && this.CropRatio == "" {
 		return errors.New("Invalid height")
 	}
 
