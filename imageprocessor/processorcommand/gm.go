@@ -193,3 +193,23 @@ func CustomThumb(filename, name string, width, height int, cropGravity string, c
 
 	return outfile, nil
 }
+
+func Full(filename string, name string, format thumbType.ThumbType) (string, error) {
+	outfile := fmt.Sprintf("%s_%s", filename, name)
+
+	args := []string{
+		fmt.Sprintf("%s[0]", filename),
+		"-quality",
+		"83",
+		"-density",
+		"72x72",
+		fmt.Sprintf("%s:%s", format.ToString(), outfile),
+	}
+
+	err := runProcessorCommand(GM_COMMAND, args)
+	if err != nil {
+		return "", err
+	}
+
+	return outfile, nil
+}
