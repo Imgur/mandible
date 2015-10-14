@@ -33,7 +33,7 @@ Pull down the mandible config file and edit it:
 wget https://raw.githubusercontent.com/Imgur/mandible/master/config/default.conf.json -O ~/mandible/conf.json
 ```
 ```
-vim ~/mandible/config.json
+vim ~/mandible/conf.json
 ```
 
 To start mandible (port settings could change based on your conf.json):
