@@ -68,6 +68,11 @@ type ImageResponse struct {
 	UserID  string                 `json:"user_id"`
 }
 
+type OcrResponse struct {
+    Hash string     `json:"hash"`
+    OCRText string  `json:"ocrtext"`
+}
+
 type UserError struct {
 	UserFacingMessage error
 	LogMessage        error
@@ -293,6 +298,73 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		}
 	}
 
+    ocrHandler := func(w http.ResponseWriter, r *http.Request) {
+        imageID := r.FormValue("uid")
+
+        factory := imagestore.NewFactory(s.Config)
+        tObj := factory.NewStoreObject(imageID, "", "original")
+
+        storeReader, err := s.ImageStore.Get(tObj)
+        if err != nil {
+            resp := ServerResponse{
+                Status: http.StatusBadRequest,
+                Error: fmt.Sprintf("Error retrieving image with ID: %s", imageID),
+            }
+            resp.Write(w)
+            return
+        }
+        defer storeReader.Close()
+
+        storeFile, err := saveToTmp(storeReader)
+        if err != nil {
+            resp := ServerResponse{
+                Status: http.StatusBadRequest,
+                Error: fmt.Sprintf("Error saving original image to tmpfile: %s", imageID),
+            }
+            resp.Write(w)
+            return
+        }
+        defer os.Remove(storeFile)
+
+        upload, err := uploadedfile.NewUploadedFile("", storeFile, nil)
+        if err != nil {
+            resp := ServerResponse{
+                Error: fmt.Sprintf("Unable to generate UploadedFile object: %s", imageID),
+                Status: http.StatusInternalServerError,
+            }
+            resp.Write(w)
+            return
+        }
+        upload.SetHash(imageID)
+        defer upload.Clean()
+
+        //TODO: fix this sp error:
+        processor := imageprocessor.DuelOCRStratagy()
+        err = processor.Process(upload)
+        if err != nil {
+            log.Printf("Error runinng DuelOCRStrategy on %+v: %s", upload, err.Error())
+            resp := ServerResponse{
+                Error: "Unable to execute OCR strategy",
+                Status: http.StatusInternalServerError,
+            }
+            resp.Write(w)
+            return
+        }
+
+        ocrResp := OcrResponse{
+            Hash:    upload.GetHash(),
+            OCRText: upload.GetOCRText(),
+        }
+
+        resp := ServerResponse{
+            Data:   ocrResp,
+            Status: http.StatusOK,
+        }
+
+        resp.Write(w)
+    }
+        
+
 	thumbnailHandler := func(w http.ResponseWriter, r *http.Request) {
 		imageID := r.FormValue("uid")
 
@@ -403,6 +475,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 
 	router.HandleFunc("/thumbnail", thumbnailHandler)
 
+    router.HandleFunc("/ocr", ocrHandler)
 	router.HandleFunc("/", rootHandler)
 
 	muxer.Handle("/", router)
