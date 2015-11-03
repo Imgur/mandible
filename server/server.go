@@ -146,7 +146,6 @@ func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*upl
 
 	thumbsResp, err := s.buildThumbResponse(upload)
 	if err != nil {
-		log.Printf("Error processing %+v: %s", upload, err.Error())
 		return ServerResponse{
 			Error:  "Unable to process thumbnail!",
 			Status: http.StatusInternalServerError,
@@ -368,7 +367,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		ts := upload.GetThumbs()
 		t := ts[0]
 
-		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.Name)
+		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.GetName())
 		tObj = factory.NewStoreObject(thumbName, upload.GetMime(), "thumbnail")
 		err = tObj.Store(t, s.ImageStore)
 		if err != nil {
@@ -413,14 +412,14 @@ func (s *Server) buildThumbResponse(upload *uploadedfile.UploadedFile) (map[stri
 	thumbsResp := map[string]interface{}{}
 
 	for _, t := range upload.GetThumbs() {
-		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.Name)
+		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.GetName())
 		tObj := factory.NewStoreObject(thumbName, upload.GetMime(), "thumbnail")
 		err := tObj.Store(t, s.ImageStore)
 		if err != nil {
 			return nil, err
 		}
 
-		thumbsResp[t.Name] = tObj.Url
+		thumbsResp[t.GetName()] = tObj.Url
 	}
 
 	return thumbsResp, nil
@@ -461,45 +460,43 @@ func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
 		return []*uploadedfile.ThumbFile{}, nil
 	}
 
-	type ThumbRequest struct {
-		Width         int    `json:"width"`
-		MaxWidth      int    `json:"max_width"`
-		Height        int    `json:"height"`
-		MaxHeight     int    `json:"max_height"`
-		Shape         string `json:"shape"`
-		CropGravity   string `json:"crop_gravity"`
-		CropHeight    int    `json:"crop_height"`
-		CropWidth     int    `json:"crop_width"`
-		Quality       int    `json:"quality"`
-		CropRatio     string `json:"crop_ratio"`
-		DesiredFormat string `json:"format"`
-	}
-	var thumbRequests map[string]ThumbRequest
-	err := json.Unmarshal([]byte(thumbString), &thumbRequests)
+	var t map[string]map[string]interface{}
+	err := json.Unmarshal([]byte(thumbString), &t)
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, errors.New("Error parsing thumbnail JSON!")
 	}
 
 	var thumbs []*uploadedfile.ThumbFile
-	for name, thumbRequest := range thumbRequests {
-		thumb := uploadedfile.NewThumbFile(
-			thumbRequest.Width,
-			thumbRequest.MaxWidth,
-			thumbRequest.Height,
-			thumbRequest.MaxHeight,
-			name,
-			thumbRequest.Shape,
-			"", // shape
-			thumbRequest.CropGravity,
-			thumbRequest.CropWidth,
-			thumbRequest.CropHeight,
-			thumbRequest.CropRatio,
-			thumbRequest.Quality,
-			thumbRequest.DesiredFormat,
-		)
+	for name, thumb := range t {
+		width, wOk := thumb["width"].(float64)
+		maxWidth, mwOk := thumb["max_width"].(float64)
+		height, hOk := thumb["height"].(float64)
+		maxHeight, mhOk := thumb["max_height"].(float64)
+		if !wOk && !mwOk && !hOk && !mhOk {
+			return nil, errors.New("One of [width, max_width, height, max_height] must be set")
+		}
 
-		thumbs = append(thumbs, thumb)
+		shape, sOk := thumb["shape"].(string)
+		if !sOk {
+			return nil, errors.New("Invalid thumbnail shape!")
+		}
+
+		switch shape {
+		case "thumb":
+		case "square":
+		case "circle":
+		case "custom":
+		default:
+			return nil, errors.New("Invalid thumbnail shape!")
+		}
+
+		cropGravity, _ := thumb["crop_gravity"].(string)
+		cropHeight, _ := thumb["crop_height"].(float64)
+		cropWidth, _ := thumb["crop_width"].(float64)
+		quality, _ := thumb["quality"].(float64)
+		cropRatio, _ := thumb["crop_ratio"].(string)
+
+		thumbs = append(thumbs, uploadedfile.NewThumbFile(int(width), int(maxWidth), int(height), int(maxHeight), name, shape, "", cropGravity, int(cropWidth), int(cropHeight), cropRatio, int(quality)))
 	}
 
 	return thumbs, nil

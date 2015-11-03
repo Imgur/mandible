@@ -13,57 +13,104 @@ import (
 )
 
 var (
-	defaultQuality   = 83
-	maxImageSideSize = 10000
+	defaultQuality = 83
 )
 
 type ThumbFile struct {
-	localPath string
-
-	Name          string
-	Width         int
-	MaxWidth      int
-	Height        int
-	MaxHeight     int
-	Shape         string
-	CropGravity   string
-	CropWidth     int
-	CropHeight    int
-	CropRatio     string
-	Quality       int
-	Format        string
-	StoreURI      string
-	DesiredFormat string
+	name        string
+	width       int
+	maxWidth    int
+	height      int
+	maxHeight   int
+	shape       string
+	cropGravity string
+	cropWidth   int
+	cropHeight  int
+	cropRatio   string
+	quality     int
+	format      string
+	localPath   string
+	storeURI    string
 }
 
-func NewThumbFile(width, maxWidth, height, maxHeight int, name, shape, path, cropGravity string, cropWidth, cropHeight int, cropRatio string, quality int, desiredFormat string) *ThumbFile {
+func NewThumbFile(width, maxWidth, height, maxHeight int, name, shape, path, cropGravity string, cropWidth, cropHeight int, cropRatio string, quality int) *ThumbFile {
 	if quality == 0 {
 		quality = defaultQuality
 	}
 
 	return &ThumbFile{
-		localPath: path,
-
-		Name:          name,
-		Width:         width,
-		MaxWidth:      maxWidth,
-		Height:        height,
-		MaxHeight:     maxHeight,
-		Shape:         shape,
-		CropGravity:   cropGravity,
-		CropWidth:     cropWidth,
-		CropHeight:    cropHeight,
-		CropRatio:     cropRatio,
-		Quality:       quality,
-		Format:        "",
-		StoreURI:      "",
-		DesiredFormat: desiredFormat,
+		name,
+		width,
+		maxWidth,
+		height,
+		maxHeight,
+		shape,
+		cropGravity,
+		cropWidth,
+		cropHeight,
+		cropRatio,
+		quality,
+		"",
+		path,
+		"",
 	}
+}
+
+func (this *ThumbFile) GetName() string {
+	return this.name
+}
+
+func (this *ThumbFile) SetName(name string) {
+	this.name = name
+}
+
+func (this *ThumbFile) GetHeight() int {
+	return this.height
+}
+
+func (this *ThumbFile) SetHeight(h int) {
+	this.height = h
+}
+
+func (this *ThumbFile) GetMaxHeight() int {
+	return this.maxHeight
+}
+
+func (this *ThumbFile) SetMaxHeight(h int) {
+	this.maxHeight = h
+}
+
+func (this *ThumbFile) GetWidth() int {
+	return this.width
+}
+
+func (this *ThumbFile) SetWidth(h int) {
+	this.width = h
+}
+
+func (this *ThumbFile) GetMaxWidth() int {
+	return this.maxWidth
+}
+
+func (this *ThumbFile) SetMaxWidth(h int) {
+	this.maxWidth = h
+}
+
+func (this *ThumbFile) GetShape() string {
+	return this.shape
+}
+
+func (this *ThumbFile) SetShape(shape string) {
+	this.shape = shape
+}
+
+func (this *ThumbFile) GetPath() string {
+	return this.localPath
 }
 
 func (this *ThumbFile) SetPath(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return errors.New(fmt.Sprintf("Error when creating thumbnail %s", this.Name))
+		return errors.New(fmt.Sprintf("Error when creating thumbnail %s", this.GetName()))
 	}
 
 	this.localPath = path
@@ -71,43 +118,71 @@ func (this *ThumbFile) SetPath(path string) error {
 	return nil
 }
 
-func (this *ThumbFile) GetPath() string {
-	return this.localPath
+func (this *ThumbFile) SetCropGravity(gravity string) {
+	this.cropGravity = gravity
 }
 
-func (this *ThumbFile) GetOutputFormat(original *UploadedFile) thumbType.ThumbType {
-	if this.DesiredFormat != "" {
-		return thumbType.FromString(this.DesiredFormat)
-	}
+func (this *ThumbFile) GetCropGravity() string {
+	return this.cropGravity
+}
 
-	return thumbType.FromMime(original.GetMime())
+func (this *ThumbFile) SetCropWidth(width int) {
+	this.cropWidth = width
+}
+
+func (this *ThumbFile) GetCropWidth() int {
+	return this.cropWidth
+}
+
+func (this *ThumbFile) SetCropHeight(height int) {
+	this.cropHeight = height
+}
+
+func (this *ThumbFile) GetCropHeight() int {
+	return this.cropHeight
+}
+
+func (this *ThumbFile) SetCropRatio(ratio string) {
+	this.cropRatio = ratio
+}
+
+func (this *ThumbFile) GetCropRatio() string {
+	return this.cropRatio
+}
+
+func (this *ThumbFile) SetQuality(quality int) {
+	this.quality = quality
+}
+
+func (this *ThumbFile) GetQuality() int {
+	return this.quality
 }
 
 func (this *ThumbFile) ComputeWidth(original *UploadedFile) int {
-	width := this.Width
+	width := this.GetWidth()
 
 	oWidth, _, err := original.Dimensions()
 	if err != nil {
 		return 0
 	}
 
-	if this.MaxWidth > 0 {
-		width = int(math.Min(float64(oWidth), float64(this.MaxWidth)))
+	if this.GetMaxWidth() > 0 {
+		width = int(math.Min(float64(oWidth), float64(this.GetMaxWidth())))
 	}
 
 	return width
 }
 
 func (this *ThumbFile) ComputeHeight(original *UploadedFile) int {
-	height := this.Height
+	height := this.GetHeight()
 
 	_, oHeight, err := original.Dimensions()
 	if err != nil {
 		return 0
 	}
 
-	if this.MaxHeight > 0 {
-		height = int(math.Min(float64(oHeight), float64(this.MaxHeight)))
+	if this.GetMaxHeight() > 0 {
+		height = int(math.Min(float64(oHeight), float64(this.GetMaxHeight())))
 	}
 
 	return height
@@ -115,7 +190,7 @@ func (this *ThumbFile) ComputeHeight(original *UploadedFile) int {
 
 func (this *ThumbFile) ComputeCrop(original *UploadedFile) (int, int, error) {
 	re := regexp.MustCompile("(.*):(.*)")
-	matches := re.FindStringSubmatch(this.CropRatio)
+	matches := re.FindStringSubmatch(this.GetCropRatio())
 	if len(matches) != 3 {
 		return 0, 0, errors.New("Invalid crop_ratio")
 	}
@@ -144,7 +219,7 @@ func (this *ThumbFile) ComputeCrop(original *UploadedFile) (int, int, error) {
 }
 
 func (this *ThumbFile) Process(original *UploadedFile) error {
-	switch this.Shape {
+	switch this.shape {
 	case "circle":
 		return this.processCircle(original)
 	case "thumb":
@@ -153,24 +228,18 @@ func (this *ThumbFile) Process(original *UploadedFile) error {
 		return this.processSquare(original)
 	case "custom":
 		return this.processCustom(original)
-	default:
-		return this.processFull(original)
+
 	}
+
+	return errors.New("Invalid thumb shape " + this.shape)
 }
 
 func (this *ThumbFile) String() string {
-	return fmt.Sprintf("Thumbnail of <%s>", this.Name)
+	return fmt.Sprintf("Thumbnail of <%s>", this.name)
 }
 
 func (this *ThumbFile) processSquare(original *UploadedFile) error {
-	if this.Width == 0 {
-		return errors.New("Width cannot be 0")
-	}
-	if this.Width > maxImageSideSize {
-		return errors.New("Width too large")
-	}
-
-	filename, err := processorcommand.SquareThumb(original.GetPath(), this.Name, this.Width, this.GetOutputFormat(original))
+	filename, err := processorcommand.SquareThumb(original.GetPath(), this.GetName(), this.GetWidth(), thumbType.FromMime(original.GetMime()))
 	if err != nil {
 		return err
 	}
@@ -183,14 +252,7 @@ func (this *ThumbFile) processSquare(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processCircle(original *UploadedFile) error {
-	if this.Width == 0 {
-		return errors.New("Width cannot be 0")
-	}
-	if this.Width > maxImageSideSize {
-		return errors.New("Width too large")
-	}
-
-	filename, err := processorcommand.CircleThumb(original.GetPath(), this.Name, this.Width, this.GetOutputFormat(original))
+	filename, err := processorcommand.CircleThumb(original.GetPath(), this.GetName(), this.GetWidth(), thumbType.FromMime(original.GetMime()))
 	if err != nil {
 		return err
 	}
@@ -203,20 +265,7 @@ func (this *ThumbFile) processCircle(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processThumb(original *UploadedFile) error {
-	if this.Width == 0 {
-		return errors.New("Width cannot be 0")
-	}
-	if this.Width > maxImageSideSize {
-		return errors.New("Width too large")
-	}
-	if this.Height == 0 {
-		return errors.New("Height cannot be 0")
-	}
-	if this.Height > maxImageSideSize {
-		return errors.New("Height too large")
-	}
-
-	filename, err := processorcommand.Thumb(original.GetPath(), this.Name, this.Width, this.Height, this.GetOutputFormat(original))
+	filename, err := processorcommand.Thumb(original.GetPath(), this.GetName(), this.GetWidth(), this.GetHeight(), thumbType.FromMime(original.GetMime()))
 	if err != nil {
 		return err
 	}
@@ -229,40 +278,18 @@ func (this *ThumbFile) processThumb(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processCustom(original *UploadedFile) error {
-	cropWidth := this.CropWidth
-	cropHeight := this.CropHeight
+	cropWidth := this.GetCropWidth()
+	cropHeight := this.GetCropHeight()
 	var err error
 
-	if this.CropRatio != "" {
+	if this.GetCropRatio() != "" {
 		cropWidth, cropHeight, err = this.ComputeCrop(original)
 		if err != nil {
 			return err
 		}
 	}
 
-	width := this.ComputeWidth(original)
-	height := this.ComputeHeight(original)
-	if (width == 0 || width > maxImageSideSize) && this.CropRatio == "" {
-		return errors.New("Invalid width")
-	}
-	if (height == 0 || height > maxImageSideSize) && this.CropRatio == "" {
-		return errors.New("Invalid height")
-	}
-
-	filename, err := processorcommand.CustomThumb(original.GetPath(), this.Name, width, height, this.CropGravity, cropWidth, cropHeight, this.Quality, this.GetOutputFormat(original))
-	if err != nil {
-		return err
-	}
-
-	if err := this.SetPath(filename); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (this *ThumbFile) processFull(original *UploadedFile) error {
-	filename, err := processorcommand.Full(original.GetPath(), this.Name, this.GetOutputFormat(original))
+	filename, err := processorcommand.CustomThumb(original.GetPath(), this.GetName(), this.ComputeWidth(original), this.ComputeHeight(original), this.GetCropGravity(), cropWidth, cropHeight, this.GetQuality(), thumbType.FromMime(original.GetMime()))
 	if err != nil {
 		return err
 	}
