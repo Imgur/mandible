@@ -172,8 +172,6 @@ func CustomThumb(filename, name string, width, height int, cropGravity string, c
 		fmt.Sprintf("%dx%d^", width, height),
 		"-density",
 		"72x72",
-		"-unsharp",
-		"0.5",
 	}
 
 	if cropGravity != "" {
