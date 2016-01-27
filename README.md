@@ -230,3 +230,7 @@ Content-Length: 0
 Content-Type: text/plain; charset=utf-8
 ```
 
+## Contributing
+
+The easiest way to develop on this project is to use the built-in docker image. We are using the Go 1.5 vendor experiment, which means if
+you import a package you must vendor the source code into this repository using Godep. 
