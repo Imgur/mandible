@@ -1,7 +1,30 @@
 {
-	"ImportPath": "github.com/gophergala/ImgurGo",
-	"GoVersion": "go1.4.1",
+	"ImportPath": "github.com/Imgur/mandible",
+	"GoVersion": "go1.5",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/bradfitz/http2",
+			"Rev": "f8202bc903bda493ebba4aa54922d78430c2c42f"
+		},
+		{
+			"ImportPath": "github.com/golang/glog",
+			"Rev": "44145f04b68cf362d9c4df2182967c2275eaefed"
+		},
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "34a5f244f1c01cdfee8e60324258cfbb97a42aec"
+		},
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Rev": "215affda49addc4c8ef7e2534915df2c8c35c6cd"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Rev": "47e8f450ef38c857cdd922ec08862ca9d65a1c6d"
+		},
 		{
 			"ImportPath": "github.com/mitchellh/goamz/aws",
 			"Rev": "2441a8d0fab90553ec345cfdf3db24bb61ea61c3"
@@ -11,8 +34,56 @@
 			"Rev": "2441a8d0fab90553ec345cfdf3db24bb61ea61c3"
 		},
 		{
+			"ImportPath": "github.com/trustmaster/go-aspell",
+			"Rev": "b1cc0c2c49f83195f1708a1e6d23967d94817296"
+		},
+		{
 			"ImportPath": "github.com/vaughan0/go-ini",
 			"Rev": "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/terminal",
+			"Rev": "3760e016850398b85094c4c99e955b8c3dea5711"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "84afb0af0050ae286aa9ced0c29383c2a866a925"
+		},
+		{
+			"ImportPath": "golang.org/x/oauth2",
+			"Rev": "b5adcc2dcdf009d0391547edc6ecbaff889f5bb9"
+		},
+		{
+			"ImportPath": "google.golang.org/api/bigquery/v2",
+			"Rev": "0610a35668fd6881bec389e74208f0df92010e96"
+		},
+		{
+			"ImportPath": "google.golang.org/api/container/v1beta1",
+			"Rev": "0610a35668fd6881bec389e74208f0df92010e96"
+		},
+		{
+			"ImportPath": "google.golang.org/api/googleapi",
+			"Rev": "0610a35668fd6881bec389e74208f0df92010e96"
+		},
+		{
+			"ImportPath": "google.golang.org/api/pubsub/v1beta2",
+			"Rev": "0610a35668fd6881bec389e74208f0df92010e96"
+		},
+		{
+			"ImportPath": "google.golang.org/api/storage/v1",
+			"Rev": "0610a35668fd6881bec389e74208f0df92010e96"
+		},
+		{
+			"ImportPath": "google.golang.org/appengine",
+			"Rev": "6bde959377a90acb53366051d7d587bfd7171354"
+		},
+		{
+			"ImportPath": "google.golang.org/cloud",
+			"Rev": "0b21ed5434dc279f2b8ea3c02dc69135600bbb8b"
+		},
+		{
+			"ImportPath": "google.golang.org/grpc",
+			"Rev": "d6f8134fd2e79a0a2a40f284d5552065fb6a8e3c"
 		}
 	]
 }
