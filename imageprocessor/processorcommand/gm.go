@@ -166,12 +166,17 @@ func CustomThumb(filename, name string, width, height int, cropGravity string, c
 
 	args := []string{
 		fmt.Sprintf("%s[0]", filename),
-		"-quality",
-		fmt.Sprintf("%d", quality),
 		"-resize",
 		fmt.Sprintf("%dx%d^", width, height),
 		"-density",
 		"72x72",
+	}
+
+	if quality != -1 {
+		args = append(args,
+			"-quality",
+			fmt.Sprintf("%d", quality),
+		)
 	}
 
 	if cropGravity != "" {
