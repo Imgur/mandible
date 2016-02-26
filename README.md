@@ -77,7 +77,7 @@ Add the following to the `Stores` array in your conf.json file:
 
 ## REST API:
 
-Interfacing with ImgurGo is extremely simple:
+Interfacing with mandible is extremely simple:
 
 ### Upload an image file:
 `POST /file`
@@ -85,18 +85,21 @@ Interfacing with ImgurGo is extremely simple:
 with the following multi-part/form-data
 - ```image``` - file
 
+---
 ### Upload an image from a URL:
 `POST /url`
 
 with the following multi-part/form-data
 - ```image``` - string
 
+---
 ### Upload an image from base64 data:
 `POST /base64`
 
 with the following multi-part/form-data
 - ```image``` - image encoded as base64 data
 
+---
 ### Thumbnail generation during upload:
 
 **To generate thumbnails with an upload request, pass the following JSON as form-data, keyed under `thumbs`**
@@ -120,6 +123,7 @@ with the following multi-part/form-data
 
 Note: Square thumbnails don't preserve aspect ratio, whereas the 'thumb' type does
 
+---
 ### On the fly thumbnail generation:
 **this will return `content-type: image/...` and serve up a thumbnail.**
 
@@ -146,6 +150,7 @@ with the following get parameters:
 }
 ```
 
+---
 ### OCR endpoint
 **Runs OCR on the given image and returns text**
 
