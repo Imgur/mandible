@@ -99,7 +99,7 @@ with the following multi-part/form-data
 
 ### Thumbnail generation during upload:
 
-To generate thumbnails with the request, pass the following JSON as form-data, keyed under `thumbs`
+**To generate thumbnails with an upload request, pass the following JSON as form-data, keyed under `thumbs`**
 
 ```javascript
 {
@@ -121,7 +121,7 @@ To generate thumbnails with the request, pass the following JSON as form-data, k
 Note: Square thumbnails don't preserve aspect ratio, whereas the 'thumb' type does
 
 ### On the fly thumbnail generation:
-#### this will return `content-type: image/...` and serve up a thumbnail.
+**this will return `content-type: image/...` and serve up a thumbnail.**
 
 `GET /thumbnail`
 
@@ -147,7 +147,8 @@ with the following get parameters:
 ```
 
 ### OCR endpoint
-#### Runs OCR on the given image and returns text
+**Runs OCR on the given image and returns text**
+
 `GET /ocr`
 
 with the following get parameters:
