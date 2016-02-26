@@ -300,6 +300,14 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 
 	ocrHandler := func(w http.ResponseWriter, r *http.Request) {
 		imageID := r.FormValue("uid")
+		if imageID == "" {
+			resp := ServerResponse{
+				Status: http.StatusBadRequest,
+				Error:  "Image ID must be passed as \"uid\"",
+			}
+			resp.Write(w)
+			return
+		}
 
 		factory := imagestore.NewFactory(s.Config)
 		tObj := factory.NewStoreObject(imageID, "", "original")
