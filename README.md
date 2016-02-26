@@ -33,7 +33,7 @@ Pull down the mandible config file and edit it:
 wget https://raw.githubusercontent.com/Imgur/mandible/master/config/default.conf.json -O ~/mandible/conf.json
 ```
 ```
-vim ~/mandible/config.json
+vim ~/mandible/conf.json
 ```
 
 To start mandible (port settings could change based on your conf.json):
@@ -277,3 +277,7 @@ Content-Length: 0
 Content-Type: text/plain; charset=utf-8
 ```
 
+## Contributing
+
+The easiest way to develop on this project is to use the built-in docker image. We are using the Go 1.5 vendor experiment, which means if
+you import a package you must vendor the source code into this repository using Godep. 

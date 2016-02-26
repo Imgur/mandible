@@ -7,24 +7,28 @@
 # 5. race detector (http://blog.golang.org/race-detector)
 # 6. test coverage (http://blog.golang.org/cover)
 
+export GO15VENDOREXPERIMENT=1
+
 set -e
+
+PROJECTS="./uploadedfile ./server ./imageprocessor ./imagestore ./config ."
 
 # Automatic checks
 test -z "$(gofmt -l -w .     | tee /dev/stderr)"
 # test -z "$(goimports -l -w . | tee /dev/stderr)"
 # test -z "$(golint .          | tee /dev/stderr)"
-go vet ./...
-go test -race ./...
+godep go vet $PROJECTS
+godep go test -race $PROJECTS
 
 # Run test coverage on each subdirectories and merge the coverage profile.
 
 echo "mode: count" > profile.cov
 
 # Standard go tooling behavior is to ignore dirs with leading underscors
-for dir in $(find . -maxdepth 10 -not -path './.git*' -not -path '*/_*' -type d);
+for dir in $PROJECTS
 do
 if ls $dir/*.go &> /dev/null; then
-    go test -covermode=count -coverprofile=$dir/profile.tmp $dir
+    godep go test -covermode=count -coverprofile=$dir/profile.tmp $dir
     if [ -f $dir/profile.tmp ]
     then
         cat $dir/profile.tmp | tail -n +2 >> profile.cov
@@ -33,6 +37,6 @@ if ls $dir/*.go &> /dev/null; then
 fi
 done
 
-go tool cover -func profile.cov
+godep go tool cover -func profile.cov
 
 [ ${COVERALLS_TOKEN} ] && goveralls -coverprofile=profile.cov -service travis-ci -repotoken $COVERALLS_TOKEN
