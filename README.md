@@ -97,7 +97,7 @@ with the following multi-part/form-data
 with the following multi-part/form-data
 - ```image``` - image encoded as base64 data
 
-### Thumbnail Generation:
+### Thumbnail generation during upload:
 
 To generate thumbnails with the request, pass the following JSON as form-data, keyed under `thumbs`
 
@@ -119,6 +119,47 @@ To generate thumbnails with the request, pass the following JSON as form-data, k
 ```
 
 Note: Square thumbnails don't preserve aspect ratio, whereas the 'thumb' type does
+
+### On the fly thumbnail generation:
+#### this will return `content-type: image/...` and serve up a thumbnail.
+
+`GET /thumbnail`
+
+with the following get parameters:
+- ```uid``` - Unique ID of the image
+- ```thumbs``` - JSON of the following format:
+```javascript
+{
+    "name for the thumbnail": {
+        "shape": ("square" | "thumb" | "circle" | "custom") // required
+        "width": int,
+        "height": int,
+        "max_width": int,
+        "max_height": int,
+        "crop_gravity": string, // e.g. "nw" for north west of the image
+        "crop_height": int,
+        "crop_width": int,
+        "quaity": int,
+        "crop_ratio": string, // e.g. "2:1"
+        "format": string, // on of: jpg, png, gif, webm
+    }
+}
+```
+
+### OCR endpoint
+#### Runs OCR on the given image and returns text
+`GET /ocr`
+
+with the following get parameters:
+- ```uid``` - Unique ID of the image
+
+returns:
+```Javascript
+{
+    "hash": string, //uid of the image
+    "ocrtext": string // text returned from OCR
+}
+```
 
 ## Example usage (assuming localhost)
 
