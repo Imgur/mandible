@@ -77,7 +77,7 @@ Add the following to the `Stores` array in your conf.json file:
 
 ## REST API:
 
-Interfacing with ImgurGo is extremely simple:
+Interfacing with mandible is extremely simple:
 
 ### Upload an image file:
 `POST /file`
@@ -85,21 +85,24 @@ Interfacing with ImgurGo is extremely simple:
 with the following multi-part/form-data
 - ```image``` - file
 
+---
 ### Upload an image from a URL:
 `POST /url`
 
 with the following multi-part/form-data
 - ```image``` - string
 
+---
 ### Upload an image from base64 data:
 `POST /base64`
 
 with the following multi-part/form-data
 - ```image``` - image encoded as base64 data
 
-### Thumbnail Generation:
+---
+### Thumbnail generation during upload:
 
-To generate thumbnails with the request, pass the following JSON as form-data, keyed under `thumbs`
+**To generate thumbnails with an upload request, pass the following JSON as form-data, keyed under `thumbs`**
 
 ```javascript
 {
@@ -119,6 +122,50 @@ To generate thumbnails with the request, pass the following JSON as form-data, k
 ```
 
 Note: Square thumbnails don't preserve aspect ratio, whereas the 'thumb' type does
+
+---
+### On the fly thumbnail generation:
+**this will return `content-type: image/...` and serve up a thumbnail.**
+
+`GET /thumbnail`
+
+with the following get parameters:
+- ```uid``` - Unique ID of the image
+- ```thumbs``` - JSON of the following format:
+```javascript
+{
+    "name for the thumbnail": {
+        "shape": ("square" | "thumb" | "circle" | "custom") // required
+        "width": int,
+        "height": int,
+        "max_width": int,
+        "max_height": int,
+        "crop_gravity": string, // e.g. "nw" for north west of the image
+        "crop_height": int,
+        "crop_width": int,
+        "quaity": int,
+        "crop_ratio": string, // e.g. "2:1"
+        "format": string, // on of: jpg, png, gif, webm
+    }
+}
+```
+
+---
+### OCR endpoint
+**Runs OCR on the given image and returns text**
+
+`GET /ocr`
+
+with the following get parameters:
+- ```uid``` - Unique ID of the image
+
+returns:
+```Javascript
+{
+    "hash": string, //uid of the image
+    "ocrtext": string // text returned from OCR
+}
+```
 
 ## Example usage (assuming localhost)
 
