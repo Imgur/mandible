@@ -31,7 +31,8 @@ func TestRequestingTheFrontPageGetsSomeHTML(t *testing.T) {
 	memcfg := make(map[string]string)
 	memcfg["Type"] = "memory"
 	cfg.Stores = append(cfg.Stores, memcfg)
-	server := NewServer(cfg, imageprocessor.PassthroughStrategy)
+	stats := &DiscardStats{}
+	server := NewServer(cfg, imageprocessor.PassthroughStrategy, stats)
 
 	muxer := http.NewServeMux()
 
@@ -74,7 +75,8 @@ func TestPostingBase64FilePutsTheFileInStorageAndReturnsJSON(t *testing.T) {
 	memcfg := make(map[string]string)
 	memcfg["Type"] = "memory"
 	cfg.Stores = append(cfg.Stores, memcfg)
-	server := NewServer(cfg, imageprocessor.PassthroughStrategy)
+	stats := &DiscardStats{}
+	server := NewServer(cfg, imageprocessor.PassthroughStrategy, stats)
 
 	muxer := http.NewServeMux()
 
@@ -252,7 +254,8 @@ func TestGetFullWebpThumb(t *testing.T) {
 	memcfg := make(map[string]string)
 	memcfg["Type"] = "memory"
 	cfg.Stores = append(cfg.Stores, memcfg)
-	server := NewServer(cfg, imageprocessor.ThumbnailStrategy)
+	stats := &DiscardStats{}
+	server := NewServer(cfg, imageprocessor.ThumbnailStrategy, stats)
 	muxer := http.NewServeMux()
 	server.Configure(muxer)
 	ts := httptest.NewServer(muxer)
@@ -344,7 +347,8 @@ func TestGetSizedWebpThumb(t *testing.T) {
 	memcfg := make(map[string]string)
 	memcfg["Type"] = "memory"
 	cfg.Stores = append(cfg.Stores, memcfg)
-	server := NewServer(cfg, imageprocessor.ThumbnailStrategy)
+	stats := &DiscardStats{}
+	server := NewServer(cfg, imageprocessor.ThumbnailStrategy, stats)
 	muxer := http.NewServeMux()
 	server.Configure(muxer)
 	ts := httptest.NewServer(muxer)
@@ -448,7 +452,8 @@ func TestTooLarge(t *testing.T) {
 	memcfg := make(map[string]string)
 	memcfg["Type"] = "memory"
 	cfg.Stores = append(cfg.Stores, memcfg)
-	server := NewServer(cfg, imageprocessor.ThumbnailStrategy)
+	stats := &DiscardStats{}
+	server := NewServer(cfg, imageprocessor.ThumbnailStrategy, stats)
 	muxer := http.NewServeMux()
 	server.Configure(muxer)
 	ts := httptest.NewServer(muxer)
@@ -505,7 +510,8 @@ func TestTooSmall(t *testing.T) {
 	memcfg := make(map[string]string)
 	memcfg["Type"] = "memory"
 	cfg.Stores = append(cfg.Stores, memcfg)
-	server := NewServer(cfg, imageprocessor.ThumbnailStrategy)
+	stats := &DiscardStats{}
+	server := NewServer(cfg, imageprocessor.ThumbnailStrategy, stats)
 	muxer := http.NewServeMux()
 	server.Configure(muxer)
 	ts := httptest.NewServer(muxer)
@@ -562,7 +568,8 @@ func TestGetTallThumb(t *testing.T) {
 	memcfg := make(map[string]string)
 	memcfg["Type"] = "memory"
 	cfg.Stores = append(cfg.Stores, memcfg)
-	server := NewServer(cfg, imageprocessor.ThumbnailStrategy)
+	stats := &DiscardStats{}
+	server := NewServer(cfg, imageprocessor.ThumbnailStrategy, stats)
 	muxer := http.NewServeMux()
 	server.Configure(muxer)
 	ts := httptest.NewServer(muxer)
