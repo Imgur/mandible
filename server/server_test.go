@@ -171,7 +171,8 @@ func TestAuthentication(t *testing.T) {
 	memcfg["Type"] = "memory"
 	cfg.Stores = append(cfg.Stores, memcfg)
 	authenticator := NewHMACAuthenticatorSHA256([]byte("foobar"))
-	server := NewAuthenticatedServer(cfg, imageprocessor.PassthroughStrategy, authenticator)
+	stats := &DiscardStats{}
+	server := NewAuthenticatedServer(cfg, imageprocessor.PassthroughStrategy, authenticator, stats)
 
 	muxer := http.NewServeMux()
 
