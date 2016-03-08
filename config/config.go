@@ -7,11 +7,13 @@ import (
 )
 
 type Configuration struct {
-	MaxFileSize int64
-	HashLength  int
-	UserAgent   string
-	Stores      []map[string]string
-	Port        int
+	MaxFileSize     int64
+	HashLength      int
+	UserAgent       string
+	Stores          []map[string]string
+	Port            int
+	DatadogEnabled  bool
+	DatadogHostname string
 }
 
 func NewConfiguration(path string) *Configuration {

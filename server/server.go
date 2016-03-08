@@ -28,6 +28,7 @@ type Server struct {
 	hashGenerator     *imagestore.HashGenerator
 	processorStrategy imageprocessor.ImageProcessorStrategy
 	authenticator     Authenticator
+	stats             RuntimeStats
 }
 
 type ServerResponse struct {
@@ -78,23 +79,23 @@ type UserError struct {
 	LogMessage        error
 }
 
-func NewServer(c *config.Configuration, strategy imageprocessor.ImageProcessorStrategy) *Server {
+func NewServer(c *config.Configuration, strategy imageprocessor.ImageProcessorStrategy, stats RuntimeStats) *Server {
 	factory := imagestore.NewFactory(c)
 	httpclient := &http.Client{}
 	stores := factory.NewImageStores()
 
 	hashGenerator := factory.NewHashGenerator(stores)
 	authenticator := &PassthroughAuthenticator{}
-	return &Server{c, httpclient, stores, hashGenerator, strategy, authenticator}
+	return &Server{c, httpclient, stores, hashGenerator, strategy, authenticator, stats}
 }
 
-func NewAuthenticatedServer(c *config.Configuration, strategy imageprocessor.ImageProcessorStrategy, auth Authenticator) *Server {
+func NewAuthenticatedServer(c *config.Configuration, strategy imageprocessor.ImageProcessorStrategy, auth Authenticator, stats RuntimeStats) *Server {
 	factory := imagestore.NewFactory(c)
 	httpclient := &http.Client{}
 	stores := factory.NewImageStores()
 
 	hashGenerator := factory.NewHashGenerator(stores)
-	return &Server{c, httpclient, stores, hashGenerator, strategy, auth}
+	return &Server{c, httpclient, stores, hashGenerator, strategy, auth, stats}
 }
 
 func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*uploadedfile.ThumbFile, user *AuthenticatedUser) ServerResponse {
@@ -205,11 +206,11 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 
 	var extractorFile fileExtractor = func(r *http.Request) (uploadFile io.Reader, filename string, uerr *UserError) {
 		uploadFile, header, err := r.FormFile("image")
-
 		if err != nil {
 			return nil, "", &UserError{LogMessage: err, UserFacingMessage: errors.New("Error processing file")}
 		}
 
+		s.stats.Upload("file")
 		return uploadFile, header.Filename, nil
 	}
 
@@ -221,6 +222,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 			return nil, "", &UserError{LogMessage: err, UserFacingMessage: errors.New("Error downloading URL!")}
 		}
 
+		s.stats.Upload("url")
 		return uploadFile, path.Base(url), nil
 	}
 
@@ -230,6 +232,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 
 		uploadFile = base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64data))
 
+		s.stats.Upload("base64")
 		return uploadFile, "", nil
 	}
 
@@ -460,6 +463,8 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 			return
 		}
 
+		s.stats.Thumbnail(t.Name)
+
 		http.ServeFile(w, r, t.GetPath())
 	}
 
@@ -500,6 +505,7 @@ func (s *Server) buildThumbResponse(upload *uploadedfile.UploadedFile) (map[stri
 			return nil, err
 		}
 
+		s.stats.Thumbnail(t.Name)
 		thumbsResp[t.Name] = tObj.Url
 	}
 
