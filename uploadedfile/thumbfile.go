@@ -170,7 +170,7 @@ func (this *ThumbFile) processSquare(original *UploadedFile) error {
 		return errors.New("Width too large")
 	}
 
-	filename, err := processorcommand.SquareThumb(original.GetPath(), this.Name, this.Width, this.GetOutputFormat(original))
+	filename, err := processorcommand.SquareThumb(original.GetPath(), this.Name, this.Width, this.Quality, this.GetOutputFormat(original))
 	if err != nil {
 		return err
 	}
@@ -190,7 +190,10 @@ func (this *ThumbFile) processCircle(original *UploadedFile) error {
 		return errors.New("Width too large")
 	}
 
-	filename, err := processorcommand.CircleThumb(original.GetPath(), this.Name, this.Width, this.GetOutputFormat(original))
+	//Circle thumbs should always be PNGs
+	outputFormat := thumbType.FromString("png")
+
+	filename, err := processorcommand.CircleThumb(original.GetPath(), this.Name, this.Width, this.Quality, outputFormat)
 	if err != nil {
 		return err
 	}
@@ -216,7 +219,7 @@ func (this *ThumbFile) processThumb(original *UploadedFile) error {
 		return errors.New("Height too large")
 	}
 
-	filename, err := processorcommand.Thumb(original.GetPath(), this.Name, this.Width, this.Height, this.GetOutputFormat(original))
+	filename, err := processorcommand.Thumb(original.GetPath(), this.Name, this.Width, this.Height, this.Quality, this.GetOutputFormat(original))
 	if err != nil {
 		return err
 	}
@@ -266,7 +269,7 @@ func (this *ThumbFile) processCustom(original *UploadedFile) error {
 }
 
 func (this *ThumbFile) processFull(original *UploadedFile) error {
-	filename, err := processorcommand.Full(original.GetPath(), this.Name, this.GetOutputFormat(original))
+	filename, err := processorcommand.Full(original.GetPath(), this.Name, this.Quality, this.GetOutputFormat(original))
 	if err != nil {
 		return err
 	}
