@@ -400,7 +400,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		storeReader, err := s.ImageStore.Get(tObj)
 		if err != nil {
 			resp := ServerResponse{
-				Status: http.StatusBadRequest,
+				Status: http.StatusNotFound,
 				Error:  fmt.Sprintf("Error retrieving image with ID: %s", imageID),
 			}
 			resp.Write(w)
