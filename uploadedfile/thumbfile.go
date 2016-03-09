@@ -190,7 +190,7 @@ func (this *ThumbFile) processCircle(original *UploadedFile) error {
 		return errors.New("Width too large")
 	}
 
-	//Circle thumbs should always be PNGs for transparency reasons.
+	//Circle thumbs should always be PNGs
 	outputFormat := thumbType.FromString("png")
 
 	filename, err := processorcommand.CircleThumb(original.GetPath(), this.Name, this.Width, this.Quality, outputFormat)
