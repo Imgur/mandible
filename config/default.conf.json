@@ -29,5 +29,7 @@
             "NamePathRegex" : "^([a-zA-Z0-9])([a-zA-Z0-9]).*",
             "NamePathMap" : "${ImageSize}/${1}/${2}/${ImageName}"
         }
-    ]
+    ],
+    "DatadogEnabled": false,
+    "DatadogHostname": "127.0.0.1"
 }
