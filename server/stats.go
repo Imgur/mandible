@@ -1,7 +1,9 @@
 package server
 
 import (
+	"fmt"
 	"net"
+	"time"
 
 	"github.com/PagerDuty/godspeed"
 )
@@ -9,15 +11,21 @@ import (
 type RuntimeStats interface {
 	LogStartup()
 
+	Request()
+	ResponseTime(elapsed time.Duration)
 	Thumbnail(name string)
 	Upload(source string)
+	Error(code int)
 }
 
 type DiscardStats struct{}
 
-func (d *DiscardStats) LogStartup()           {}
-func (d *DiscardStats) Thumbnail(name string) {}
-func (d *DiscardStats) Upload(source string)  {}
+func (d *DiscardStats) LogStartup()                        {}
+func (d *DiscardStats) Request()                           {}
+func (d *DiscardStats) ResponseTime(elapsed time.Duration) {}
+func (d *DiscardStats) Thumbnail(name string)              {}
+func (d *DiscardStats) Upload(source string)               {}
+func (d *DiscardStats) Error(code int)                     {}
 
 type DatadogStats struct {
 	dog *godspeed.Godspeed
@@ -53,10 +61,29 @@ func (d *DatadogStats) LogStartup() {
 	d.dog.Incr("mandible.startup", nil)
 }
 
+func (d *DatadogStats) Request() {
+	d.dog.Incr("mandible.request", nil)
+}
+
+func (d *DatadogStats) ResponseTime(elapsed time.Duration) {
+	time := elapsed.Seconds()
+
+	d.dog.Timing("mandible.responseTime", time, nil)
+}
+
 func (d *DatadogStats) Thumbnail(name string) {
-	d.dog.Incr("mandible.thumbnail", []string{name})
+	tag := fmt.Sprintf("size:%s", name)
+
+	d.dog.Incr("mandible.thumbnail", []string{tag})
 }
 
 func (d *DatadogStats) Upload(source string) {
-	d.dog.Incr("mandible.upload", []string{source})
+	tag := fmt.Sprintf("source:%s", source)
+
+	d.dog.Incr("mandible.upload", []string{tag})
+}
+
+func (d *DatadogStats) Error(code int) {
+	tag := fmt.Sprintf("code:%d", code)
+	d.dog.Incr("mandible.error", []string{tag})
 }
