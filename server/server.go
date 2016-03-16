@@ -484,13 +484,13 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 
 	statsMiddleware := func(handler http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			s.stats.Request()
+			s.stats.Request(r.URL.Path)
 
 			start := time.Now()
 			handler(w, r)
 			elapsed := time.Since(start)
 
-			s.stats.ResponseTime(elapsed)
+			s.stats.ResponseTime(elapsed, r.URL.Path)
 		}
 	}
 
