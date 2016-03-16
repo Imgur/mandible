@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -38,8 +39,14 @@ type ServerResponse struct {
 	Success *bool       `json:"success"` // the empty value is the nil pointer, because this is a computed property
 }
 
-func (resp *ServerResponse) Write(w http.ResponseWriter) {
+func (resp *ServerResponse) Write(w http.ResponseWriter, s RuntimeStats) {
 	respBytes, _ := resp.json()
+
+	if resp.Status >= http.StatusBadRequest {
+		log.Println(fmt.Sprintf("HTTP error: %d -- %s", resp.Status, resp.Error))
+		s.Error(resp.Status)
+	}
+
 	w.WriteHeader(resp.Status)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(respBytes)
@@ -247,7 +254,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 					Status: http.StatusBadRequest,
 					Error:  uerr.UserFacingMessage.Error(),
 				}
-				resp.Write(w)
+				resp.Write(w, s.stats)
 				return
 			}
 
@@ -257,7 +264,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 					Status: http.StatusBadRequest,
 					Error:  "Error parsing thumbnails!",
 				}
-				resp.Write(w)
+				resp.Write(w, s.stats)
 				return
 			}
 
@@ -271,7 +278,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				break
 			}
 
-			resp.Write(w)
+			resp.Write(w, s.stats)
 		}
 	}
 
@@ -308,7 +315,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Status: http.StatusBadRequest,
 				Error:  "Image ID must be passed as \"uid\"",
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 
@@ -321,7 +328,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Status: http.StatusBadRequest,
 				Error:  fmt.Sprintf("Error retrieving image with ID: %s", imageID),
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 		defer storeReader.Close()
@@ -332,7 +339,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Status: http.StatusBadRequest,
 				Error:  fmt.Sprintf("Error saving original image to tmpfile: %s", imageID),
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 		defer os.Remove(storeFile)
@@ -343,7 +350,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Error:  fmt.Sprintf("Unable to generate UploadedFile object: %s", imageID),
 				Status: http.StatusInternalServerError,
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 		upload.SetHash(imageID)
@@ -358,7 +365,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Error:  "Unable to execute OCR strategy",
 				Status: http.StatusInternalServerError,
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 
@@ -372,7 +379,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 			Status: http.StatusOK,
 		}
 
-		resp.Write(w)
+		resp.Write(w, s.stats)
 	}
 
 	thumbnailHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -387,7 +394,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Status: http.StatusBadRequest,
 				Error:  "Error parsing thumbnails!",
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 
@@ -396,7 +403,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Status: http.StatusBadRequest,
 				Error:  "Wrong number of thumbnails, expected 1",
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 
@@ -406,7 +413,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Status: http.StatusNotFound,
 				Error:  fmt.Sprintf("Error retrieving image with ID: %s", imageID),
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 		defer storeReader.Close()
@@ -415,9 +422,9 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		if err != nil {
 			resp := ServerResponse{
 				Status: http.StatusBadRequest,
-				Error:  "Error parsing thumbnails!",
+				Error:  "Error saving originial Image!",
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 		defer os.Remove(storeFile)
@@ -429,7 +436,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Error:  "Unable to process thumbnail!",
 				Status: http.StatusInternalServerError,
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 		upload.SetHash(imageID)
@@ -443,7 +450,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Error:  "Unable to process thumbnail!",
 				Status: http.StatusInternalServerError,
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 
@@ -459,7 +466,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				Error:  "Unable to store thumbnail!",
 				Status: http.StatusInternalServerError,
 			}
-			resp.Write(w)
+			resp.Write(w, s.stats)
 			return
 		}
 
@@ -475,20 +482,32 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		fmt.Fprint(w, "</body></html>")
 	}
 
+	statsMiddleware := func(handler http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			s.stats.Request(r.URL.Path)
+
+			start := time.Now()
+			handler(w, r)
+			elapsed := time.Since(start)
+
+			s.stats.ResponseTime(elapsed, r.URL.Path)
+		}
+	}
+
 	router := mux.NewRouter()
 
-	router.HandleFunc("/file", uploadHandler(extractorFile, nil))
-	router.HandleFunc("/url", uploadHandler(extractorUrl, nil))
-	router.HandleFunc("/base64", uploadHandler(extractorBase64, nil))
+	router.HandleFunc("/file", statsMiddleware(uploadHandler(extractorFile, nil)))
+	router.HandleFunc("/url", statsMiddleware(uploadHandler(extractorUrl, nil)))
+	router.HandleFunc("/base64", statsMiddleware(uploadHandler(extractorBase64, nil)))
 
-	router.HandleFunc("/user/{user_id}/file", authenticatedEndpoint(uploadHandler, extractorBase64))
-	router.HandleFunc("/user/{user_id}/url", authenticatedEndpoint(uploadHandler, extractorUrl))
-	router.HandleFunc("/user/{user_id}/base64", authenticatedEndpoint(uploadHandler, extractorBase64))
+	router.HandleFunc("/user/{user_id}/file", statsMiddleware(authenticatedEndpoint(uploadHandler, extractorBase64)))
+	router.HandleFunc("/user/{user_id}/url", statsMiddleware(authenticatedEndpoint(uploadHandler, extractorUrl)))
+	router.HandleFunc("/user/{user_id}/base64", statsMiddleware(authenticatedEndpoint(uploadHandler, extractorBase64)))
 
-	router.HandleFunc("/thumbnail", thumbnailHandler)
+	router.HandleFunc("/thumbnail", statsMiddleware(thumbnailHandler))
 
-	router.HandleFunc("/ocr", ocrHandler)
-	router.HandleFunc("/", rootHandler)
+	router.HandleFunc("/ocr", statsMiddleware(ocrHandler))
+	router.HandleFunc("/", statsMiddleware(rootHandler))
 
 	muxer.Handle("/", router)
 }
