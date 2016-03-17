@@ -482,9 +482,14 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		fmt.Fprint(w, "</body></html>")
 	}
 
-	statsMiddleware := func(handler http.HandlerFunc) http.HandlerFunc {
+	requestMiddleware := func(handler http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			s.stats.Request(r.URL.Path)
+
+			if os.Getenv("MANDIBLE_DEBUG") == "true" {
+				r.ParseForm()
+				log.Printf("Request url: %s with get params: %v and Headers: %v", r.URL.Path, r.Form, r.Header)
+			}
 
 			start := time.Now()
 			handler(w, r)
@@ -496,18 +501,18 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/file", statsMiddleware(uploadHandler(extractorFile, nil)))
-	router.HandleFunc("/url", statsMiddleware(uploadHandler(extractorUrl, nil)))
-	router.HandleFunc("/base64", statsMiddleware(uploadHandler(extractorBase64, nil)))
+	router.HandleFunc("/file", requestMiddleware(uploadHandler(extractorFile, nil)))
+	router.HandleFunc("/url", requestMiddleware(uploadHandler(extractorUrl, nil)))
+	router.HandleFunc("/base64", requestMiddleware(uploadHandler(extractorBase64, nil)))
 
-	router.HandleFunc("/user/{user_id}/file", statsMiddleware(authenticatedEndpoint(uploadHandler, extractorBase64)))
-	router.HandleFunc("/user/{user_id}/url", statsMiddleware(authenticatedEndpoint(uploadHandler, extractorUrl)))
-	router.HandleFunc("/user/{user_id}/base64", statsMiddleware(authenticatedEndpoint(uploadHandler, extractorBase64)))
+	router.HandleFunc("/user/{user_id}/file", requestMiddleware(authenticatedEndpoint(uploadHandler, extractorBase64)))
+	router.HandleFunc("/user/{user_id}/url", requestMiddleware(authenticatedEndpoint(uploadHandler, extractorUrl)))
+	router.HandleFunc("/user/{user_id}/base64", requestMiddleware(authenticatedEndpoint(uploadHandler, extractorBase64)))
 
-	router.HandleFunc("/thumbnail", statsMiddleware(thumbnailHandler))
+	router.HandleFunc("/thumbnail", requestMiddleware(thumbnailHandler))
 
-	router.HandleFunc("/ocr", statsMiddleware(ocrHandler))
-	router.HandleFunc("/", statsMiddleware(rootHandler))
+	router.HandleFunc("/ocr", requestMiddleware(ocrHandler))
+	router.HandleFunc("/", requestMiddleware(rootHandler))
 
 	muxer.Handle("/", router)
 }
