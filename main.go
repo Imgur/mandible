@@ -46,5 +46,6 @@ func main() {
 
 	log.Printf("Listening on Port: %s", port)
 
+	stats.LogStartup()
 	http.ListenAndServe(port, muxer)
 }
