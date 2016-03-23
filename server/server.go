@@ -120,7 +120,7 @@ func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*upl
 	if err != nil {
 		return ServerResponse{
 			Error:  "Error detecting mime type!",
-			Status: http.StatusInternalServerError,
+			Status: http.StatusBadRequest,
 		}
 	}
 
@@ -421,7 +421,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		storeFile, err := saveToTmp(storeReader)
 		if err != nil {
 			resp := ServerResponse{
-				Status: http.StatusBadRequest,
+				Status: http.StatusInternalServerError,
 				Error:  "Error saving originial Image!",
 			}
 			resp.Write(w, s.stats)
