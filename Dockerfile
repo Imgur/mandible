@@ -8,7 +8,6 @@ ADD . /go/src/github.com/Imgur/mandible
 WORKDIR /go/src/github.com/Imgur/mandible
 RUN go get github.com/mattn/goveralls
 RUN go get github.com/tools/godep
-RUN go get golang.org/x/tools/cmd/vet
 RUN godep restore
 RUN godep go install -v .
 CMD ["mandible"]

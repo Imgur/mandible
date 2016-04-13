@@ -2,7 +2,6 @@ package imagestore
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/mitchellh/goamz/s3"
@@ -43,12 +42,12 @@ func (this *S3ImageStore) Save(src string, obj *StoreObject) (*StoreObject, erro
 
 	bucket := this.client.Bucket(this.bucketName)
 
-	data, err := ioutil.ReadAll(srcFd)
+	stats, err := srcFd.Stat()
 	if err != nil {
 		return nil, err
 	}
 
-	err = bucket.Put(this.toPath(obj), data, obj.MimeType, s3.BucketOwnerFull)
+	err = bucket.PutReader(this.toPath(obj), srcFd, stats.Size(), obj.MimeType, s3.BucketOwnerFull)
 	if err != nil {
 		return nil, err
 	}
