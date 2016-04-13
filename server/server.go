@@ -421,7 +421,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		storeFile, err := saveToTmp(storeReader)
 		if err != nil {
 			resp := ServerResponse{
-				Status: http.StatusBadRequest,
+				Status: http.StatusInternalServerError,
 				Error:  "Error saving originial Image!",
 			}
 			resp.Write(w, s.stats)
