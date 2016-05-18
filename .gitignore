@@ -29,3 +29,6 @@ tags
 *.sw[o-p]
 
 profile.cov
+
+#IDEA project files
+.idea

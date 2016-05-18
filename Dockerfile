@@ -1,4 +1,4 @@
-FROM golang:1.5
+FROM golang:1.6
 RUN apt-get update && apt-get install -yqq aspell aspell-en libaspell-dev tesseract-ocr tesseract-ocr-eng imagemagick optipng exiftool libjpeg-progs webp
 ADD docker/meme.traineddata /usr/share/tesseract-ocr/tessdata/meme.traineddata
 ADD docker/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml

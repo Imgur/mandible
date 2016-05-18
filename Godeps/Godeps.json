@@ -1,13 +1,18 @@
 {
 	"ImportPath": "github.com/Imgur/mandible",
-	"GoVersion": "go1.5",
-	"Packages": [
-		"./..."
-	],
+	"GoVersion": "go1.6",
 	"Deps": [
+		{
+			"ImportPath": "github.com/PagerDuty/godspeed",
+			"Rev": "ef757b820a7d6760a89641ac29541967eb6d9f05"
+		},
 		{
 			"ImportPath": "github.com/bradfitz/http2",
 			"Rev": "f8202bc903bda493ebba4aa54922d78430c2c42f"
+		},
+		{
+			"ImportPath": "github.com/ernado/selectel/storage",
+			"Rev": "10f520cf8312d6729981b6cd30f1085d0fce436b"
 		},
 		{
 			"ImportPath": "github.com/golang/glog",
@@ -42,10 +47,6 @@
 			"Rev": "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1"
 		},
 		{
-			"ImportPath": "golang.org/x/crypto/ssh/terminal",
-			"Rev": "3760e016850398b85094c4c99e955b8c3dea5711"
-		},
-		{
 			"ImportPath": "golang.org/x/net/context",
 			"Rev": "84afb0af0050ae286aa9ced0c29383c2a866a925"
 		},
@@ -54,28 +55,12 @@
 			"Rev": "b5adcc2dcdf009d0391547edc6ecbaff889f5bb9"
 		},
 		{
-			"ImportPath": "google.golang.org/api/bigquery/v2",
-			"Rev": "0610a35668fd6881bec389e74208f0df92010e96"
-		},
-		{
-			"ImportPath": "google.golang.org/api/container/v1beta1",
-			"Rev": "0610a35668fd6881bec389e74208f0df92010e96"
-		},
-		{
 			"ImportPath": "google.golang.org/api/googleapi",
-			"Rev": "0610a35668fd6881bec389e74208f0df92010e96"
-		},
-		{
-			"ImportPath": "google.golang.org/api/pubsub/v1beta2",
 			"Rev": "0610a35668fd6881bec389e74208f0df92010e96"
 		},
 		{
 			"ImportPath": "google.golang.org/api/storage/v1",
 			"Rev": "0610a35668fd6881bec389e74208f0df92010e96"
-		},
-		{
-			"ImportPath": "google.golang.org/appengine",
-			"Rev": "6bde959377a90acb53366051d7d587bfd7171354"
 		},
 		{
 			"ImportPath": "google.golang.org/cloud",
