@@ -55,20 +55,6 @@ func (this *OCRResult) removeNonWords(blob string) string {
 	return strings.TrimSpace(str)
 }
 
-func (this *OCRResult) getBestString() string {
-	cleanString := this.removeNonWords(this.Text)
-	ocrWordCount := this.wordCount(this.Text)
-	cleanWordCount := this.wordCount(cleanString)
-
-	percentKept := float64(cleanWordCount) / float64(ocrWordCount)
-
-	if percentKept > .90 {
-		return this.Text
-	}
-
-	return cleanString
-}
-
 func (this *OCRResult) wordCount(blob string) int {
 	word_regexp := regexp.MustCompile("\\b(\\w+)\\b")
 	words := word_regexp.FindAllString(blob, -1)
@@ -107,7 +93,7 @@ func (this MultiOCRCommand) Run(image string) (*OCRResult, error) {
 	for i := 0; i < len(this); i++ {
 		select {
 		case result := <-results:
-			blob := result.getBestString()
+			blob := result.removeNonWords(result.Text)
 			count := result.wordCount(blob)
 
 			if count > max {
