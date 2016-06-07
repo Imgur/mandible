@@ -34,9 +34,10 @@ type ThumbFile struct {
 	Format        string
 	StoreURI      string
 	DesiredFormat string
+	NoStore       bool
 }
 
-func NewThumbFile(width, maxWidth, height, maxHeight int, name, shape, path, cropGravity string, cropWidth, cropHeight int, cropRatio string, quality int, desiredFormat string) *ThumbFile {
+func NewThumbFile(width, maxWidth, height, maxHeight int, name, shape, path, cropGravity string, cropWidth, cropHeight int, cropRatio string, quality int, desiredFormat string, noStore bool) *ThumbFile {
 	if quality == 0 {
 		quality = defaultQuality
 	}
@@ -58,7 +59,12 @@ func NewThumbFile(width, maxWidth, height, maxHeight int, name, shape, path, cro
 		Format:        "",
 		StoreURI:      "",
 		DesiredFormat: desiredFormat,
+		NoStore:       noStore,
 	}
+}
+
+func (this *ThumbFile) GetNoStore() bool {
+	return this.NoStore
 }
 
 func (this *ThumbFile) SetPath(path string) error {

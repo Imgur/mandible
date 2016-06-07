@@ -457,17 +457,18 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		ts := upload.GetThumbs()
 		t := ts[0]
 
-		thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.Name)
-		tObj = factory.NewStoreObject(thumbName, upload.GetMime(), "thumbnail")
-		err = tObj.Store(t, s.ImageStore)
-		if err != nil {
-			log.Printf("Error storing %+v: %s", t, err.Error())
-			resp := ServerResponse{
-				Error:  "Unable to store thumbnail!",
-				Status: http.StatusInternalServerError,
-			}
-			resp.Write(w, s.stats)
-			return
+		if !t.GetNoStore() {
+			thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.Name)
+			tObj = factory.NewStoreObject(thumbName, upload.GetMime(), "thumbnail")
+			err = tObj.Store(t, s.ImageStore)
+			if err != nil {
+				log.Printf("Error storing %+v: %s", t, err.Error())
+				resp := ServerResponse{
+					Error:  "Unable to store thumbnail!",
+					Status: http.StatusInternalServerError,
+				}
+				resp.Write(w, s.stats)
+				return
 		}
 
 		s.stats.Thumbnail(t.Name)
@@ -583,6 +584,7 @@ func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
 		Quality       int    `json:"quality"`
 		CropRatio     string `json:"crop_ratio"`
 		DesiredFormat string `json:"format"`
+		NoStore       bool   `json:"nostore"`
 	}
 	var thumbRequests map[string]ThumbRequest
 	err := json.Unmarshal([]byte(thumbString), &thumbRequests)
@@ -607,6 +609,7 @@ func parseThumbs(r *http.Request) ([]*uploadedfile.ThumbFile, error) {
 			thumbRequest.CropRatio,
 			thumbRequest.Quality,
 			thumbRequest.DesiredFormat,
+			thumbRequest.NoStore,
 		)
 
 		thumbs = append(thumbs, thumb)
