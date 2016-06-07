@@ -23,13 +23,15 @@ func newOCRResult(ocrType string, result string) *OCRResult {
 	}
 }
 
-func (this *OCRResult) removeNonWords(blob string) string {
+func (this *OCRResult) removeNonWords() {
+	blob := this.Text
+
 	speller, err := aspell.NewSpeller(map[string]string{
 		"lang": "en_US",
 	})
 	if err != nil {
 		fmt.Printf("Error: %s", err.Error())
-		return ""
+		return
 	}
 	defer speller.Delete()
 
@@ -52,7 +54,7 @@ func (this *OCRResult) removeNonWords(blob string) string {
 		}
 	}
 
-	return strings.TrimSpace(str)
+	this.Text = strings.TrimSpace(str)
 }
 
 func (this *OCRResult) wordCount(blob string) int {
@@ -93,8 +95,8 @@ func (this MultiOCRCommand) Run(image string) (*OCRResult, error) {
 	for i := 0; i < len(this); i++ {
 		select {
 		case result := <-results:
-			blob := result.removeNonWords(result.Text)
-			count := result.wordCount(blob)
+			result.removeNonWords()
+			count := result.wordCount(result.Text)
 
 			if count > max {
 				best = result
