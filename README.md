@@ -27,7 +27,7 @@ Processing Steps:
 
 ### Docker
 
-Pull down the mandible config file and edit it: 
+Pull down the mandible config file and edit it:
 
 ```
 wget https://raw.githubusercontent.com/Imgur/mandible/master/config/default.conf.json -O ~/mandible/conf.json
@@ -145,7 +145,8 @@ with the following get parameters:
         "crop_width": int,
         "quaity": int,
         "crop_ratio": string, // e.g. "2:1"
-        "format": string, // on of: jpg, png, gif, webm
+        "format": string, // one of: jpg, png, gif, webm,
+        "nostore": bool, // if true, the resulting thumbnail won't be added to the backing storage
     }
 }
 ```
@@ -225,7 +226,7 @@ curl -i http://127.0.0.1:8080/file \
 
 ### Authenticated upload
 
-Uses HTTP headers `Authentication` and `X-Authentication-HMAC`. Generate HMACs by base64-encoding a JSON blob like below. [Example MAC generator](http://play.golang.org/p/3otGr8LBZt). 
+Uses HTTP headers `Authentication` and `X-Authentication-HMAC`. Generate HMACs by base64-encoding a JSON blob like below. [Example MAC generator](http://play.golang.org/p/3otGr8LBZt).
 Supplying the client with the Authentication blob and MAC is out of scope for this project. In the future we will support symmetric and asymmetric encryption of the authentication blobs.
 
 #### Request to my own account with proper authorization:
@@ -280,4 +281,4 @@ Content-Type: text/plain; charset=utf-8
 ## Contributing
 
 The easiest way to develop on this project is to use the built-in docker image. We are using the Go 1.5 vendor experiment, which means if
-you import a package you must vendor the source code into this repository using Godep. 
+you import a package you must vendor the source code into this repository using Godep.
