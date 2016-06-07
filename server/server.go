@@ -469,6 +469,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 				}
 				resp.Write(w, s.stats)
 				return
+			}
 		}
 
 		s.stats.Thumbnail(t.Name)
