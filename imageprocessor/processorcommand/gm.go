@@ -6,12 +6,13 @@ import (
 	"github.com/Imgur/mandible/imageprocessor/thumbType"
 )
 
-const GM_COMMAND = "gm convert"
+const GM_COMMAND = "gm"
 
 func ConvertToJpeg(filename string) (string, error) {
 	outfile := fmt.Sprintf("%s_jpg", filename)
 
 	args := []string{
+		"convert",
 		filename,
 		"-flatten",
 		"JPEG:" + outfile,
@@ -29,6 +30,7 @@ func FixOrientation(filename string) (string, error) {
 	outfile := fmt.Sprintf("%s_ort", filename)
 
 	args := []string{
+		"convert",
 		filename,
 		"-auto-orient",
 		outfile,
@@ -46,6 +48,7 @@ func Quality(filename string, quality int) (string, error) {
 	outfile := fmt.Sprintf("%s_q", filename)
 
 	args := []string{
+		"convert",
 		filename,
 		"-quality",
 		fmt.Sprintf("%d", quality),
@@ -66,6 +69,7 @@ func ResizePercent(filename string, percent int) (string, error) {
 	outfile := fmt.Sprintf("%s_rp", filename)
 
 	args := []string{
+		"convert",
 		filename,
 		"-resize",
 		fmt.Sprintf("%d%%", percent),
@@ -84,6 +88,7 @@ func SquareThumb(filename, name string, size int, quality int, format thumbType.
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
 	args := []string{
+		"convert",
 		fmt.Sprintf("%s[0]", filename),
 		"-resize",
 		fmt.Sprintf("%dx%d^", size, size),
@@ -118,6 +123,7 @@ func Thumb(filename, name string, width, height int, quality int, format thumbTy
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
 	args := []string{
+		"convert",
 		fmt.Sprintf("%s[0]", filename),
 		"-resize",
 		fmt.Sprintf("%dx%d>", width, height),
@@ -151,6 +157,7 @@ func CircleThumb(filename, name string, width int, quality int, format thumbType
 	}
 
 	args := []string{
+		"convert",
 		"-size",
 		fmt.Sprintf("%dx%d", width, width),
 		"xc:none",
@@ -185,6 +192,7 @@ func CustomThumb(filename, name string, width, height int, cropGravity string, c
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
 	args := []string{
+		"convert",
 		fmt.Sprintf("%s[0]", filename),
 		"-resize",
 		fmt.Sprintf("%dx%d^", width, height),
@@ -221,6 +229,7 @@ func Full(filename string, name string, quality int, format thumbType.ThumbType)
 	outfile := fmt.Sprintf("%s_%s", filename, name)
 
 	args := []string{
+		"convert",
 		fmt.Sprintf("%s[0]", filename),
 		"-density",
 		"72x72",
