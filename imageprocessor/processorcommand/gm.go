@@ -6,7 +6,7 @@ import (
 	"github.com/Imgur/mandible/imageprocessor/thumbType"
 )
 
-const GM_COMMAND = "convert"
+const GM_COMMAND = "gm convert"
 
 func ConvertToJpeg(filename string) (string, error) {
 	outfile := fmt.Sprintf("%s_jpg", filename)
