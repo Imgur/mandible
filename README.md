@@ -15,6 +15,8 @@ Supported file types
 Pluggable storage layers
 - S3
 - Local
+- GCS
+- Memory (Not intended for production use)
 
 Pluggable authentication scheme
 - Time-grant HMAC
