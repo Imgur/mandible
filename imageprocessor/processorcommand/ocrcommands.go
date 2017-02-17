@@ -7,6 +7,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/trustmaster/go-aspell"
 )
 
 type OCRResult struct {
