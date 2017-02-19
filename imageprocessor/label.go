@@ -26,6 +26,10 @@ type LabelModel struct {
 }
 
 func NewLabelModel(modelDir string) (*LabelModel, error) {
+	if modelDir == "" {
+		return nil, errors.New("Invalid location to save label model")
+	}
+
 	// Load the serialized GraphDef from a file.
 	modelFile, labelsFile, err := modelFiles(modelDir)
 	if err != nil {

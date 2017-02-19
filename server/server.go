@@ -506,12 +506,16 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		}
 	}
 
-	labelModel, err := imageprocessor.NewLabelModel("/tmp/tf/")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	router := mux.NewRouter()
+
+	if s.Config.LabelingEnabled {
+		labelModel, err := imageprocessor.NewLabelModel(s.Config.LabelModelDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		router.HandleFunc("/label", requestMiddleware(labelHandler(s, labelModel)))
+	}
 
 	router.HandleFunc("/file", requestMiddleware(uploadHandler(extractorFile, nil)))
 	router.HandleFunc("/url", requestMiddleware(uploadHandler(extractorUrl, nil)))
@@ -522,7 +526,6 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 	router.HandleFunc("/user/{user_id}/base64", requestMiddleware(authenticatedEndpoint(uploadHandler, extractorBase64)))
 
 	router.HandleFunc("/thumbnail", requestMiddleware(thumbnailHandler))
-	router.HandleFunc("/label", requestMiddleware(labelHandler(s, labelModel)))
 	router.HandleFunc("/ocr", requestMiddleware(ocrHandler))
 	router.HandleFunc("/", requestMiddleware(rootHandler))
 

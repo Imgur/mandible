@@ -31,5 +31,8 @@
         }
     ],
     "DatadogEnabled": false,
-    "DatadogHostname": "127.0.0.1"
+    "DatadogHostname": "127.0.0.1",
+
+    "LabelingEnabled": true,
+    "LabelModelDir": "/tmp/tf/"
 }

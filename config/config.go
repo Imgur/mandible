@@ -14,6 +14,8 @@ type Configuration struct {
 	Port            int
 	DatadogEnabled  bool
 	DatadogHostname string
+	LabelingEnabled bool
+	LabelModelDir   string
 }
 
 func NewConfiguration(path string) *Configuration {
