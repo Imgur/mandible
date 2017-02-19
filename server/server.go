@@ -314,56 +314,15 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 	}
 
 	ocrHandler := func(w http.ResponseWriter, r *http.Request) {
-		imageID := r.FormValue("uid")
-		if imageID == "" {
-			resp := ServerResponse{
-				Status: http.StatusBadRequest,
-				Error:  "Image ID must be passed as \"uid\"",
-			}
-			resp.Write(w, s.stats)
+		upload, ok := getUploadObjFromUID(s, w, r)
+		if !ok {
 			return
 		}
-
-		factory := imagestore.NewFactory(s.Config)
-		tObj := factory.NewStoreObject(imageID, "", "original")
-
-		storeReader, err := s.ImageStore.Get(tObj)
-		if err != nil {
-			resp := ServerResponse{
-				Status: http.StatusBadRequest,
-				Error:  fmt.Sprintf("Error retrieving image with ID: %s", imageID),
-			}
-			resp.Write(w, s.stats)
-			return
-		}
-		defer storeReader.Close()
-
-		storeFile, err := saveToTmp(storeReader)
-		if err != nil {
-			resp := ServerResponse{
-				Status: http.StatusBadRequest,
-				Error:  fmt.Sprintf("Error saving original image to tmpfile: %s", imageID),
-			}
-			resp.Write(w, s.stats)
-			return
-		}
-		defer os.Remove(storeFile)
-
-		upload, err := uploadedfile.NewUploadedFile("", storeFile, nil)
-		if err != nil {
-			resp := ServerResponse{
-				Error:  fmt.Sprintf("Unable to generate UploadedFile object: %s", imageID),
-				Status: http.StatusInternalServerError,
-			}
-			resp.Write(w, s.stats)
-			return
-		}
-		upload.SetHash(imageID)
 		defer upload.Clean()
 
 		//TODO: fix this sp error:
 		processor := imageprocessor.DuelOCRStratagy()
-		err = processor.Process(upload)
+		err := processor.Process(upload)
 		if err != nil {
 			log.Printf("Error runinng DuelOCRStrategy on %+v: %s", upload, err.Error())
 			resp := ServerResponse{
@@ -388,11 +347,6 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 	}
 
 	thumbnailHandler := func(w http.ResponseWriter, r *http.Request) {
-		imageID := r.FormValue("uid")
-
-		factory := imagestore.NewFactory(s.Config)
-		tObj := factory.NewStoreObject(imageID, "", "original")
-
 		thumbs, err := parseThumbs(r)
 		if err != nil {
 			resp := ServerResponse{
@@ -412,39 +366,10 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 			return
 		}
 
-		storeReader, err := s.ImageStore.Get(tObj)
-		if err != nil {
-			resp := ServerResponse{
-				Status: http.StatusNotFound,
-				Error:  fmt.Sprintf("Error retrieving image with ID: %s", imageID),
-			}
-			resp.Write(w, s.stats)
+		upload, ok := getUploadObjFromUID(s, w, r)
+		if !ok {
 			return
 		}
-		defer storeReader.Close()
-
-		storeFile, err := saveToTmp(storeReader)
-		if err != nil {
-			resp := ServerResponse{
-				Status: http.StatusInternalServerError,
-				Error:  "Error saving original Image!",
-			}
-			resp.Write(w, s.stats)
-			return
-		}
-		defer os.Remove(storeFile)
-
-		upload, err := uploadedfile.NewUploadedFile("", storeFile, thumbs)
-		if err != nil {
-			log.Printf("Error processing %+v: %s", storeFile, err.Error())
-			resp := ServerResponse{
-				Error:  "Unable to process thumbnail!",
-				Status: http.StatusInternalServerError,
-			}
-			resp.Write(w, s.stats)
-			return
-		}
-		upload.SetHash(imageID)
 		defer upload.Clean()
 
 		processor, _ := imageprocessor.ThumbnailStrategy(s.Config, upload)
@@ -463,9 +388,10 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		t := ts[0]
 
 		if !t.GetNoStore() {
+			factory := imagestore.NewFactory(s.Config)
 			thumbName := fmt.Sprintf("%s/%s", upload.GetHash(), t.Name)
-			tObj = factory.NewStoreObject(thumbName, upload.GetMime(), "thumbnail")
-			err = tObj.Store(t, s.ImageStore)
+			tObj := factory.NewStoreObject(thumbName, upload.GetMime(), "thumbnail")
+			err := tObj.Store(t, s.ImageStore)
 			if err != nil {
 				log.Printf("Error storing %+v: %s", t, err.Error())
 				resp := ServerResponse{
