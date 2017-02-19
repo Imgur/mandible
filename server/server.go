@@ -81,6 +81,11 @@ type OcrResponse struct {
 	OCRText string `json:"ocrtext"`
 }
 
+type LabelsResponse struct {
+	Hash   string             `json:"hash"`
+	Labels map[string]float32 `json:"labels"`
+}
+
 type UserError struct {
 	UserFacingMessage error
 	LogMessage        error
@@ -501,6 +506,11 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 		}
 	}
 
+	labelModel, err := imageprocessor.NewLabelModel("/tmp/tf/")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/file", requestMiddleware(uploadHandler(extractorFile, nil)))
@@ -512,7 +522,7 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 	router.HandleFunc("/user/{user_id}/base64", requestMiddleware(authenticatedEndpoint(uploadHandler, extractorBase64)))
 
 	router.HandleFunc("/thumbnail", requestMiddleware(thumbnailHandler))
-
+	router.HandleFunc("/label", requestMiddleware(labelHandler(s, labelModel)))
 	router.HandleFunc("/ocr", requestMiddleware(ocrHandler))
 	router.HandleFunc("/", requestMiddleware(rootHandler))
 
@@ -637,4 +647,86 @@ func saveToTmp(upload io.Reader) (string, error) {
 	}
 
 	return tmpFile.Name(), nil
+}
+
+func labelHandler(s *Server, labelModel *imageprocessor.LabelModel) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		upload, ok := getUploadObjFromUID(s, w, r)
+		if !ok {
+			return
+		}
+		defer upload.Clean()
+
+		err := labelModel.Process(upload)
+		if err != nil {
+			log.Printf("Error runinng label model on %+v: %s", upload, err.Error())
+			resp := ServerResponse{
+				Error:  fmt.Sprintf("Unable to execute label model, %s", err),
+				Status: http.StatusInternalServerError,
+			}
+			resp.Write(w, s.stats)
+			return
+		}
+
+		labelsResp := LabelsResponse{
+			Hash:   upload.GetHash(),
+			Labels: upload.GetLabels(),
+		}
+
+		resp := ServerResponse{
+			Data:   labelsResp,
+			Status: http.StatusOK,
+		}
+
+		resp.Write(w, s.stats)
+	}
+}
+
+func getUploadObjFromUID(s *Server, w http.ResponseWriter, r *http.Request) (*uploadedfile.UploadedFile, bool) {
+	imageID := r.FormValue("uid")
+	if imageID == "" {
+		resp := ServerResponse{
+			Status: http.StatusBadRequest,
+			Error:  "Image ID must be passed as \"uid\"",
+		}
+		resp.Write(w, s.stats)
+		return nil, false
+	}
+
+	factory := imagestore.NewFactory(s.Config)
+	tObj := factory.NewStoreObject(imageID, "", "original")
+
+	storeReader, err := s.ImageStore.Get(tObj)
+	if err != nil {
+		resp := ServerResponse{
+			Status: http.StatusBadRequest,
+			Error:  fmt.Sprintf("Error retrieving image with ID: %s", imageID),
+		}
+		resp.Write(w, s.stats)
+		return nil, false
+	}
+	defer storeReader.Close()
+
+	storeFile, err := saveToTmp(storeReader)
+	if err != nil {
+		resp := ServerResponse{
+			Status: http.StatusBadRequest,
+			Error:  fmt.Sprintf("Error saving original image to tmpfile: %s", imageID),
+		}
+		resp.Write(w, s.stats)
+		return nil, false
+	}
+
+	upload, err := uploadedfile.NewUploadedFile("", storeFile, nil)
+	if err != nil {
+		resp := ServerResponse{
+			Error:  fmt.Sprintf("Unable to generate UploadedFile object: %s", imageID),
+			Status: http.StatusInternalServerError,
+		}
+		resp.Write(w, s.stats)
+		return nil, false
+	}
+	upload.SetHash(imageID)
+
+	return upload, true
 }

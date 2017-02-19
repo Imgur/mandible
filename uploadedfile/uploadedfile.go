@@ -17,6 +17,7 @@ type UploadedFile struct {
 	hash     string
 	ocrText  string
 	thumbs   []*ThumbFile
+	labels   map[string]float32
 }
 
 var supportedTypes = map[string]bool{
@@ -53,6 +54,7 @@ func NewUploadedFile(filename, path string, thumbs []*ThumbFile) (*UploadedFile,
 		"",
 		"",
 		thumbs,
+		nil,
 	}, nil
 }
 
@@ -72,12 +74,20 @@ func (this *UploadedFile) SetHash(hash string) {
 	this.hash = hash
 }
 
+func (this *UploadedFile) GetLabels() map[string]float32 {
+	return this.labels
+}
+
 func (this *UploadedFile) GetOCRText() string {
 	return this.ocrText
 }
 
 func (this *UploadedFile) SetOCRText(text string) {
 	this.ocrText = text
+}
+
+func (this *UploadedFile) SetLabels(labels map[string]float32) {
+	this.labels = labels
 }
 
 func (this *UploadedFile) SetPath(path string) {
