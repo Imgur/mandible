@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/Imgur/mandible",
-	"GoVersion": "go1.5",
+	"GoVersion": "v79",
 	"Packages": [
 		"./..."
 	],
@@ -84,6 +84,10 @@
 		{
 			"ImportPath": "google.golang.org/grpc",
 			"Rev": "d6f8134fd2e79a0a2a40f284d5552065fb6a8e3c"
-		}
+		},
+        {
+            "ImportPath": "github.com/hashicorp/go-uuid",
+            "Rev": "64130c7a86d732268a38cb04cfbaf0cc987fda98"
+        }
 	]
 }

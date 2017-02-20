@@ -101,7 +101,7 @@ func (m *LabelModel) Process(image *uploadedfile.UploadedFile) error {
 	// labels for each image in the "batch". The batch size was 1.
 	// Find the most probably label index.
 	probabilities := output[0].Value().([][]float32)[0]
-	topLabels := m.printBestLabel(probabilities)
+	topLabels := m.getTopN(probabilities)
 	image.SetLabels(topLabels)
 
 	return nil
@@ -122,7 +122,7 @@ func (p PairList) Len() int           { return len(p) }
 func (p PairList) Less(i, j int) bool { return p[i].Probability < p[j].Probability }
 func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
-func (m *LabelModel) printBestLabel(probabilities []float32) map[string]float32 {
+func (m *LabelModel) getTopN(probabilities []float32) map[string]float32 {
 	labelsToProb := make(PairList, len(m.labels))
 	for i, _ := range m.labels {
 		labelsToProb[i] = Pair{m.labels[i], probabilities[i]}

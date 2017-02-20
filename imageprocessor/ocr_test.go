@@ -11,7 +11,7 @@ import (
 )
 
 func TestStandardOCR(t *testing.T) {
-	image, err := getUploadedFileObject()
+	image, err := getUploadedFileObject("ocrtestimage.png")
 	if err != nil {
 		t.Fatalf("Could not initialize standard OCR test")
 	}
@@ -26,7 +26,7 @@ func TestStandardOCR(t *testing.T) {
 }
 
 func TestDuelOCR(t *testing.T) {
-	image, err := getUploadedFileObject()
+	image, err := getUploadedFileObject("ocrtestimage.png")
 	if err != nil {
 		t.Fatalf("Could not initialize standard OCR test")
 	}
@@ -40,13 +40,13 @@ func TestDuelOCR(t *testing.T) {
 	}
 }
 
-func getUploadedFileObject() (*uploadedfile.UploadedFile, error) {
-	filename, err := copyTestImage("testdata/ocrtestimage.png")
+func getUploadedFileObject(imageName string) (*uploadedfile.UploadedFile, error) {
+	filename, err := copyTestImage("testdata/" + imageName)
 	if err != nil {
 		return nil, err
 	}
 
-	image, err := uploadedfile.NewUploadedFile("ocrtestimage.png", filename, nil)
+	image, err := uploadedfile.NewUploadedFile(imageName, filename, nil)
 	if err != nil {
 		return nil, errors.New("Could not initialize standard OCR test")
 	}
