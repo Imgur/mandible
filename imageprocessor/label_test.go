@@ -42,6 +42,8 @@ func BenchmarkLabelModel(b *testing.B) {
 	image, model := getTestFixtures(b, id)
 	defer image.Clean()
 
+	// This is here because the GPU version is slower on the first process as it
+	// creates the process on the GPU.
 	err = model.Process(image)
 	if err != nil {
 		b.Fatal(err)
