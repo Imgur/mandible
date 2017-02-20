@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/Imgur/mandible",
-	"GoVersion": "v79",
+	"GoVersion": "go1.8",
 	"Packages": [
 		"./..."
 	],
@@ -85,9 +85,19 @@
 			"ImportPath": "google.golang.org/grpc",
 			"Rev": "d6f8134fd2e79a0a2a40f284d5552065fb6a8e3c"
 		},
-        {
-            "ImportPath": "github.com/hashicorp/go-uuid",
-            "Rev": "64130c7a86d732268a38cb04cfbaf0cc987fda98"
-        }
+		{
+			"ImportPath": "github.com/hashicorp/go-uuid",
+			"Rev": "64130c7a86d732268a38cb04cfbaf0cc987fda98"
+		},
+		{
+			"ImportPath": "github.com/tensorflow/tensorflow/tensorflow/go",
+			"Comment": "v1.0.0-1286-g195b306",
+			"Rev": "195b3063e48e089cceeeb165e50eef90122f3344"
+		},
+		{
+			"ImportPath": "github.com/tensorflow/tensorflow/tensorflow/go/op",
+			"Comment": "v1.0.0-1286-g195b306",
+			"Rev": "195b3063e48e089cceeeb165e50eef90122f3344"
+		}
 	]
 }

@@ -11,7 +11,6 @@ RUN wget "https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-
 RUN tar -C /usr/local -xvf libtensorflow-cpu-linux-x86_64-1.0.0.tar.gz
 ENV LIBRARY_PATH=/usr/local/lib
 ENV LD_LIBRARY_PATH=/usr/local/lib
-RUN go get github.com/tensorflow/tensorflow/tensorflow/go
 
 RUN go get github.com/mattn/goveralls
 RUN go get github.com/tools/godep

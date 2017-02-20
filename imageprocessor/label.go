@@ -111,6 +111,7 @@ func (this *LabelModel) String() string {
 	return "LabelModel runner"
 }
 
+// Used for the sort operation in getTopN()
 type Pair struct {
 	Label       string
 	Probability float32
@@ -122,6 +123,7 @@ func (p PairList) Len() int           { return len(p) }
 func (p PairList) Less(i, j int) bool { return p[i].Probability < p[j].Probability }
 func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
+// Returns the top N labels
 func (m *LabelModel) getTopN(probabilities []float32) map[string]float32 {
 	labelsToProb := make(PairList, len(m.labels))
 	for i, _ := range m.labels {
