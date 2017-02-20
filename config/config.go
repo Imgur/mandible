@@ -16,6 +16,7 @@ type Configuration struct {
 	DatadogHostname string
 	LabelingEnabled bool
 	LabelModelDir   string
+	LabelTopN       int
 }
 
 func NewConfiguration(path string) *Configuration {

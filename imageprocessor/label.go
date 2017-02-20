@@ -23,9 +23,10 @@ type LabelModel struct {
 	graph     *tf.Graph
 	modelFile string
 	labels    []string
+	topN      int
 }
 
-func NewLabelModel(modelDir string) (*LabelModel, error) {
+func NewLabelModel(modelDir string, topN int) (*LabelModel, error) {
 	if modelDir == "" {
 		return nil, errors.New("Invalid location to save label model")
 	}
@@ -66,6 +67,7 @@ func NewLabelModel(modelDir string) (*LabelModel, error) {
 		graph:     graph,
 		modelFile: modelFile,
 		labels:    labels,
+		topN:      topN,
 	}, nil
 }
 
@@ -127,8 +129,8 @@ func (m *LabelModel) printBestLabel(probabilities []float32) map[string]float32 
 	}
 	sort.Sort(sort.Reverse(labelsToProb))
 
-	topLabelsToProb := make(map[string]float32, 5)
-	for i := 0; i < 5; i++ {
+	topLabelsToProb := make(map[string]float32, m.topN)
+	for i := 0; i < m.topN; i++ {
 		topLabelsToProb[labelsToProb[i].Label] = labelsToProb[i].Probability
 	}
 

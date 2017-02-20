@@ -435,7 +435,12 @@ func (s *Server) Configure(muxer *http.ServeMux) {
 	router := mux.NewRouter()
 
 	if s.Config.LabelingEnabled {
-		labelModel, err := imageprocessor.NewLabelModel(s.Config.LabelModelDir)
+		topN := s.Config.LabelTopN
+		if topN < 1 {
+			topN = 5
+		}
+
+		labelModel, err := imageprocessor.NewLabelModel(s.Config.LabelModelDir, topN)
 		if err != nil {
 			log.Fatal(err)
 		}

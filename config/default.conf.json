@@ -34,5 +34,6 @@
     "DatadogHostname": "127.0.0.1",
 
     "LabelingEnabled": true,
-    "LabelModelDir": "/tmp/tf/"
+    "LabelModelDir": "/tmp/tf/",
+    "LabelTopN": 5
 }
