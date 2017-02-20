@@ -1,0 +1,40 @@
+FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
+
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		g++ \
+		gcc \
+		libc6-dev \
+		make \
+		pkg-config \
+        git \
+	&& rm -rf /var/lib/apt/lists/*
+
+ENV GOPATH /go
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
+
+RUN apt-get update && apt-get install -yqq git wget aspell aspell-en libaspell-dev tesseract-ocr tesseract-ocr-eng imagemagick optipng exiftool libjpeg-progs webp
+ADD docker/meme.traineddata /usr/share/tesseract-ocr/tessdata/meme.traineddata
+ADD docker/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
+RUN mkdir -p /etc/mandible /tmp/imagestore
+ENV MANDIBLE_CONF /etc/mandible/conf.json
+ADD . /go/src/github.com/Imgur/mandible
+WORKDIR /go/src/github.com/Imgur/mandible
+
+RUN wget https://storage.googleapis.com/golang/go1.8.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzf go1.8.linux-amd64.tar.gz
+
+
+RUN wget "https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-gpu-linux-x86_64-1.0.0.tar.gz"
+RUN tar -C /usr/local -xvf libtensorflow-gpu-linux-x86_64-1.0.0.tar.gz
+ENV LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+RUN go get github.com/tensorflow/tensorflow/tensorflow/go
+
+RUN go get github.com/mattn/goveralls
+RUN go get github.com/tools/godep
+RUN godep restore
+RUN godep go install -v .
+CMD ["mandible"]
