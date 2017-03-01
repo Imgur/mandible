@@ -1,7 +1,7 @@
-FROM golang:1.8
-RUN apt-get update && apt-get install -yqq aspell aspell-en libaspell-dev tesseract-ocr tesseract-ocr-eng imagemagick optipng exiftool libjpeg-progs webp
+FROM golang:1.8-stretch
+RUN apt-get update && apt-get install -yqq aspell aspell-en libaspell-dev tesseract-ocr tesseract-ocr-eng graphicsmagick optipng exiftool libjpeg-progs webp
+
 ADD docker/meme.traineddata /usr/share/tesseract-ocr/tessdata/meme.traineddata
-ADD docker/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
 RUN mkdir -p /etc/mandible /tmp/imagestore
 ENV MANDIBLE_CONF /etc/mandible/conf.json
 ADD . /go/src/github.com/Imgur/mandible
