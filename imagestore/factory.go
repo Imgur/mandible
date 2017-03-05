@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/s3"
 
+	selectel "github.com/ernado/selectel/storage"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	gcloud "google.golang.org/cloud"
@@ -39,6 +40,9 @@ func (this *Factory) NewImageStores() ImageStore {
 			stores = append(stores, store)
 		case "memory":
 			store = NewInMemoryImageStore()
+			stores = append(stores, store)
+		case "selectel":
+			store = this.NewSelectelStore(configWrapper)
 			stores = append(stores, store)
 		default:
 			log.Fatalf("Unsupported store %s", configWrapper["Type"])
@@ -120,4 +124,16 @@ func (this *Factory) NewHashGenerator(store ImageStore) *HashGenerator {
 
 	hashGen.init()
 	return hashGen
+}
+
+func (this *Factory) NewSelectelStore(conf map[string]string) ImageStore {
+	user, key, container, rootPath := conf["user"], conf["key"], conf["container"], conf["rootPath"]
+	client, err := selectel.New(user, key)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	mapper := NewNamePathMapper(conf["NamePathRegex"], conf["NamePathMap"])
+
+	return NewSelectelImageStore(client, mapper, container, rootPath)
 }
