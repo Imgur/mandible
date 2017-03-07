@@ -10,8 +10,8 @@ WORKDIR /go/src/github.com/Imgur/mandible
 
 RUN wget "https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-cpu-linux-x86_64-1.0.0.tar.gz"
 RUN tar -C /usr/local -xvf libtensorflow-cpu-linux-x86_64-1.0.0.tar.gz
-ENV LIBRARY_PATH=/usr/local/lib
-ENV LD_LIBRARY_PATH=/usr/local/lib
+ENV LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
 RUN go get github.com/mattn/goveralls
 RUN go get github.com/tools/godep
