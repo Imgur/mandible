@@ -205,7 +205,7 @@ func constructGraphToNormalizeImage(format string) (graph *tf.Graph, input, outp
 	case "image/png":
 		decode = op.DecodePng(s, input, op.DecodePngChannels(3))
 	default:
-		err = errors.New("Image type not suppored")
+		err = errors.New("Image type not supported")
 		return
 	}
 
