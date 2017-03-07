@@ -41,7 +41,6 @@ func TestStandardOCR(t *testing.T) {
 	}
 }*/
 
-
 func getUploadedFileObject(imageName string) (*uploadedfile.UploadedFile, error) {
 	filename, err := copyTestImage("testdata/" + imageName)
 
