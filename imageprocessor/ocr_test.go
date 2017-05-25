@@ -25,21 +25,6 @@ func TestStandardOCR(t *testing.T) {
 	}
 }
 
-// func TestDuelOCR(t *testing.T) {
-// 	image, err := getUploadedFileObject()
-// 	if err != nil {
-// 		t.Fatalf("Could not initialize standard OCR test")
-// 	}
-// 	defer image.Clean()
-//
-// 	ocrStratagy := DuelOCRStratagy()
-// 	ocrStratagy.Process(image)
-//
-// 	if image.GetOCRText() != "hello" {
-// 		t.Fatalf("Did not get proper Duel OCR text back %s != hello", image.GetOCRText())
-// 	}
-// }
-
 func getUploadedFileObject() (*uploadedfile.UploadedFile, error) {
 	filename, err := copyTestImage("testdata/ocrtestimage.png")
 	if err != nil {
