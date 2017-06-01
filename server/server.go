@@ -115,7 +115,6 @@ func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*upl
 	}
 
 	upload, err := uploadedfile.NewUploadedFile(fileName, tmpFile, thumbs)
-	defer upload.Clean()
 
 	if err != nil {
 		return ServerResponse{
@@ -123,6 +122,7 @@ func (s *Server) uploadFile(uploadFile io.Reader, fileName string, thumbs []*upl
 			Status: http.StatusInternalServerError,
 		}
 	}
+	defer upload.Clean()
 
 	processor, err := s.processorStrategy(s.Config, upload)
 	if err != nil {
